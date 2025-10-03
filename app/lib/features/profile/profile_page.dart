@@ -9,7 +9,7 @@ import '../../controllers/user_profile_controller.dart';
 import '../../l10n/app_translations.dart';
 import '../../models/user_profile.dart';
 import '../../services/preference_store.dart';
-import '../../ui/widgets/thela_snackbar.dart';
+import '../../ui/widgets/thala_snackbar.dart';
 import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 import '../auth/email_password_login_page.dart';
 import '../legal/copyright_page.dart';
@@ -50,7 +50,7 @@ class _ProfilePageBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final isDark = context.isDarkMode;
     final profileController = context.watch<UserProfileController>();
     final auth = context.watch<AuthController>();
@@ -89,7 +89,7 @@ class _ProfilePageBody extends StatelessWidget {
                     }
                     if (profileController.profile == null) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        buildThelaSnackBar(
+                        buildThalaSnackBar(
                           context,
                           icon: Icons.lock_outline,
                           iconColor: theme.colorScheme.error,
@@ -113,11 +113,11 @@ class _ProfilePageBody extends StatelessWidget {
                       await auth.signOut();
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          buildThelaSnackBar(
+                          buildThalaSnackBar(
                             context,
                             icon: Icons.logout,
                             iconColor: theme.colorScheme.secondary,
-                            semanticsLabel: 'Signed out of Thela.',
+                            semanticsLabel: 'Signed out of Thala.',
                           ),
                         );
                       }
@@ -152,7 +152,7 @@ class _ProfilePageBody extends StatelessWidget {
                 _SettingsTile(
                   icon: Icons.notifications_outlined,
                   title: 'Notifications',
-                  subtitle: 'Choose how Thela reaches you.',
+                  subtitle: 'Choose how Thala reaches you.',
                   onTap: () => NotificationSettingsPage.push(context),
                 ),
               ],
@@ -217,7 +217,7 @@ class _ProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final useLiquidGlass =
         !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
 
@@ -296,7 +296,7 @@ class _ProfileHeader extends StatelessWidget {
     }
 
     final displayName = _resolveDisplayName(context, profile);
-    final email = profile?.email ?? 'guest@thela.culture';
+    final email = profile?.email ?? 'guest@thala.culture';
     final pronouns = _clean(profile?.pronouns);
     final community = _clean(profile?.community);
     final bio = _clean(profile?.bio);
@@ -450,7 +450,7 @@ class _SettingsGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final isDark = context.isDarkMode;
     final blockColor = isDark ? palette.surfaceStrong : palette.surfaceBright;
     return Column(
@@ -498,7 +498,7 @@ class _SettingsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     return ListTile(
       onTap: onTap,
       leading: Container(
@@ -546,7 +546,7 @@ class _SettingsTileRow extends StatelessWidget {
       children: [
         tile,
         if (showDivider)
-          Divider(height: 1, indent: 72, color: context.thelaPalette.border),
+          Divider(height: 1, indent: 72, color: context.thalaPalette.border),
       ],
     );
   }
@@ -555,11 +555,11 @@ class _SettingsTileRow extends StatelessWidget {
 // ignore: unused_element
 void _showComingSoon(BuildContext context) {
   ScaffoldMessenger.of(context).showSnackBar(
-    buildThelaSnackBar(
+    buildThalaSnackBar(
       context,
       icon: Icons.auto_awesome,
       iconColor: Theme.of(context).colorScheme.secondary,
-      semanticsLabel: 'Coming soon to Thela.',
+      semanticsLabel: 'Coming soon to Thala.',
     ),
   );
 }

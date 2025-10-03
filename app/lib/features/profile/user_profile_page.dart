@@ -5,9 +5,10 @@ import '../../app/app_theme.dart';
 import '../../controllers/auth_controller.dart';
 import '../../controllers/feed_controller.dart';
 import '../../controllers/messages_controller.dart';
+import '../../l10n/app_translations.dart';
 import '../../models/video_post.dart';
-import '../../ui/widgets/thela_glass_surface.dart';
-import '../../ui/widgets/thela_snackbar.dart';
+import '../../ui/widgets/thala_glass_surface.dart';
+import '../../ui/widgets/thala_snackbar.dart';
 import '../messages/message_thread_page.dart';
 
 class UserProfilePage extends StatefulWidget {
@@ -42,7 +43,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final locale = Localizations.maybeLocaleOf(context) ?? const Locale('en');
     final feed = context.watch<FeedController>();
     final String creatorHandle = widget.post.creatorHandle;
@@ -72,10 +73,20 @@ class _UserProfilePageState extends State<UserProfilePage> {
     final int totalLikes = heroPosts.fold(0, (sum, post) => sum + post.likes);
     final int totalShares = heroPosts.fold(0, (sum, post) => sum + post.shares);
 
+    final String storiesStatLabel =
+        AppTranslations.of(context, AppText.profileStoriesCountLabel);
+    final String appreciationsStatLabel =
+        AppTranslations.of(context, AppText.profileAppreciationsCountLabel);
+    final String sharesStatLabel =
+        AppTranslations.of(context, AppText.profileSharesCountLabel);
+
     final List<_ProfileStat> stats = <_ProfileStat>[
-      _ProfileStat(label: 'Stories', value: _formatNumber(storyCount)),
-      _ProfileStat(label: 'Appreciations', value: _formatNumber(totalLikes)),
-      _ProfileStat(label: 'Shares', value: _formatNumber(totalShares)),
+      _ProfileStat(label: storiesStatLabel, value: _formatNumber(storyCount)),
+      _ProfileStat(
+        label: appreciationsStatLabel,
+        value: _formatNumber(totalLikes),
+      ),
+      _ProfileStat(label: sharesStatLabel, value: _formatNumber(totalShares)),
     ];
 
     final List<VideoPost> likedPosts = creatorPosts
@@ -95,8 +106,30 @@ class _UserProfilePageState extends State<UserProfilePage> {
     final bool messagingEnabled =
         messagesController != null && messagesController.isSupabaseEnabled;
 
+    final String messageLabel =
+        AppTranslations.of(context, AppText.profileMessageAction);
+    final String storiesTabLabel =
+        AppTranslations.of(context, AppText.profileStoriesTab);
+    final String likedTabLabel =
+        AppTranslations.of(context, AppText.profileLikedTab);
+    final String mediaTabLabel =
+        AppTranslations.of(context, AppText.profileMediaTab);
+    final String storiesEmptyTitle =
+        AppTranslations.of(context, AppText.profileStoriesEmptyTitle);
+    final String storiesEmptyMessage =
+        AppTranslations.of(context, AppText.profileStoriesEmptyMessage);
+    final String likedEmptyTitle =
+        AppTranslations.of(context, AppText.profileLikedEmptyTitle);
+    final String likedEmptyMessage =
+        AppTranslations.of(context, AppText.profileLikedEmptyMessage);
+    final String mediaEmptyTitle =
+        AppTranslations.of(context, AppText.profileMediaEmptyTitle);
+    final String mediaEmptyMessage =
+        AppTranslations.of(context, AppText.profileMediaEmptyMessage);
+
     final Widget actions = _ProfileActionsRow(
       followButton: _FollowButton(post: widget.post),
+      messageLabel: messageLabel,
       onMessage: messagingEnabled ? () => _startDirectMessage(heroTitle) : null,
       isMessaging: _isStartingDm,
       messagingEnabled: messagingEnabled,
@@ -107,7 +140,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
       child: Scaffold(
         extendBodyBehindAppBar: true,
         backgroundColor: Colors.transparent,
-        body: ThelaPageBackground(
+        body: ThalaPageBackground(
           child: SafeArea(
             top: false,
             bottom: false,
@@ -145,22 +178,36 @@ class _UserProfilePageState extends State<UserProfilePage> {
                       actionRow: actions,
                     ),
                   ),
-                  bottom: const _ProfileTabs(),
+                  bottom: _ProfileTabs(
+                    storiesLabel: storiesTabLabel,
+                    likedLabel: likedTabLabel,
+                    mediaLabel: mediaTabLabel,
+                  ),
                 ),
               ],
               body: TabBarView(
                 physics: const BouncingScrollPhysics(),
                 children: [
-                  _ProfileStoriesList(posts: creatorPosts, locale: locale),
+                  _ProfileStoriesList(
+                    posts: creatorPosts,
+                    locale: locale,
+                    emptyTitle: storiesEmptyTitle,
+                    emptyMessage: storiesEmptyMessage,
+                    emptyIcon: Icons.local_movies_outlined,
+                  ),
                   _ProfileStoriesList(
                     posts: likedPosts,
                     locale: locale,
-                    emptyTitle: 'Nothing liked yet',
-                    emptyMessage:
-                        'Once you celebrate a story, it will appear here for quick reference.',
+                    emptyTitle: likedEmptyTitle,
+                    emptyMessage: likedEmptyMessage,
                     emptyIcon: Icons.favorite_border,
                   ),
-                  _ProfileMediaGrid(posts: mediaPosts, locale: locale),
+                  _ProfileMediaGrid(
+                    posts: mediaPosts,
+                    locale: locale,
+                    emptyTitle: mediaEmptyTitle,
+                    emptyMessage: mediaEmptyMessage,
+                  ),
                 ],
               ),
             ),
@@ -212,7 +259,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
   void _showSnack(String message) {
     final messenger = ScaffoldMessenger.maybeOf(context);
     messenger?.showSnackBar(
-      buildThelaSnackBar(
+      buildThalaSnackBar(
         context,
         icon: Icons.info_outline,
         iconColor: Theme.of(context).colorScheme.secondary,
@@ -223,18 +270,34 @@ class _UserProfilePageState extends State<UserProfilePage> {
 }
 
 class _ProfileTabs extends StatelessWidget implements PreferredSizeWidget {
-  const _ProfileTabs();
+  const _ProfileTabs({
+    required this.storiesLabel,
+    required this.likedLabel,
+    required this.mediaLabel,
+  });
+
+  final String storiesLabel;
+  final String likedLabel;
+  final String mediaLabel;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final bool isDark = theme.brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-      child: ThelaGlassSurface(
+      child: ThalaGlassSurface(
         cornerRadius: 28,
+        enableLiquid: false,
+        shadows: [
+          BoxShadow(
+            color: palette.surfaceDim.withValues(alpha: 0.28),
+            blurRadius: 18,
+            offset: const Offset(0, 10),
+          ),
+        ],
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: TabBar(
           labelColor: palette.textPrimary,
@@ -245,14 +308,15 @@ class _ProfileTabs extends StatelessWidget implements PreferredSizeWidget {
             ),
             borderRadius: BorderRadius.circular(20),
           ),
+          indicatorPadding: const EdgeInsets.all(2),
           indicatorSize: TabBarIndicatorSize.tab,
           labelStyle: theme.textTheme.titleSmall?.copyWith(
             fontWeight: FontWeight.w600,
           ),
-          tabs: const [
-            Tab(text: 'Stories'),
-            Tab(text: 'Liked'),
-            Tab(text: 'Media'),
+          tabs: [
+            Tab(text: storiesLabel),
+            Tab(text: likedLabel),
+            Tab(text: mediaLabel),
           ],
         ),
       ),
@@ -287,7 +351,7 @@ class _ProfileHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final String initial = displayName.isNotEmpty
         ? displayName.characters.first.toUpperCase()
         : '?';
@@ -309,7 +373,7 @@ class _ProfileHero extends StatelessWidget {
           alignment: Alignment.bottomCenter,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-            child: ThelaGlassSurface(
+            child: ThalaGlassSurface(
               cornerRadius: 32,
               padding: const EdgeInsets.all(24),
               child: Column(
@@ -447,7 +511,7 @@ class _ProfileBackdrop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final placeholder = DecoratedBox(
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -492,7 +556,7 @@ class _ProfileStatsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
 
     return Row(
       children: [
@@ -503,6 +567,7 @@ class _ProfileStatsRow extends StatelessWidget {
               children: [
                 Text(
                   stats[index].value,
+                  textAlign: TextAlign.center,
                   style: theme.textTheme.titleLarge?.copyWith(
                     color: palette.textPrimary,
                     fontWeight: FontWeight.w700,
@@ -511,6 +576,9 @@ class _ProfileStatsRow extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   stats[index].label,
+                  maxLines: 2,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: palette.textSecondary,
                   ),
@@ -522,7 +590,7 @@ class _ProfileStatsRow extends StatelessWidget {
             Container(
               width: 1,
               height: 44,
-              margin: const EdgeInsets.symmetric(horizontal: 12),
+              margin: const EdgeInsets.symmetric(horizontal: 10),
               color: palette.border.withValues(alpha: 0.35),
             ),
         ],
@@ -534,12 +602,14 @@ class _ProfileStatsRow extends StatelessWidget {
 class _ProfileActionsRow extends StatelessWidget {
   const _ProfileActionsRow({
     required this.followButton,
+    required this.messageLabel,
     required this.onMessage,
     required this.isMessaging,
     required this.messagingEnabled,
   });
 
   final Widget followButton;
+  final String messageLabel;
   final VoidCallback? onMessage;
   final bool isMessaging;
   final bool messagingEnabled;
@@ -576,7 +646,7 @@ class _ProfileActionsRow extends StatelessWidget {
                   )
                 : const Icon(Icons.forum_outlined),
             label: Text(
-              'Message',
+              messageLabel,
               style: theme.textTheme.titleSmall?.copyWith(
                 color: theme.colorScheme.onPrimary,
                 fontWeight: FontWeight.w600,
@@ -600,6 +670,10 @@ class _FollowButton extends StatelessWidget {
     final feed = context.watch<FeedController>();
     final bool isFollowing = feed.isFollowing(post);
     final bool isProcessing = feed.isUpdatePending('${post.id}-follow');
+    final String followLabel =
+        AppTranslations.of(context, AppText.followAction);
+    final String followingLabel =
+        AppTranslations.of(context, AppText.followingLabel);
 
     Future<void> handleFollow() async {
       final auth = context.read<AuthController>();
@@ -641,7 +715,7 @@ class _FollowButton extends StatelessWidget {
               color: theme.colorScheme.onSecondary,
             ),
       label: Text(
-        isFollowing ? 'Following' : 'Follow',
+        isFollowing ? followingLabel : followLabel,
         style: theme.textTheme.titleSmall?.copyWith(
           color: theme.colorScheme.onSecondary,
           fontWeight: FontWeight.w600,
@@ -653,7 +727,7 @@ class _FollowButton extends StatelessWidget {
   void _showSnack(BuildContext context, String message) {
     final messenger = ScaffoldMessenger.maybeOf(context);
     messenger?.showSnackBar(
-      buildThelaSnackBar(
+      buildThalaSnackBar(
         context,
         icon: Icons.info_outline,
         iconColor: Theme.of(context).colorScheme.secondary,
@@ -709,10 +783,19 @@ class _ProfileStoriesList extends StatelessWidget {
 }
 
 class _ProfileMediaGrid extends StatelessWidget {
-  const _ProfileMediaGrid({required this.posts, required this.locale});
+  const _ProfileMediaGrid({
+    required this.posts,
+    required this.locale,
+    required this.emptyTitle,
+    required this.emptyMessage,
+    this.emptyIcon = Icons.collections_outlined,
+  });
 
   final List<VideoPost> posts;
   final Locale locale;
+  final String emptyTitle;
+  final String emptyMessage;
+  final IconData emptyIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -720,12 +803,11 @@ class _ProfileMediaGrid extends StatelessWidget {
       return ListView(
         padding: const EdgeInsets.fromLTRB(20, 32, 20, 120),
         physics: const BouncingScrollPhysics(),
-        children: const [
+        children: [
           _ProfileEmptyState(
-            icon: Icons.collections_outlined,
-            title: 'No media yet',
-            message:
-                'As soon as this creator adds galleries or slides, they will appear here.',
+            icon: emptyIcon,
+            title: emptyTitle,
+            message: emptyMessage,
           ),
         ],
       );
@@ -758,12 +840,12 @@ class _ProfilePostCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final title = post.title.resolve(locale);
     final description = post.description.resolve(locale);
     final double aspect = post.aspectRatio ?? (post.isImage ? 4 / 5 : 16 / 9);
 
-    return ThelaGlassSurface(
+    return ThalaGlassSurface(
       cornerRadius: 28,
       padding: EdgeInsets.zero,
       child: Column(
@@ -817,10 +899,10 @@ class _ProfileMediaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final title = post.title.resolve(locale);
 
-    return ThelaGlassSurface(
+    return ThalaGlassSurface(
       cornerRadius: 24,
       padding: EdgeInsets.zero,
       child: Column(
@@ -860,7 +942,7 @@ class _ProfileMediaPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final theme = Theme.of(context);
     final Widget placeholder = DecoratedBox(
       decoration: BoxDecoration(
@@ -940,9 +1022,9 @@ class _ProfileEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
 
-    return ThelaGlassSurface(
+    return ThalaGlassSurface(
       cornerRadius: 28,
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
       child: Column(

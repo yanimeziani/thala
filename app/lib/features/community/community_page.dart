@@ -8,9 +8,9 @@ import '../../data/community_repository.dart';
 import '../../data/sample_community_profiles.dart';
 import '../../l10n/app_translations.dart';
 import '../../models/community_profile.dart';
-import '../../ui/widgets/thela_glass_surface.dart';
-import '../../ui/widgets/thela_snackbar.dart';
-import '../../ui/widgets/thela_logo.dart';
+import '../../ui/widgets/thala_glass_surface.dart';
+import '../../ui/widgets/thala_snackbar.dart';
+import '../../ui/widgets/thala_logo.dart';
 
 class CommunityPage extends StatefulWidget {
   const CommunityPage({super.key});
@@ -71,7 +71,7 @@ class _CommunityPageState extends State<CommunityPage> {
         AppText.communitySupabaseRequired,
       );
       ScaffoldMessenger.of(context).showSnackBar(
-        buildThelaSnackBar(
+        buildThalaSnackBar(
           context,
           icon: Icons.cloud_off,
           iconColor: Theme.of(context).colorScheme.error,
@@ -107,7 +107,7 @@ class _CommunityPageState extends State<CommunityPage> {
         AppText.communityHostSuccess,
       );
       ScaffoldMessenger.of(context).showSnackBar(
-        buildThelaSnackBar(
+        buildThalaSnackBar(
           context,
           icon: Icons.send_rounded,
           iconColor: Theme.of(context).colorScheme.secondary,
@@ -124,7 +124,7 @@ class _CommunityPageState extends State<CommunityPage> {
         AppText.communityHostFailure,
       );
       ScaffoldMessenger.of(context).showSnackBar(
-        buildThelaSnackBar(
+        buildThalaSnackBar(
           context,
           icon: Icons.error_outline,
           iconColor: Theme.of(context).colorScheme.error,
@@ -141,7 +141,7 @@ class _CommunityPageState extends State<CommunityPage> {
   Widget build(BuildContext context) {
     final locale = Localizations.maybeLocaleOf(context) ?? const Locale('en');
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
 
     if (_profiles.isEmpty) {
       return Scaffold(
@@ -163,7 +163,7 @@ class _CommunityPageState extends State<CommunityPage> {
     return Scaffold(
       extendBody: true,
       backgroundColor: Colors.transparent,
-      body: ThelaPageBackground(
+      body: ThalaPageBackground(
         child: SafeArea(
           bottom: false,
           child: Padding(
@@ -243,13 +243,13 @@ class _CommunityHeader extends StatelessWidget {
     final theme = Theme.of(context);
     final title = AppTranslations.of(context, AppText.communityTab);
 
-    return ThelaGlassSurface(
+    return ThalaGlassSurface(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       cornerRadius: 28,
       backgroundOpacity: theme.brightness == Brightness.dark ? 0.22 : 0.68,
       child: Row(
         children: [
-          ThelaLogo(
+          ThalaLogo(
             size: 48,
             fit: BoxFit.contain,
             semanticLabel: AppTranslations.of(context, AppText.appName),
@@ -405,7 +405,7 @@ class _CommunityCard extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(width: 12),
-                              ThelaGlassSurface(
+                              ThalaGlassSurface(
                                 enableBorder: false,
                                 backgroundColor: Colors.white,
                                 backgroundOpacity: 0.14,
@@ -681,7 +681,7 @@ class _CommunityLinkPill extends StatelessWidget {
         final message = AppTranslations.of(context, AppText.commonCopied);
         final messenger = ScaffoldMessenger.maybeOf(context);
         messenger?.showSnackBar(
-          buildThelaSnackBar(
+          buildThalaSnackBar(
             context,
             icon: Icons.copy_all_outlined,
             iconColor: theme.colorScheme.secondary,
@@ -845,7 +845,7 @@ class _HostRequestSheetState extends State<_HostRequestSheet> {
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final isDark = context.isDarkMode;
     final sheetColor = isDark
         ? const Color(0xFF0A1216).withValues(alpha: 0.96)

@@ -15,21 +15,21 @@ import 'models/onboarding_answers.dart';
 import 'services/preference_store.dart';
 import 'services/recommendation_service.dart';
 import 'services/supabase_manager.dart';
-import 'ui/widgets/thela_snackbar.dart';
+import 'ui/widgets/thala_snackbar.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ThelaBootstrap());
+  runApp(const ThalaBootstrap());
 }
 
-class ThelaBootstrap extends StatefulWidget {
-  const ThelaBootstrap({super.key});
+class ThalaBootstrap extends StatefulWidget {
+  const ThalaBootstrap({super.key});
 
   @override
-  State<ThelaBootstrap> createState() => _ThelaBootstrapState();
+  State<ThalaBootstrap> createState() => _ThalaBootstrapState();
 }
 
-class _ThelaBootstrapState extends State<ThelaBootstrap> {
+class _ThalaBootstrapState extends State<ThalaBootstrap> {
   late final Future<void> _initialization = SupabaseManager.ensureInitialized();
 
   @override
@@ -38,18 +38,18 @@ class _ThelaBootstrapState extends State<ThelaBootstrap> {
       future: _initialization,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          return const ThelaRoot();
+          return const ThalaRoot();
         }
 
         if (snapshot.hasError) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
-            theme: buildThelaLightTheme(),
-            darkTheme: buildThelaDarkTheme(),
+            theme: buildThalaLightTheme(),
+            darkTheme: buildThalaDarkTheme(),
             themeMode: ThemeMode.system,
             home: Builder(
               builder: (context) {
-                final palette = context.thelaPalette;
+                final palette = context.thalaPalette;
                 final textTheme = Theme.of(context).textTheme;
                 return Scaffold(
                   backgroundColor: Theme.of(context).colorScheme.background,
@@ -73,8 +73,8 @@ class _ThelaBootstrapState extends State<ThelaBootstrap> {
 
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          theme: buildThelaLightTheme(),
-          darkTheme: buildThelaDarkTheme(),
+          theme: buildThalaLightTheme(),
+          darkTheme: buildThalaDarkTheme(),
           themeMode: ThemeMode.system,
           home: Builder(
             builder: (context) => const Scaffold(
@@ -87,8 +87,8 @@ class _ThelaBootstrapState extends State<ThelaBootstrap> {
   }
 }
 
-class ThelaRoot extends StatelessWidget {
-  const ThelaRoot({super.key});
+class ThalaRoot extends StatelessWidget {
+  const ThalaRoot({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -113,13 +113,13 @@ class ThelaRoot extends StatelessWidget {
           ),
         ),
       ],
-      child: const ThelaApp(),
+      child: const ThalaApp(),
     );
   }
 }
 
-class ThelaApp extends StatelessWidget {
-  const ThelaApp({super.key});
+class ThalaApp extends StatelessWidget {
+  const ThalaApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -127,9 +127,9 @@ class ThelaApp extends StatelessWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Thela',
-      theme: buildThelaLightTheme(),
-      darkTheme: buildThelaDarkTheme(),
+      title: 'Thala',
+      theme: buildThalaLightTheme(),
+      darkTheme: buildThalaDarkTheme(),
       themeMode: ThemeMode.system,
       locale: localization.locale,
       supportedLocales: LocalizationController.supportedLocales,
@@ -212,10 +212,10 @@ class _AuthGateState extends State<AuthGate> {
       }
       final message = _buildMessage(answers);
       messenger.showSnackBar(
-        buildThelaSnackBar(
+        buildThalaSnackBar(
           context,
           icon: Icons.waving_hand,
-          badgeColor: context.thelaPalette.surfaceStrong.withValues(
+          badgeColor: context.thalaPalette.surfaceStrong.withValues(
             alpha: 0.65,
           ),
           semanticsLabel: message,
@@ -232,7 +232,7 @@ class _AuthGateState extends State<AuthGate> {
     if (answers.isInterested == true) {
       return 'Tanemmirt! Explore and learn with the Amazigh community.';
     }
-    return 'Welcome to Thela. Discover Amazigh culture at your own rhythm.';
+    return 'Welcome to Thala. Discover Amazigh culture at your own rhythm.';
   }
 
   Future<void> _restoreOnboardingState() async {
@@ -260,7 +260,7 @@ class _AuthUnavailableView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.background,

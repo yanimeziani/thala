@@ -116,10 +116,10 @@ class FeedRepository {
                 fr: row['location_fr'] as String? ?? 'Terres amazighes',
               ),
               creatorName: LocalizedText(
-                en: row['creator_name_en'] as String? ?? 'Thela Creator',
-                fr: row['creator_name_fr'] as String? ?? 'Créateur Thela',
+                en: row['creator_name_en'] as String? ?? 'Thala Creator',
+                fr: row['creator_name_fr'] as String? ?? 'Créateur Thala',
               ),
-              creatorHandle: row['creator_handle'] as String? ?? '@thela',
+              creatorHandle: row['creator_handle'] as String? ?? '@thala',
               likes: (row['likes'] as num?)?.toInt() ?? 0,
               comments: (row['comments'] as num?)?.toInt() ?? 0,
               shares: (row['shares'] as num?)?.toInt() ?? 0,

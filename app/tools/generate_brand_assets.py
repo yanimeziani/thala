@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Rasterise Thela brand assets from the primary SVG logo."""
+"""Rasterise Thala brand assets from the primary SVG logo."""
 
 from __future__ import annotations
 

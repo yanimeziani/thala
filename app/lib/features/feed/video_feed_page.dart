@@ -11,9 +11,9 @@ import '../../models/video_post.dart';
 import '../profile/profile_page.dart';
 import '../profile/user_profile_page.dart';
 import 'widgets/video_story_page.dart';
-import '../../ui/widgets/thela_glass_surface.dart';
-import '../../ui/widgets/thela_snackbar.dart';
-import '../../ui/widgets/thela_logo.dart';
+import '../../ui/widgets/thala_glass_surface.dart';
+import '../../ui/widgets/thala_snackbar.dart';
+import '../../ui/widgets/thala_logo.dart';
 
 class VideoFeedPage extends StatefulWidget {
   const VideoFeedPage({super.key});
@@ -99,7 +99,7 @@ class _VideoFeedPageState extends State<VideoFeedPage> {
         final messenger = ScaffoldMessenger.maybeOf(context);
         if (messenger != null) {
           messenger.showSnackBar(
-            buildThelaSnackBar(
+            buildThalaSnackBar(
               context,
               icon: Icons.error_outline,
               iconColor: Theme.of(context).colorScheme.error,
@@ -212,7 +212,7 @@ class _FeedHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -223,7 +223,7 @@ class _FeedHeader extends StatelessWidget {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                ThelaLogo(
+                ThalaLogo(
                   size: 36,
                   semanticLabel: AppTranslations.of(context, AppText.appName),
                 ),
@@ -308,7 +308,7 @@ class _FeedHeader extends StatelessWidget {
 
         return SizedBox(
           width: constraints.maxWidth,
-          child: ThelaGlassSurface(
+          child: ThalaGlassSurface(
             enableLiquid: useLiquidGlass,
             enableBorder: false,
             cornerRadius: 28,
@@ -338,7 +338,7 @@ class _FeedActionIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     return IconButton(
       tooltip: tooltip,
       onPressed: onPressed,
@@ -357,7 +357,7 @@ class _ActiveStoryChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final fallBackTitle = AppTranslations.of(context, AppText.appName);
     final title = post?.creatorName.resolve(locale).trim();
     final handle = _formatHandle(post?.creatorHandle ?? '');
@@ -771,7 +771,7 @@ class _PulsingLogo extends StatelessWidget {
           child: Transform.scale(
             scale: scale,
             child: const Center(
-              child: ThelaLogo(size: 96, fit: BoxFit.contain),
+              child: ThalaLogo(size: 96, fit: BoxFit.contain),
             ),
           ),
         );
@@ -1065,7 +1065,7 @@ class _ErrorBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
 
     return Material(
       color: theme.colorScheme.error.withOpacity(0.85),

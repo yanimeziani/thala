@@ -16,6 +16,19 @@ enum AppText {
   archiveThresholdLabel,
   exploreTab,
   profileTab,
+  profileStoriesTab,
+  profileLikedTab,
+  profileMediaTab,
+  profileStoriesCountLabel,
+  profileAppreciationsCountLabel,
+  profileSharesCountLabel,
+  profileStoriesEmptyTitle,
+  profileStoriesEmptyMessage,
+  profileLikedEmptyTitle,
+  profileLikedEmptyMessage,
+  profileMediaEmptyTitle,
+  profileMediaEmptyMessage,
+  profileMessageAction,
   keepWatching,
   browseCommunities,
   discoverArchive,
@@ -212,7 +225,7 @@ class AppTranslations {
   }
 
   static const Map<AppText, Map<String, String>> _values = {
-    AppText.appName: {'en': 'Thela', 'fr': 'Thela'},
+    AppText.appName: {'en': 'Thala', 'fr': 'Thala'},
     AppText.tagline: {
       'en': 'Stories of Amazigh culture in motion',
       'fr': 'Les histoires de la culture amazighe en mouvement',
@@ -245,6 +258,44 @@ class AppTranslations {
     },
     AppText.exploreTab: {'en': 'Explore', 'fr': 'Explorer'},
     AppText.profileTab: {'en': 'Profile', 'fr': 'Profil'},
+    AppText.profileStoriesTab: {'en': 'Stories', 'fr': 'Histoires'},
+    AppText.profileLikedTab: {'en': 'Liked', 'fr': 'Appréciés'},
+    AppText.profileMediaTab: {'en': 'Media', 'fr': 'Médias'},
+    AppText.profileStoriesCountLabel: {'en': 'Stories', 'fr': 'Histoires'},
+    AppText.profileAppreciationsCountLabel: {
+      'en': 'Appreciations',
+      'fr': 'Appréciations',
+    },
+    AppText.profileSharesCountLabel: {'en': 'Shares', 'fr': 'Partages'},
+    AppText.profileStoriesEmptyTitle: {
+      'en': 'No stories yet',
+      'fr': "Pas encore d'histoires",
+    },
+    AppText.profileStoriesEmptyMessage: {
+      'en': 'This creator has not shared any stories yet.',
+      'fr': "Ce créateur n'a pas encore partagé d'histoires.",
+    },
+    AppText.profileLikedEmptyTitle: {
+      'en': 'Nothing liked yet',
+      'fr': 'Aucun contenu apprécié pour le moment',
+    },
+    AppText.profileLikedEmptyMessage: {
+      'en':
+          'Once you celebrate a story, it will appear here for quick reference.',
+      'fr':
+          'Lorsque tu célèbres une histoire, elle apparaîtra ici pour la retrouver facilement.',
+    },
+    AppText.profileMediaEmptyTitle: {
+      'en': 'No media yet',
+      'fr': 'Pas encore de médias',
+    },
+    AppText.profileMediaEmptyMessage: {
+      'en':
+          'As soon as this creator adds galleries or slides, they will appear here.',
+      'fr':
+          'Dès que ce créateur ajoutera des galeries ou des diaporamas, ils apparaîtront ici.',
+    },
+    AppText.profileMessageAction: {'en': 'Message', 'fr': 'Message'},
     AppText.keepWatching: {'en': 'Keep watching', 'fr': 'Continuer'},
     AppText.browseCommunities: {
       'en': 'Discover Amazigh communities',
@@ -447,8 +498,8 @@ class AppTranslations {
     AppText.feedMute: {'en': 'Mute', 'fr': 'Couper le son'},
     AppText.feedUnmute: {'en': 'Unmute', 'fr': 'Activer le son'},
     AppText.onboardingWelcomeTitle: {
-      'en': 'Azul! Welcome to Thela',
-      'fr': 'Azul ! Bienvenue sur Thela',
+      'en': 'Azul! Welcome to Thala',
+      'fr': 'Azul ! Bienvenue sur Thala',
     },
     AppText.onboardingWelcomeDescription: {
       'en':
@@ -526,13 +577,13 @@ class AppTranslations {
     },
     AppText.onboardingSummaryEmpty: {
       'en':
-          'We are honoured you\'re here. Explore Thela and discover new Amazigh stories.',
+          'We are honoured you\'re here. Explore Thala and discover new Amazigh stories.',
       'fr':
-          'Nous sommes honorés de t’accueillir. Explore Thela et découvre de nouvelles histoires amazighes.',
+          'Nous sommes honorés de t’accueillir. Explore Thala et découvre de nouvelles histoires amazighes.',
     },
     AppText.onboardingContinue: {'en': 'Continue', 'fr': 'Continuer'},
     AppText.onboardingSkip: {'en': 'Skip', 'fr': 'Passer'},
-    AppText.onboardingEnter: {'en': 'Enter Thela', 'fr': 'Entrer sur Thela'},
+    AppText.onboardingEnter: {'en': 'Enter Thala', 'fr': 'Entrer sur Thala'},
     AppText.createStoryTitle: {
       'en': 'Create new story',
       'fr': 'Créer une nouvelle histoire',
@@ -580,8 +631,8 @@ class AppTranslations {
       'fr': 'Le pseudo ne peut pas être vide',
     },
     AppText.createStoryMusicLibrary: {
-      'en': 'Music from Thela library',
-      'fr': 'Musique de la bibliothèque Thela',
+      'en': 'Music from Thala library',
+      'fr': 'Musique de la bibliothèque Thala',
     },
     AppText.createStoryNoTrack: {'en': 'No track', 'fr': 'Aucun morceau'},
     AppText.createStoryVisual: {
@@ -647,8 +698,8 @@ class AppTranslations {
       'fr': 'Histoire enregistrée localement.',
     },
     AppText.musicTitle: {
-      'en': 'Thela Soundscapes',
-      'fr': 'Paysages sonores Thela',
+      'en': 'Thala Soundscapes',
+      'fr': 'Paysages sonores Thala',
     },
     AppText.musicSubtitle: {
       'en': 'Live pulses from Amazigh music and voices',
@@ -694,9 +745,9 @@ class AppTranslations {
     },
     AppText.rightsBeforeItem1: {
       'en':
-          'Review the content on Thela and confirm it infringes your rights or community protocols.',
+          'Review the content on Thala and confirm it infringes your rights or community protocols.',
       'fr':
-          'Vérifie le contenu sur Thela et confirme qu’il enfreint tes droits ou les protocoles de ta communauté.',
+          'Vérifie le contenu sur Thala et confirme qu’il enfreint tes droits ou les protocoles de ta communauté.',
     },
     AppText.rightsBeforeItem2: {
       'en':
@@ -715,8 +766,8 @@ class AppTranslations {
       'fr': 'Envoyer ta demande de retrait',
     },
     AppText.rightsSendItem1: {
-      'en': 'Email: rights@thela.culture',
-      'fr': 'Courriel : rights@thela.culture',
+      'en': 'Email: rights@thala.culture',
+      'fr': 'Courriel : rights@thala.culture',
     },
     AppText.rightsSendItem2: {
       'en': 'Subject line: COPYRIGHT TAKEDOWN - [Your Name / Collective]',
@@ -771,9 +822,9 @@ class AppTranslations {
     },
     AppText.rightsEmergencyDescription: {
       'en':
-          'If the content presents immediate harm or contains sacred knowledge, email urgent@thela.culture with "EMERGENCY" in the subject. We will prioritise the review.',
+          'If the content presents immediate harm or contains sacred knowledge, email urgent@thala.culture with "EMERGENCY" in the subject. We will prioritise the review.',
       'fr':
-          'Si le contenu cause un préjudice immédiat ou contient un savoir sacré, écris à urgent@thela.culture avec « EMERGENCY » dans l’objet. Nous prioriserons la revue.',
+          'Si le contenu cause un préjudice immédiat ou contient un savoir sacré, écris à urgent@thala.culture avec « EMERGENCY » dans l’objet. Nous prioriserons la revue.',
     },
     AppText.rightsOpenAccount: {
       'en': 'Open account settings',

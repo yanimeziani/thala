@@ -1,4 +1,4 @@
-# Cultural Recommendation Research for Thela
+# Cultural Recommendation Research for Thala
 
 ## Mission Context
 - **Objective**: help Amazigh people and allies rediscover cultural practices, stories, and music through an addictive-yet-respectful discovery engine.

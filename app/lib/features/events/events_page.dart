@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../../app/app_theme.dart';
 import '../../l10n/app_translations.dart';
 import '../../models/localized_text.dart';
-import '../../ui/widgets/thela_glass_surface.dart';
+import '../../ui/widgets/thala_glass_surface.dart';
 
 class EventsPage extends StatelessWidget {
   const EventsPage({super.key});
@@ -13,7 +13,7 @@ class EventsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final locale = Localizations.maybeLocaleOf(context) ?? const Locale('en');
     final mediaQuery = MediaQuery.of(context);
     final bottomPadding = mediaQuery.padding.bottom + 96;
@@ -23,13 +23,13 @@ class EventsPage extends StatelessWidget {
     return Scaffold(
       extendBody: true,
       backgroundColor: Colors.transparent,
-      body: ThelaPageBackground(
+      body: ThalaPageBackground(
         child: SafeArea(
           bottom: false,
           child: ListView(
             padding: EdgeInsets.fromLTRB(20, 20, 20, bottomPadding),
             children: [
-              ThelaGlassSurface(
+              ThalaGlassSurface(
                 enableBorder: false,
                 cornerRadius: 28,
                 backgroundOpacity: theme.brightness == Brightness.dark
@@ -102,7 +102,7 @@ class _EventCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final modeLabel = _modeLabel(context, event.mode);
     final pills = <Widget>[
       _EventPill(icon: _modeIcon(event.mode), label: modeLabel),
@@ -257,7 +257,7 @@ class _EventPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),

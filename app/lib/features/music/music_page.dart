@@ -12,8 +12,8 @@ import '../../data/sample_tracks.dart';
 import '../../l10n/app_translations.dart';
 import '../../models/music_track.dart';
 import '../../ui/widgets/section_header.dart';
-import '../../ui/widgets/thela_glass_surface.dart';
-import '../../ui/widgets/thela_snackbar.dart';
+import '../../ui/widgets/thala_glass_surface.dart';
+import '../../ui/widgets/thala_snackbar.dart';
 
 class MusicPage extends StatefulWidget {
   const MusicPage({super.key});
@@ -121,7 +121,7 @@ class _MusicPageState extends State<MusicPage>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      ThelaGlassSurface(
+                      ThalaGlassSurface(
                         enableBorder: false,
                         cornerRadius: 28,
                         backgroundOpacity: theme.brightness == Brightness.dark
@@ -135,7 +135,7 @@ class _MusicPageState extends State<MusicPage>
                         ),
                       ),
                       const SizedBox(height: 20),
-                      ThelaGlassSurface(
+                      ThalaGlassSurface(
                         enableBorder: false,
                         cornerRadius: 28,
                         backgroundOpacity: theme.brightness == Brightness.dark
@@ -152,7 +152,7 @@ class _MusicPageState extends State<MusicPage>
                       if (_activeTrackId != null)
                         Padding(
                           padding: const EdgeInsets.only(top: 16),
-                          child: ThelaGlassSurface(
+                          child: ThalaGlassSurface(
                             enableBorder: false,
                             cornerRadius: 24,
                             backgroundOpacity:
@@ -277,7 +277,7 @@ class _MusicPageState extends State<MusicPage>
       final message = AppTranslations.of(context, AppText.musicError);
       final messenger = ScaffoldMessenger.maybeOf(context);
       messenger?.showSnackBar(
-        buildThelaSnackBar(
+        buildThalaSnackBar(
           context,
           icon: Icons.music_off,
           iconColor: Theme.of(context).colorScheme.error,
@@ -313,7 +313,7 @@ class _MusicPageState extends State<MusicPage>
       final message = AppTranslations.of(context, AppText.musicError);
       final messenger = ScaffoldMessenger.maybeOf(context);
       messenger?.showSnackBar(
-        buildThelaSnackBar(
+        buildThalaSnackBar(
           context,
           icon: Icons.error_outline,
           iconColor: Theme.of(context).colorScheme.error,
@@ -488,7 +488,7 @@ class _TrackTile extends StatelessWidget {
       normalized,
     )!;
 
-    return ThelaGlassSurface(
+    return ThalaGlassSurface(
       enableBorder: false,
       cornerRadius: 24,
       backgroundOpacity: isActive ? 0.42 : 0.28,

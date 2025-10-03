@@ -4,8 +4,8 @@ import 'package:provider/provider.dart';
 import '../../app/app_theme.dart';
 import '../../controllers/user_profile_controller.dart';
 import '../../models/user_profile.dart';
-import '../../ui/widgets/thela_glass_surface.dart';
-import '../../ui/widgets/thela_snackbar.dart';
+import '../../ui/widgets/thala_glass_surface.dart';
+import '../../ui/widgets/thala_snackbar.dart';
 
 class ProfileDetailsPage extends StatefulWidget {
   const ProfileDetailsPage({super.key});
@@ -47,7 +47,7 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
   Widget build(BuildContext context) {
     final controller = context.watch<UserProfileController>();
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final profile = controller.profile;
     final isSaving = controller.isSaving;
 
@@ -68,14 +68,14 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
       ),
       body: controller.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ThelaPageBackground(
+          : ThalaPageBackground(
               child: SafeArea(
                 child: Form(
                   key: _formKey,
                   child: ListView(
                     padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
                     children: [
-                      ThelaGlassSurface(
+                      ThalaGlassSurface(
                         cornerRadius: 28,
                         backgroundOpacity: theme.brightness == Brightness.dark
                             ? 0.24
@@ -85,13 +85,13 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Share how you show up in the Thela community.',
+                              'Share how you show up in the Thala community.',
                               style: theme.textTheme.bodyLarge?.copyWith(
                                 color: palette.textSecondary,
                               ),
                             ),
                             const SizedBox(height: 24),
-                            _ThelaTextField(
+                            _ThalaTextField(
                               controller: _displayNameController,
                               label: 'Display name',
                               hint: 'e.g. Tiziri Aït',
@@ -104,14 +104,14 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
                               },
                             ),
                             const SizedBox(height: 16),
-                            _ThelaTextField(
+                            _ThalaTextField(
                               controller: _pronounsController,
                               label: 'Pronouns (optional)',
                               hint: 'they / she / he',
                               maxLength: 24,
                             ),
                             const SizedBox(height: 16),
-                            _ThelaTextField(
+                            _ThalaTextField(
                               controller: _communityController,
                               label: 'Community ties',
                               hint:
@@ -119,7 +119,7 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
                               maxLength: 80,
                             ),
                             const SizedBox(height: 16),
-                            _ThelaTextField(
+                            _ThalaTextField(
                               controller: _bioController,
                               label: 'Short bio',
                               hint:
@@ -196,7 +196,7 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
     }
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        buildThelaSnackBar(
+        buildThalaSnackBar(
           context,
           icon: Icons.check_circle,
           iconColor: Theme.of(context).colorScheme.secondary,
@@ -208,7 +208,7 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
       final error = controller.error;
       if (error != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          buildThelaSnackBar(
+          buildThalaSnackBar(
             context,
             icon: Icons.error_outline,
             iconColor: Theme.of(context).colorScheme.error,
@@ -234,8 +234,8 @@ class _ProfileDetailsPageState extends State<ProfileDetailsPage> {
   }
 }
 
-class _ThelaTextField extends StatelessWidget {
-  const _ThelaTextField({
+class _ThalaTextField extends StatelessWidget {
+  const _ThalaTextField({
     required this.controller,
     required this.label,
     required this.hint,
@@ -256,7 +256,7 @@ class _ThelaTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     return TextFormField(
       controller: controller,
       validator: validator,

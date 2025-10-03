@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/app_theme.dart';
 import '../../l10n/app_translations.dart';
-import '../../ui/widgets/thela_glass_surface.dart';
+import '../../ui/widgets/thala_glass_surface.dart';
 import '../profile/profile_page.dart';
 
 class RightsPage extends StatelessWidget {
@@ -11,7 +11,7 @@ class RightsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final theme = Theme.of(context);
     final title = AppTranslations.of(context, AppText.rightsTitle);
     final intro = AppTranslations.of(context, AppText.rightsIntro);
@@ -20,11 +20,11 @@ class RightsPage extends StatelessWidget {
       extendBody: true,
       backgroundColor: Colors.transparent,
       body: SafeArea(
-        child: ThelaPageBackground(
+        child: ThalaPageBackground(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
             children: [
-              ThelaGlassSurface(
+              ThalaGlassSurface(
                 enableBorder: false,
                 cornerRadius: 28,
                 backgroundOpacity: theme.brightness == Brightness.dark
@@ -125,9 +125,9 @@ class _RightsInfoBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final textTheme = theme.textTheme;
-    return ThelaGlassSurface(
+    return ThalaGlassSurface(
       cornerRadius: 24,
       backgroundOpacity: context.isDarkMode ? 0.24 : 0.62,
       borderColor: palette.border,
@@ -158,7 +158,7 @@ class _RightsBullet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
@@ -184,7 +184,7 @@ class _EmergencyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final textTheme = theme.textTheme;
     final gradient = LinearGradient(
       colors: context.isDarkMode
@@ -194,7 +194,7 @@ class _EmergencyCard extends StatelessWidget {
       end: Alignment.bottomRight,
     );
 
-    return ThelaGlassSurface(
+    return ThalaGlassSurface(
       enableBorder: false,
       cornerRadius: 24,
       backgroundOpacity: context.isDarkMode ? 0.2 : 0.5,

@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Thela</string>
+	<string>Thala</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>thela</string>
+	<string>Thala</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -50,19 +50,19 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>Allow Thela to record your Amazigh stories using the camera.</string>
+	<string>Allow Thala to record your Amazigh stories using the camera.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Enable microphone access so your voice is captured with your videos.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Allow Thela to pick existing videos from your library to post.</string>
+	<string>Allow Thala to pick existing videos from your library to post.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Allow Thela to save edited clips back to your library.</string>
+	<string>Allow Thala to save edited clips back to your library.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>app.mobile.thela</string>
+				<string>app.mobile.thala</string>
 			</array>
 		</dict>
 	</array>

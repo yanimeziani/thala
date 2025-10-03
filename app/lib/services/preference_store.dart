@@ -10,9 +10,9 @@ class PreferenceStore {
   PreferenceStore({SharedPreferences? preferences})
     : _preferences = preferences;
 
-  static const _onboardingKey = 'thela.onboarding_answers';
-  static const _notificationSettingsKey = 'thela.notification_settings';
-  static const _profileKeyPrefix = 'thela.profile.';
+  static const _onboardingKey = 'thala.onboarding_answers';
+  static const _notificationSettingsKey = 'thala.notification_settings';
+  static const _profileKeyPrefix = 'thala.profile.';
 
   SharedPreferences? _preferences;
   OnboardingAnswers? _cachedOnboarding;

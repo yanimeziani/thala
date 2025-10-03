@@ -3,8 +3,8 @@ import 'package:flutter/services.dart';
 
 /// Semantic color palette used across the app for colors that aren't
 /// represented directly in the stock Material [ColorScheme].
-class ThelaPalette extends ThemeExtension<ThelaPalette> {
-  const ThelaPalette({
+class ThalaPalette extends ThemeExtension<ThalaPalette> {
+  const ThalaPalette({
     required this.textPrimary,
     required this.textSecondary,
     required this.textMuted,
@@ -49,7 +49,7 @@ class ThelaPalette extends ThemeExtension<ThelaPalette> {
   final Color inverseBorderStrong;
 
   @override
-  ThelaPalette copyWith({
+  ThalaPalette copyWith({
     Color? textPrimary,
     Color? textSecondary,
     Color? textMuted,
@@ -71,7 +71,7 @@ class ThelaPalette extends ThemeExtension<ThelaPalette> {
     Color? inverseBorder,
     Color? inverseBorderStrong,
   }) {
-    return ThelaPalette(
+    return ThalaPalette(
       textPrimary: textPrimary ?? this.textPrimary,
       textSecondary: textSecondary ?? this.textSecondary,
       textMuted: textMuted ?? this.textMuted,
@@ -98,11 +98,11 @@ class ThelaPalette extends ThemeExtension<ThelaPalette> {
   }
 
   @override
-  ThelaPalette lerp(ThemeExtension<ThelaPalette>? other, double t) {
-    if (other is! ThelaPalette) {
+  ThalaPalette lerp(ThemeExtension<ThalaPalette>? other, double t) {
+    if (other is! ThalaPalette) {
       return this;
     }
-    return ThelaPalette(
+    return ThalaPalette(
       textPrimary: Color.lerp(textPrimary, other.textPrimary, t) ?? textPrimary,
       textSecondary:
           Color.lerp(textSecondary, other.textSecondary, t) ?? textSecondary,
@@ -163,11 +163,11 @@ class ThelaPalette extends ThemeExtension<ThelaPalette> {
   }
 }
 
-ThemeData buildThelaLightTheme() => _buildThelaTheme(Brightness.light);
+ThemeData buildThalaLightTheme() => _buildThalaTheme(Brightness.light);
 
-ThemeData buildThelaDarkTheme() => _buildThelaTheme(Brightness.dark);
+ThemeData buildThalaDarkTheme() => _buildThalaTheme(Brightness.dark);
 
-ThemeData _buildThelaTheme(Brightness brightness) {
+ThemeData _buildThalaTheme(Brightness brightness) {
   const primary = Color(0xFF1A4AA8);
   const accent = Color(0xFFEB6A3B);
   const success = Color(0xFF2AC38D);
@@ -329,7 +329,7 @@ ThemeData _buildThelaTheme(Brightness brightness) {
       deleteIconColor: onSurfaceVariant,
     ),
     extensions: [
-      ThelaPalette(
+      ThalaPalette(
         textPrimary: onSurface,
         textSecondary: onSurfaceVariant,
         textMuted: muted,
@@ -429,10 +429,10 @@ ThemeData _buildThelaTheme(Brightness brightness) {
   );
 }
 
-extension ThelaPaletteContext on BuildContext {
-  ThelaPalette get thelaPalette {
-    final palette = Theme.of(this).extension<ThelaPalette>();
-    assert(palette != null, 'ThelaPalette has not been added to the theme');
+extension ThalaPaletteContext on BuildContext {
+  ThalaPalette get thalaPalette {
+    final palette = Theme.of(this).extension<ThalaPalette>();
+    assert(palette != null, 'ThalaPalette has not been added to the theme');
     return palette!;
   }
 

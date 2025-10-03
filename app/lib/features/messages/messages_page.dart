@@ -6,7 +6,7 @@ import '../../controllers/messages_controller.dart';
 import '../../l10n/app_translations.dart';
 import '../../models/contact_handle.dart';
 import '../../models/message_thread.dart';
-import '../../ui/widgets/thela_glass_surface.dart';
+import '../../ui/widgets/thala_glass_surface.dart';
 import 'message_thread_page.dart';
 import 'new_message_page.dart';
 
@@ -32,7 +32,7 @@ class _MessagesPageState extends State<MessagesPage> {
   Widget build(BuildContext context) {
     final controller = context.watch<MessagesController>();
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final locale = Localizations.maybeLocaleOf(context) ?? const Locale('en');
 
     final bool isInitialLoad = controller.isLoading && !controller.hasData;
@@ -119,7 +119,7 @@ class _MessagesPageState extends State<MessagesPage> {
           ),
         ],
       ),
-      body: ThelaPageBackground(
+      body: ThalaPageBackground(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
         child: SafeArea(
           top: false,
@@ -281,7 +281,7 @@ class _SearchFieldState extends State<_SearchField> {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final bool showClear = _draft.isNotEmpty;
 
     return TextField(
@@ -334,7 +334,7 @@ class _SearchResultsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final theme = Theme.of(context);
 
     if (isSearching && handles.isEmpty) {
@@ -403,12 +403,12 @@ class _MessagesHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final theme = Theme.of(context);
     final highlight = controller.highlightedThread;
     final unread = controller.unreadCount;
 
-    return ThelaGlassSurface(
+    return ThalaGlassSurface(
       cornerRadius: 28,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
       child: Row(
@@ -496,7 +496,7 @@ class _ThreadPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final title = _resolveTitle(context, thread, locale);
     final preview = thread.lastMessage.resolve(locale).trim();
 
@@ -537,7 +537,7 @@ class _MessagesPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -567,7 +567,7 @@ class _MessageThreadTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final title = _resolveTitle(context, thread, locale);
     final preview = thread.lastMessage.resolve(locale).trim();
     final timeLabel = _formatTimestamp(context, thread.updatedAt);
@@ -677,7 +677,7 @@ class _ThreadAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final theme = Theme.of(context);
     final initials = _initialsFor(title);
     return CircleAvatar(
@@ -707,7 +707,7 @@ class _BannerMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),

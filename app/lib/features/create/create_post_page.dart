@@ -17,7 +17,7 @@ import '../../l10n/app_translations.dart';
 import '../../models/video_effect.dart';
 import '../../models/video_post.dart';
 import '../../models/music_track.dart';
-import '../../ui/widgets/thela_snackbar.dart';
+import '../../ui/widgets/thala_snackbar.dart';
 
 enum _CreateStage { capture, review }
 
@@ -186,7 +186,7 @@ class _CreatePostViewState extends State<_CreatePostView>
   ) {
     String tr(AppText key) => AppTranslations.of(context, key);
 
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final MusicTrack? track = controller.selectedTrack;
     final bool useLiquidGlass =
         !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
@@ -969,7 +969,7 @@ class _CreatePostViewState extends State<_CreatePostView>
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
-      buildThelaSnackBar(
+      buildThalaSnackBar(
         context,
         icon: Icons.error_outline,
         iconColor: Theme.of(context).colorScheme.error,
@@ -981,7 +981,7 @@ class _CreatePostViewState extends State<_CreatePostView>
 
   void _showSoonToast(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      buildThelaSnackBar(
+      buildThalaSnackBar(
         context,
         icon: Icons.auto_awesome,
         iconColor: Theme.of(context).colorScheme.secondary,
@@ -1371,7 +1371,7 @@ class _CaptureTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final theme = Theme.of(context);
 
     final header = Row(
@@ -1468,7 +1468,7 @@ class _CaptureSoundBadge extends StatelessWidget {
   });
 
   final bool useLiquidGlass;
-  final ThelaPalette palette;
+  final ThalaPalette palette;
   final String title;
   final String subtitle;
   final String? artworkUrl;
@@ -1571,7 +1571,7 @@ class _CaptureActionRail extends StatelessWidget {
   });
 
   final bool useLiquidGlass;
-  final ThelaPalette palette;
+  final ThalaPalette palette;
   final List<_CaptureAction> actions;
 
   @override
@@ -1692,7 +1692,7 @@ class _CaptureFooter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -1803,7 +1803,7 @@ class _LensCarousel extends StatelessWidget {
   });
 
   final bool useLiquidGlass;
-  final ThelaPalette palette;
+  final ThalaPalette palette;
   final String effectsLabel;
   final VideoEffect selectedEffect;
   final ValueChanged<VideoEffect> onEffectSelected;
@@ -1905,7 +1905,7 @@ class _LensChip extends StatelessWidget {
 
   final VideoEffect effect;
   final bool isSelected;
-  final ThelaPalette palette;
+  final ThalaPalette palette;
   final VoidCallback onTap;
 
   @override
@@ -1977,7 +1977,7 @@ class _CaptureModeSwitcher extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final theme = Theme.of(context);
 
     final row = Row(
@@ -2227,7 +2227,7 @@ class _DetailSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = context.watch<CreatePostController>();
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final handleColor = context.elevatedOverlay(0.18);
     final titleStyle = theme.textTheme.titleLarge?.copyWith(
       color: palette.textPrimary,
@@ -2426,7 +2426,7 @@ class _DetailTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     String? defaultValidator(String? value) {
       if (value == null || value.trim().isEmpty) {
         return AppTranslations.of(context, AppText.createStoryFieldRequired);

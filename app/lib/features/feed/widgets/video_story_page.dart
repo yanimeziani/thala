@@ -17,7 +17,7 @@ import '../../../l10n/app_translations.dart';
 import '../../../models/video_effect.dart';
 import '../../../models/music_track.dart';
 import '../../../models/video_post.dart';
-import '../../../ui/widgets/thela_snackbar.dart';
+import '../../../ui/widgets/thala_snackbar.dart';
 import '../../profile/user_profile_page.dart';
 
 class VideoStoryPage extends StatefulWidget {
@@ -469,7 +469,7 @@ class _VideoStoryPageState extends State<VideoStoryPage>
     final messenger = ScaffoldMessenger.maybeOf(context);
     final message = AppTranslations.of(context, AppText.feedCommentSent);
     messenger?.showSnackBar(
-      buildThelaSnackBar(
+      buildThalaSnackBar(
         context,
         icon: Icons.mode_comment_outlined,
         iconColor: Theme.of(context).colorScheme.secondary,
@@ -617,7 +617,7 @@ class _VideoStoryPageState extends State<VideoStoryPage>
     final messenger = ScaffoldMessenger.maybeOf(context);
     final message = AppTranslations.of(context, AppText.feedLinkCopied);
     messenger?.showSnackBar(
-      buildThelaSnackBar(
+      buildThalaSnackBar(
         context,
         icon: Icons.link,
         iconColor: Theme.of(context).colorScheme.secondary,
@@ -632,7 +632,7 @@ class _VideoStoryPageState extends State<VideoStoryPage>
       backgroundColor: Colors.transparent,
       builder: (sheetContext) {
         final theme = Theme.of(sheetContext);
-        final palette = sheetContext.thelaPalette;
+        final palette = sheetContext.thalaPalette;
         final surface = theme.colorScheme.surface;
         final backgroundColor = Color.alphaBlend(
           palette.surfaceBright.withOpacity(
@@ -706,7 +706,7 @@ class _VideoStoryPageState extends State<VideoStoryPage>
       builder: (context) {
         final viewInsets = MediaQuery.of(context).viewInsets;
         final theme = Theme.of(context);
-        final palette = context.thelaPalette;
+        final palette = context.thalaPalette;
         final surface = theme.colorScheme.surface;
         final backgroundColor = Color.alphaBlend(
           palette.surfaceBright.withOpacity(
@@ -828,7 +828,7 @@ class _VideoStoryPageState extends State<VideoStoryPage>
     final messenger = ScaffoldMessenger.maybeOf(context);
     final message = AppTranslations.of(context, AppText.feedAuthRequired);
     messenger?.showSnackBar(
-      buildThelaSnackBar(
+      buildThalaSnackBar(
         context,
         icon: Icons.lock_outline,
         iconColor: Theme.of(context).colorScheme.error,
@@ -842,7 +842,7 @@ class _VideoStoryPageState extends State<VideoStoryPage>
     final messenger = ScaffoldMessenger.maybeOf(context);
     final message = AppTranslations.of(context, AppText.feedSupabaseRequired);
     messenger?.showSnackBar(
-      buildThelaSnackBar(
+      buildThalaSnackBar(
         context,
         icon: Icons.cloud_off,
         iconColor: Theme.of(context).colorScheme.error,
@@ -858,7 +858,7 @@ class _VideoStoryPageState extends State<VideoStoryPage>
     final feed = context.watch<FeedController>();
     final auth = context.watch<AuthController>();
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final mediaQuery = MediaQuery.of(context);
     final locale = Localizations.maybeLocaleOf(context) ?? const Locale('en');
     final post = widget.post;
@@ -2139,7 +2139,7 @@ class _VideoStoryOverlay extends StatelessWidget {
   final bool likeBusy;
   final bool commentBusy;
   final bool shareBusy;
-  final ThelaPalette palette;
+  final ThalaPalette palette;
   final bool useCompactLayout;
   final Animation<double> sharePulseScale;
   final Animation<double> sharePulseGlow;
@@ -2560,7 +2560,7 @@ class _VideoStoryActionRail extends StatelessWidget {
   final VoidCallback onLike;
   final VoidCallback onComment;
   final VoidCallback onShare;
-  final ThelaPalette palette;
+  final ThalaPalette palette;
   final Animation<double> sharePulseScale;
   final Animation<double> sharePulseGlow;
 
@@ -2763,7 +2763,7 @@ class _CenterPlayIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     return IgnorePointer(
       ignoring: true,
       child: Container(

@@ -42,8 +42,8 @@ const samplePosts = <VideoPost>[
       en: 'Tizi Ouzou, Algeria',
       fr: 'Tizi Ouzou, Algérie',
     ),
-    creatorName: LocalizedText(en: 'Thela Editorial', fr: 'Éditorial Thela'),
-    creatorHandle: '@thelaeditorial',
+    creatorName: LocalizedText(en: 'Thala Editorial', fr: 'Éditorial Thala'),
+    creatorHandle: '@thalaeditorial',
     likes: 4210,
     comments: 302,
     shares: 188,
@@ -156,7 +156,7 @@ const samplePosts = <VideoPost>[
     likes: 1340,
     comments: 82,
     shares: 45,
-    tags: ['#Imzad', '#Amazigh', '#Sahara', '#Thela'],
+    tags: ['#Imzad', '#Amazigh', '#Sahara', '#Thala'],
   ),
   VideoPost(
     id: 'agadir-dance',
@@ -178,7 +178,7 @@ const samplePosts = <VideoPost>[
     likes: 2980,
     comments: 156,
     shares: 204,
-    tags: ['#Ahouach', '#Agadir', '#Dance', '#Thela'],
+    tags: ['#Ahouach', '#Agadir', '#Dance', '#Thala'],
   ),
   VideoPost(
     id: 'kabyle-poetry',
@@ -200,7 +200,7 @@ const samplePosts = <VideoPost>[
     likes: 870,
     comments: 64,
     shares: 39,
-    tags: ['#Kabyle', '#Poetry', '#Diaspora', '#Thela'],
+    tags: ['#Kabyle', '#Poetry', '#Diaspora', '#Thala'],
   ),
   VideoPost(
     id: 'rif-bread',
@@ -222,6 +222,6 @@ const samplePosts = <VideoPost>[
     likes: 1540,
     comments: 112,
     shares: 88,
-    tags: ['#Rif', '#Cuisine', '#Aghroum', '#Thela'],
+    tags: ['#Rif', '#Cuisine', '#Aghroum', '#Thala'],
   ),
 ];

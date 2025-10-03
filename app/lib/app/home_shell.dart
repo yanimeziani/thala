@@ -17,7 +17,7 @@ import '../features/feed/video_feed_page.dart';
 import '../features/messages/messages_page.dart';
 import '../features/search/search_page.dart';
 import '../services/recommendation_service.dart';
-import '../ui/widgets/thela_snackbar.dart';
+import '../ui/widgets/thala_snackbar.dart';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -109,7 +109,7 @@ class _HomeShellState extends State<HomeShell> {
       AppText.createStorySavedLocally,
     );
     messenger?.showSnackBar(
-      buildThelaSnackBar(
+      buildThalaSnackBar(
         context,
         icon: Icons.download_done,
         semanticsLabel: message,
@@ -372,7 +372,7 @@ class _BottomNavItemButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final isAction = data.isAction;
     final iconBaseColor = palette.textPrimary;
     final inactiveOpacity = 0.52;

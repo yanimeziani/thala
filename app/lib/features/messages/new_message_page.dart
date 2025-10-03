@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../app/app_theme.dart';
 import '../../controllers/messages_controller.dart';
 import '../../models/contact_handle.dart';
-import '../../ui/widgets/thela_glass_surface.dart';
+import '../../ui/widgets/thala_glass_surface.dart';
 
 typedef NewMessageSelection = ({ContactHandle? handle, String? handleText});
 
@@ -55,7 +55,7 @@ class _NewMessagePageState extends State<NewMessagePage> {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final MessagesController controller = context.watch<MessagesController>();
     final List<ContactHandle> handles = controller.searchResults;
     final bool isSearching = controller.isSearching;
@@ -63,7 +63,7 @@ class _NewMessagePageState extends State<NewMessagePage> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('New message')),
-      body: ThelaPageBackground(
+      body: ThalaPageBackground(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
         child: SafeArea(
           top: false,
@@ -161,7 +161,7 @@ class _NewMessageResults extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final double bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final String trimmed = query.trim();
     final bool showStartOption = trimmed.isNotEmpty;

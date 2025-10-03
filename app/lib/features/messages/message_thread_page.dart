@@ -86,7 +86,7 @@ class _MessageThreadPageState extends State<MessageThreadPage> {
     }
 
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
 
     return Scaffold(
       appBar: AppBar(
@@ -162,7 +162,7 @@ class _ThreadTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final theme = Theme.of(context);
     final MessageThread? value = thread;
     if (value == null) {
@@ -280,7 +280,7 @@ class _MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final theme = Theme.of(context);
     final Color bubbleColor = message.isMine
         ? theme.colorScheme.primary
@@ -444,7 +444,7 @@ class _MessageComposerState extends State<_MessageComposer> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
 
     final bool canSend = _draft.trim().isNotEmpty && !widget.isSending;
 
@@ -538,7 +538,7 @@ class _DateChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final MaterialLocalizations materials = MaterialLocalizations.of(context);
     final String label = materials.formatFullDate(dateTime);
     return Center(
@@ -563,7 +563,7 @@ class _DateChip extends StatelessWidget {
 class _EmptyConversation extends StatelessWidget {
   const _EmptyConversation({required this.palette});
 
-  final ThelaPalette palette;
+  final ThalaPalette palette;
 
   @override
   Widget build(BuildContext context) {
@@ -591,7 +591,7 @@ class _ErrorBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final theme = Theme.of(context);
     return Material(
       color: palette.surfaceSubtle,

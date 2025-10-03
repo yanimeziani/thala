@@ -1,6 +1,6 @@
-# Thela
+# Thala
 
-Thela is a TikTok-inspired home for Amazigh stories, culture, and music. The experience now includes:
+Thala is a TikTok-inspired home for Amazigh stories, culture, and music. The experience now includes:
 
 - A vertical video feed with bilingual overlays and Supabase-backed content (falls back to curated samples).
 - A shader-driven onboarding splash that greets new users and gathers Amazigh identity or ally context.
@@ -16,13 +16,28 @@ Thela is a TikTok-inspired home for Amazigh stories, culture, and music. The exp
    flutter pub get
    ```
 
-2. (Optional) Wire up Supabase so the feed can stream real data. Provide the credentials when you run the app:
+2. (Optional) Wire up Supabase so the feed can stream real data. Keep the credentials out of git by creating `.env.local` (ignored) with your values:
+
+   ```dotenv
+   SUPABASE_URL=https://your-project.supabase.co
+   SUPABASE_ANON_KEY=your-publishable-key
+   ```
+
+   Then start the app through the helper script so the values are passed as `--dart-define`s:
+
+   ```bash
+   ./tools/run_with_supabase.sh -- -d macos
+   ```
+
+   Provide any normal `flutter run` flags after `--`. If you prefer to run Flutter directly, continue passing the defines yourself:
 
    ```bash
    flutter run \
      --dart-define SUPABASE_URL=https://your-project.supabase.co \
      --dart-define SUPABASE_PUBLISHABLE_KEY=your-publishable-key
    ```
+
+   The service role key and database passwords should stay server-side; only the publishable/anon key is injected into the client build.
 
    Expected table: `videos` with columns `id`, `video_url`, `thumbnail_url`, `title_en`, `title_fr`, `description_en`, `description_fr`, `location_en`, `location_fr`, `creator_name_en`, `creator_name_fr`, `creator_handle`, `likes`, `comments`, `shares`, and `tags` (array of text). Missing credentials just keeps the curated sample feed.
 

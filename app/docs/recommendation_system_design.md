@@ -1,4 +1,4 @@
-# Thela Cultural Recommendation System Design
+# Thala Cultural Recommendation System Design
 
 ## Vision & Requirements
 - Deliver personalised, culturally respectful story feeds, archive highlights, communities, and music tracks.

@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../app/app_theme.dart';
 import '../../l10n/app_translations.dart';
-import '../../ui/widgets/thela_glass_surface.dart';
+import '../../ui/widgets/thala_glass_surface.dart';
 import '../archive/archive_page.dart';
 import '../community/community_page.dart';
 import '../events/events_page.dart';
@@ -79,13 +79,13 @@ class SearchPageState extends State<SearchPage> {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final query = _query;
     final filteredOptions = _filteredOptions;
 
-    return ThelaPageBackground(
+    return ThalaPageBackground(
       padding: const EdgeInsets.only(bottom: 96),
       child: SafeArea(
         bottom: false,
@@ -94,7 +94,7 @@ class SearchPageState extends State<SearchPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              ThelaGlassSurface(
+              ThalaGlassSurface(
                 cornerRadius: 26,
                 backgroundOpacity: isDark ? 0.18 : 0.34,
                 enableBorder: false,
@@ -232,7 +232,7 @@ class _SearchOptionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final titleStyle = theme.textTheme.titleMedium?.copyWith(
       fontWeight: FontWeight.w700,
     );
@@ -240,7 +240,7 @@ class _SearchOptionCard extends StatelessWidget {
       color: palette.textSecondary,
     );
 
-    return ThelaGlassSurface(
+    return ThalaGlassSurface(
       cornerRadius: 24,
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       child: Material(
@@ -293,7 +293,7 @@ class _SearchEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final message = AppTranslations.of(context, AppText.archiveSearchEmpty);
 
     return Column(
@@ -328,7 +328,7 @@ class _SearchActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
 
     return SizedBox(
       height: 40,

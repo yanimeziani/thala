@@ -10,7 +10,7 @@ class LocalizationController extends ChangeNotifier {
   LocalizationController({Locale? initialLocale})
     : _locale = _sanitize(initialLocale ?? const Locale('en'));
 
-  static const _preferenceKey = 'thela.preferredLanguage';
+  static const _preferenceKey = 'thala.preferredLanguage';
 
   static const supportedLocales = <Locale>[Locale('en'), Locale('fr')];
 

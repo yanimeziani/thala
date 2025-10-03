@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../app/app_theme.dart';
 import '../../controllers/auth_controller.dart';
-import '../../ui/widgets/thela_glass_surface.dart';
+import '../../ui/widgets/thala_glass_surface.dart';
 
 class EmailPasswordLoginPage extends StatefulWidget {
   const EmailPasswordLoginPage({super.key});
@@ -29,14 +29,14 @@ class _EmailPasswordLoginPageState extends State<EmailPasswordLoginPage> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthController>();
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final isAuthenticating = auth.isAuthenticating;
     final error = auth.errorMessage;
 
     return Scaffold(
       extendBody: true,
       backgroundColor: Colors.transparent,
-      body: ThelaPageBackground(
+      body: ThalaPageBackground(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(
@@ -45,7 +45,7 @@ class _EmailPasswordLoginPageState extends State<EmailPasswordLoginPage> {
             ),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
-              child: ThelaGlassSurface(
+              child: ThalaGlassSurface(
                 cornerRadius: 28,
                 backgroundOpacity: theme.brightness == Brightness.dark
                     ? 0.28

@@ -6,7 +6,7 @@ import '../../app/app_theme.dart';
 import '../../data/sample_archive_entries.dart';
 import '../../l10n/app_translations.dart';
 import '../../models/archive_entry.dart';
-import '../../ui/widgets/thela_glass_surface.dart';
+import '../../ui/widgets/thala_glass_surface.dart';
 
 class ArchivePage extends StatefulWidget {
   const ArchivePage({super.key});
@@ -119,7 +119,7 @@ class _ArchivePageState extends State<ArchivePage> {
     return Scaffold(
       extendBody: true,
       backgroundColor: Colors.transparent,
-      body: ThelaPageBackground(
+      body: ThalaPageBackground(
         child: SafeArea(
           bottom: false,
           child: Padding(
@@ -146,7 +146,7 @@ class _ArchivePageState extends State<ArchivePage> {
                         alignment: Alignment.topCenter,
                         child: Padding(
                           padding: const EdgeInsets.only(top: 4),
-                          child: ThelaGlassSurface(
+                          child: ThalaGlassSurface(
                             enableBorder: false,
                             cornerRadius: 20,
                             backgroundOpacity:
@@ -336,7 +336,7 @@ class _ArchiveSearchBarState extends State<_ArchiveSearchBar> {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
       curve: Curves.easeOutCubic,
-      child: ThelaGlassSurface(
+      child: ThalaGlassSurface(
         cornerRadius: 24,
         backgroundOpacity: opacity,
         borderColor: theme.dividerColor.withValues(
@@ -404,7 +404,7 @@ class _ArchiveIdleState extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: ThelaGlassSurface(
+        child: ThalaGlassSurface(
           cornerRadius: 28,
           enableBorder: false,
           backgroundOpacity: context.isDarkMode ? 0.22 : 0.55,
@@ -471,7 +471,7 @@ class _ArchiveEmptyState extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32),
-        child: ThelaGlassSurface(
+        child: ThalaGlassSurface(
           cornerRadius: 28,
           enableBorder: false,
           backgroundOpacity: context.isDarkMode ? 0.22 : 0.55,
@@ -650,7 +650,7 @@ class _ArchivePlayerCard extends StatelessWidget {
 
         return Align(
           alignment: Alignment.topCenter,
-          child: ThelaGlassSurface(
+          child: ThalaGlassSurface(
             cornerRadius: 28,
             backgroundOpacity: isDark ? 0.28 : 0.78,
             enableBorder: false,

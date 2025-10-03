@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:thela/models/content_profile.dart';
-import 'package:thela/models/localized_text.dart';
-import 'package:thela/models/onboarding_answers.dart';
-import 'package:thela/models/video_post.dart';
-import 'package:thela/services/recommendation_engine.dart';
+import 'package:thala/models/content_profile.dart';
+import 'package:thala/models/localized_text.dart';
+import 'package:thala/models/onboarding_answers.dart';
+import 'package:thala/models/video_post.dart';
+import 'package:thala/services/recommendation_engine.dart';
 
 void main() {
   group('RecommendationEngine', () {

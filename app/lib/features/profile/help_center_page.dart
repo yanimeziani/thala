@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/app_theme.dart';
-import '../../ui/widgets/thela_glass_surface.dart';
+import '../../ui/widgets/thala_glass_surface.dart';
 
 class HelpCenterPage extends StatelessWidget {
   const HelpCenterPage({super.key});
@@ -15,7 +15,7 @@ class HelpCenterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
 
     return Scaffold(
       extendBody: true,
@@ -24,12 +24,12 @@ class HelpCenterPage extends StatelessWidget {
         title: const Text('Help centre'),
         backgroundColor: Colors.transparent,
       ),
-      body: ThelaPageBackground(
+      body: ThalaPageBackground(
         child: SafeArea(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
             children: [
-              ThelaGlassSurface(
+              ThalaGlassSurface(
                 cornerRadius: 26,
                 backgroundOpacity: theme.brightness == Brightness.dark
                     ? 0.24
@@ -66,16 +66,16 @@ class HelpCenterPage extends StatelessWidget {
                 items: [
                   'You can update your display name, pronouns, and bio any time from Profile details.',
                   'Two-step sign-in is rolling out for guardians. Watch your inbox for activation instructions.',
-                  'If you suspect an account breach, sign out of all sessions and email safety@thela.culture.',
+                  'If you suspect an account breach, sign out of all sessions and email safety@thala.culture.',
                 ],
               ),
               const SizedBox(height: 20),
               const _HelpSection(
                 title: 'Contact the team',
                 items: [
-                  'Email support@thela.culture for technical questions or onboarding help.',
-                  'Message safety@thela.culture for urgent cultural safety requests.',
-                  'Share feature ideas at feedback@thela.culture so we can keep shaping Thela together.',
+                  'Email support@thala.culture for technical questions or onboarding help.',
+                  'Message safety@thala.culture for urgent cultural safety requests.',
+                  'Share feature ideas at feedback@thala.culture so we can keep shaping Thala together.',
                 ],
               ),
             ],
@@ -95,8 +95,8 @@ class _HelpSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
-    return ThelaGlassSurface(
+    final palette = context.thalaPalette;
+    return ThalaGlassSurface(
       cornerRadius: 22,
       backgroundOpacity: theme.brightness == Brightness.dark ? 0.22 : 0.62,
       borderColor: palette.border,

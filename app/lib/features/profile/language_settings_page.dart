@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../app/app_theme.dart';
 import '../../controllers/localization_controller.dart';
 import '../../l10n/app_translations.dart';
-import '../../ui/widgets/thela_glass_surface.dart';
+import '../../ui/widgets/thala_glass_surface.dart';
 
 class LanguageSettingsPage extends StatelessWidget {
   const LanguageSettingsPage({super.key});
@@ -22,7 +22,7 @@ class LanguageSettingsPage extends StatelessWidget {
     final language = localization.language;
     String tr(AppText key) => AppTranslations.of(context, key);
 
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     return Scaffold(
       extendBody: true,
       backgroundColor: Colors.transparent,
@@ -30,12 +30,12 @@ class LanguageSettingsPage extends StatelessWidget {
         title: Text(tr(AppText.languageTitle)),
         backgroundColor: Colors.transparent,
       ),
-      body: ThelaPageBackground(
+      body: ThalaPageBackground(
         child: SafeArea(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
             children: [
-              ThelaGlassSurface(
+              ThalaGlassSurface(
                 cornerRadius: 26,
                 backgroundOpacity: theme.brightness == Brightness.dark
                     ? 0.22
@@ -98,7 +98,7 @@ class _LanguageTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final isDark = context.isDarkMode;
     final isSelected = value == groupValue;
     return InkWell(

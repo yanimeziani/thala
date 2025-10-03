@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../app/app_theme.dart';
 import '../../l10n/app_translations.dart';
-import '../../ui/widgets/thela_glass_surface.dart';
+import '../../ui/widgets/thala_glass_surface.dart';
 import '../archive/archive_page.dart';
 import '../events/events_page.dart';
 import '../music/music_page.dart';
@@ -14,7 +14,7 @@ class ExploreHubPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final isDark = theme.brightness == Brightness.dark;
     final titleStyle = theme.textTheme.headlineSmall?.copyWith(
       fontWeight: FontWeight.w700,
@@ -54,7 +54,7 @@ class ExploreHubPage extends StatelessWidget {
           : [palette.surfaceBright, theme.scaffoldBackgroundColor],
     );
 
-    return ThelaPageBackground(
+    return ThalaPageBackground(
       colors: gradient.colors,
       begin: gradient.begin,
       end: gradient.end,
@@ -63,7 +63,7 @@ class ExploreHubPage extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 24, 20, 120),
           children: [
-            ThelaGlassSurface(
+            ThalaGlassSurface(
               cornerRadius: 26,
               backgroundOpacity: theme.brightness == Brightness.dark
                   ? 0.22
@@ -137,7 +137,7 @@ class _HubCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
     final titleStyle = theme.textTheme.titleMedium?.copyWith(
       fontWeight: FontWeight.w700,
     );
@@ -145,7 +145,7 @@ class _HubCard extends StatelessWidget {
       color: palette.textSecondary,
     );
 
-    return ThelaGlassSurface(
+    return ThalaGlassSurface(
       cornerRadius: 24,
       backgroundOpacity: theme.brightness == Brightness.dark ? 0.22 : 0.62,
       padding: EdgeInsets.zero,

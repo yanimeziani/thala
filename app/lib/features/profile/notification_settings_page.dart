@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../app/app_theme.dart';
 import '../../controllers/notification_settings_controller.dart';
 import '../../models/notification_settings.dart';
-import '../../ui/widgets/thela_glass_surface.dart';
+import '../../ui/widgets/thala_glass_surface.dart';
 
 class NotificationSettingsPage extends StatelessWidget {
   const NotificationSettingsPage({super.key});
@@ -27,7 +27,7 @@ class NotificationSettingsPage extends StatelessWidget {
     final settings = controller.settings;
     final isLoaded = controller.isLoaded;
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
 
     return Scaffold(
       extendBody: true,
@@ -38,12 +38,12 @@ class NotificationSettingsPage extends StatelessWidget {
       ),
       body: !isLoaded
           ? const Center(child: CircularProgressIndicator())
-          : ThelaPageBackground(
+          : ThalaPageBackground(
               child: SafeArea(
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
                   children: [
-                    ThelaGlassSurface(
+                    ThalaGlassSurface(
                       cornerRadius: 26,
                       backgroundOpacity: theme.brightness == Brightness.dark
                           ? 0.24
@@ -82,7 +82,7 @@ class NotificationSettingsPage extends StatelessWidget {
                     if (!settings.storyAlerts &&
                         !settings.communityHighlights &&
                         !settings.productUpdates)
-                      ThelaGlassSurface(
+                      ThalaGlassSurface(
                         cornerRadius: 20,
                         backgroundOpacity: theme.brightness == Brightness.dark
                             ? 0.22
@@ -90,7 +90,7 @@ class NotificationSettingsPage extends StatelessWidget {
                         borderColor: theme.colorScheme.error,
                         padding: const EdgeInsets.all(16),
                         child: Text(
-                          'All alerts are off. You can still explore Thela manually anytime.',
+                          'All alerts are off. You can still explore Thala manually anytime.',
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: palette.textSecondary,
                           ),
@@ -125,9 +125,9 @@ class _NotificationTile extends StatelessWidget {
     final settings = controller.settings;
     final isEnabled = _valueFor(settings);
     final theme = Theme.of(context);
-    final palette = context.thelaPalette;
+    final palette = context.thalaPalette;
 
-    return ThelaGlassSurface(
+    return ThalaGlassSurface(
       cornerRadius: 20,
       backgroundOpacity: theme.brightness == Brightness.dark ? 0.24 : 0.62,
       borderColor: palette.border,
