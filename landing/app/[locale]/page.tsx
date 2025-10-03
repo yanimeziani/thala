@@ -77,10 +77,10 @@ export default async function HomePage({ params }: PageProps) {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[var(--background)] text-ink transition-colors duration-500">
+    <div className="relative min-h-screen overflow-hidden text-ink transition-colors duration-500">
       <div className="absolute inset-0 -z-30 overflow-hidden" aria-hidden="true">
         <video
-          className="h-full w-full scale-110 object-cover blur-sm brightness-[0.7]"
+          className="h-full w-full scale-110 object-cover blur-[1px] brightness-[0.7]"
           autoPlay
           loop
           muted
