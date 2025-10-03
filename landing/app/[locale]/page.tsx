@@ -58,40 +58,50 @@ export default async function HomePage({ params }: PageProps) {
   const { navigation, hero, footer } = dictionary;
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6">
-      {/* Gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0A1216] to-[#1A2329]" />
+    <div className="relative flex min-h-screen flex-col items-center overflow-hidden">
+      {/* Softer gradient background with warmth */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0f1419] via-[#1a1f2e] to-[#0a0e14]" />
 
-      <div className="absolute top-6 right-6 z-20">
+      {/* Subtle ambient glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-gradient-radial from-[#ff9569]/5 via-transparent to-transparent blur-3xl pointer-events-none" />
+
+      <div className="absolute top-4 sm:top-6 right-4 sm:right-6 z-20">
         <LanguageSwitcher currentLocale={locale} ariaLabel={navigation.languageToggleAria} />
       </div>
 
-      <main className="relative z-10 flex w-full max-w-md flex-col items-center text-center animate-in fade-in slide-in-from-bottom-8 duration-700">
-        {/* Logo */}
-        <div className="mb-6">
-          <Image src={thalaLogo} alt="Thala" width={120} height={120} priority className="opacity-90" />
+      <main className="relative z-10 flex w-full max-w-lg flex-col items-center text-center px-5 sm:px-6 py-12 sm:py-16 animate-in fade-in slide-in-from-bottom-6 duration-1000 ease-out">
+        {/* Logo with gentle animation */}
+        <div className="mb-8 sm:mb-10 animate-in fade-in zoom-in-95 duration-700 delay-150">
+          <Image
+            src={thalaLogo}
+            alt="Thala"
+            width={100}
+            height={100}
+            priority
+            className="opacity-95 drop-shadow-2xl w-[80px] h-[80px] sm:w-[100px] sm:h-[100px]"
+          />
         </div>
 
-        {/* Title */}
-        <h1 className="text-4xl font-bold text-white tracking-tight mb-3">
-          Thala
+        {/* Title with breathing room */}
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight mb-4 sm:mb-5 leading-tight max-w-sm animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
+          {hero.title}
         </h1>
 
-        {/* Subtitle */}
-        <p className="text-white/60 mb-12">
+        {/* Subtitle - warm and inviting */}
+        <p className="text-base sm:text-lg text-white/70 mb-10 sm:mb-14 max-w-md leading-relaxed animate-in fade-in slide-in-from-bottom-3 duration-700 delay-500">
           {hero.description}
         </p>
 
-        {/* Glass card */}
-        <div className="w-full bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 p-8 shadow-2xl">
-          <h2 className="text-xl font-semibold text-white mb-6">
+        {/* Glass card - softer, more welcoming */}
+        <div className="w-full bg-white/[0.06] backdrop-blur-xl rounded-[28px] border border-white/10 p-6 sm:p-8 md:p-10 shadow-2xl shadow-black/40 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-700">
+          <h2 className="text-lg sm:text-xl font-semibold text-white/95 mb-6 sm:mb-8 tracking-tight">
             {hero.cardTitle}
           </h2>
 
-          {/* iOS CTA */}
+          {/* iOS CTA - warm and inviting */}
           <Link
             href={hero.iosCta.href}
-            className="flex items-center justify-center w-full h-14 rounded-xl bg-white text-black font-semibold text-base transition-all hover:scale-[1.02] active:scale-[0.98] mb-4"
+            className="flex items-center justify-center w-full h-12 sm:h-14 rounded-2xl bg-gradient-to-br from-white to-white/95 text-black font-semibold text-sm sm:text-base transition-all duration-300 hover:scale-[1.01] hover:shadow-lg hover:shadow-white/20 active:scale-[0.99] mb-4 sm:mb-5"
           >
             {hero.iosCta.label}
           </Link>
@@ -105,17 +115,21 @@ export default async function HomePage({ params }: PageProps) {
           />
         </div>
 
-        <footer className="mt-12 flex flex-col items-center gap-4">
-          <div className="flex gap-4 text-xs text-white/40">
-            <Link href={`/${locale}/terms`} className="hover:text-[#ff9569] transition-colors">
+        {/* Spacer for better mobile spacing */}
+        <div className="flex-grow min-h-8 sm:min-h-12" />
+
+        {/* Footer - softer and more grounded */}
+        <footer className="mt-auto pt-8 sm:pt-12 flex flex-col items-center gap-3 sm:gap-4 w-full">
+          <div className="flex flex-wrap justify-center gap-3 sm:gap-4 text-xs sm:text-sm text-white/40">
+            <Link href={`/${locale}/terms`} className="hover:text-[#ff9569] transition-colors duration-200">
               {footer.terms}
             </Link>
-            <span>•</span>
-            <Link href={`/${locale}/privacy`} className="hover:text-[#ff9569] transition-colors">
+            <span className="text-white/20">•</span>
+            <Link href={`/${locale}/privacy`} className="hover:text-[#ff9569] transition-colors duration-200">
               {footer.privacy}
             </Link>
           </div>
-          <div className="text-[0.65rem] uppercase tracking-[0.3em] text-white/40">
+          <div className="text-[0.6rem] sm:text-[0.65rem] uppercase tracking-[0.3em] text-white/30 font-light">
             {footer.note}
           </div>
         </footer>

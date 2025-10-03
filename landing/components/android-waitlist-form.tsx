@@ -43,14 +43,14 @@ export function AndroidWaitlistForm({
   };
 
   return (
-    <div className="pt-6 border-t border-white/10">
-      <p className="text-sm text-white/70 mb-3">{waitlistLabel}</p>
-      <form className="flex gap-2" onSubmit={handleSubmit}>
+    <div className="pt-5 sm:pt-6 border-t border-white/[0.08]">
+      <p className="text-xs sm:text-sm text-white/60 mb-3 sm:mb-4 font-light">{waitlistLabel}</p>
+      <form className="flex flex-col sm:flex-row gap-2 sm:gap-2.5" onSubmit={handleSubmit}>
         <input
           type="email"
           name="email"
           placeholder={emailPlaceholder}
-          className="flex-1 h-12 px-4 bg-white/5 border border-white/20 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:border-[#ff9569] transition-colors disabled:opacity-50"
+          className="flex-1 h-11 sm:h-12 px-4 bg-white/[0.04] border border-white/10 rounded-xl text-sm sm:text-base text-white placeholder:text-white/30 focus:outline-none focus:border-[#ff9569]/50 focus:bg-white/[0.06] transition-all duration-200 disabled:opacity-40"
           required
           disabled={isSubmitting || isSuccess}
         />
@@ -58,7 +58,7 @@ export function AndroidWaitlistForm({
         <button
           type="submit"
           disabled={isSubmitting || isSuccess}
-          className="px-6 h-12 rounded-lg bg-[#ff9569]/20 border border-[#ff9569]/40 text-[#ff9569] font-medium hover:bg-[#ff9569]/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="h-11 sm:h-12 px-5 sm:px-6 rounded-xl bg-[#ff9569]/10 border border-[#ff9569]/30 text-[#ff9569] text-sm sm:text-base font-medium hover:bg-[#ff9569]/20 hover:border-[#ff9569]/40 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
         >
           {isSuccess ? "✓" : submitButton}
         </button>
