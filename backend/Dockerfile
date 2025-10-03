@@ -22,8 +22,8 @@ COPY alembic/ ./alembic/
 COPY alembic.ini ./
 
 # Install Python dependencies
-RUN pip install --upgrade pip && \
-    pip install -e .
+RUN pip install --upgrade pip --root-user-action=ignore && \
+    pip install -e . --root-user-action=ignore
 
 # Create non-root user
 RUN useradd -m -u 1000 appuser && \
