@@ -1,0 +1,1 @@
+- All markdown documentation should go in @docs/

@@ -29,8 +29,8 @@ class Settings(BaseSettings):
     aws_secret_access_key: Optional[str] = Field(default=None, alias="AWS_SECRET_ACCESS_KEY")
     s3_endpoint_url: Optional[str] = Field(default=None, alias="S3_ENDPOINT_URL")
 
-    cors_allowed_origins: List[str] = Field(
-        default_factory=list,
+    cors_allowed_origins: Union[str, List[str]] = Field(
+        default="",
         alias="CORS_ALLOWED_ORIGINS",
         description="Origins permitted to access the API."
     )
