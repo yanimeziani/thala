@@ -1,0 +1,20 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "4HYDAPQ96M.app.thala",
+        "paths": [
+          "/event/*",
+          "/events/*",
+          "/profile/*",
+          "/video/*",
+          "/community/*"
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": ["4HYDAPQ96M.app.thala"]
+  }
+}

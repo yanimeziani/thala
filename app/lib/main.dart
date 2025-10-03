@@ -17,6 +17,7 @@ import 'features/splash/splash_page.dart';
 import 'l10n/app_translations.dart';
 import 'models/onboarding_answers.dart';
 import 'data/sample_tracks.dart';
+import 'services/deep_link_service.dart';
 import 'services/meili_search_manager.dart';
 import 'services/preference_store.dart';
 import 'services/recommendation_service.dart';
@@ -24,6 +25,10 @@ import 'ui/widgets/thala_snackbar.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize deep linking
+  await DeepLinkService.instance.initialize();
+
   runApp(const ThalaBootstrap());
 }
 
@@ -158,11 +163,39 @@ class AuthGate extends StatefulWidget {
 
 class _AuthGateState extends State<AuthGate> {
   bool _showOnboarding = false;
+  StreamSubscription<Uri>? _deepLinkSubscription;
 
   @override
   void initState() {
     super.initState();
     _restoreOnboardingState();
+    _setupDeepLinkListener();
+  }
+
+  @override
+  void dispose() {
+    _deepLinkSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _setupDeepLinkListener() {
+    _deepLinkSubscription = DeepLinkService.instance.linkStream.listen((uri) {
+      _handleDeepLink(uri);
+    });
+  }
+
+  void _handleDeepLink(Uri uri) {
+    final route = DeepLinkService.parseUri(uri);
+    if (route == null) return;
+
+    // Handle different deep link types
+    // TODO: Navigate to appropriate screens based on route.type and route.id
+    if (kDebugMode) {
+      debugPrint('Deep link received: $route');
+    }
+
+    // For now, just log the deep link
+    // In a full implementation, you would navigate to the appropriate screen
   }
 
   @override

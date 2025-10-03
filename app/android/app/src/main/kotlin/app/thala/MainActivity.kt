@@ -1,4 +1,4 @@
-package com.example.thala
+package app.thala
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -62,9 +62,11 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>app.mobile.thala</string>
+				<string>app.thala</string>
 			</array>
 		</dict>
 	</array>
+	<key>FlutterDeepLinkingEnabled</key>
+	<true/>
 </dict>
 </plist>
