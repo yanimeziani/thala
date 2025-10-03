@@ -2,41 +2,41 @@ import type { Dictionary } from "@/i18n/types";
 
 export const frDictionary: Dictionary = {
   metadata: {
-    title: "Thala App | Culture amazighe, partout avec vous",
+    title: "Thala — Des histoires qui restent",
     description:
-      "Thala est le foyer mobile des rituels, histoires et cercles amazighs — disponible maintenant sur iOS.",
+      "Là où vivent les histoires, la musique et les voix amazighes.",
     openGraph: {
-      title: "Thala App | Culture amazighe, partout avec vous",
+      title: "Thala — Des histoires qui restent",
       description:
-        "Téléchargez Thala sur iOS pour garder près de vous les rituels, voix et cercles kabyles.",
+        "Là où vivent les histoires, la musique et les voix amazighes.",
     },
     twitter: {
-      title: "Thala App | Culture amazighe, partout avec vous",
+      title: "Thala — Des histoires qui restent",
       description:
-        "Téléchargez Thala sur iOS pour garder près de vous les rituels, voix et cercles kabyles.",
+        "Là où vivent les histoires, la musique et les voix amazighes.",
     },
   },
   navigation: {
     languageToggleAria: "Changer de langue",
   },
   hero: {
-    eyebrow: "Thala sur iOS",
-    title: "Emportez la culture kabyle avec vous, chaque jour.",
+    eyebrow: "Maintenant sur iOS",
+    title: "Tes histoires. Tes racines. Toujours proches.",
     description:
-      "Thala rassemble rituels, capsules de langue et cercles fiables imaginés par des organisateurs amazighs partout dans le monde.",
+      "Thala rassemble les voix, la musique et les traditions amazighes dans ta poche—créé par nos communautés, pour nos communautés.",
     iosCta: {
       href: "https://apps.apple.com",
-      label: "Télécharger sur iPhone",
+      label: "Obtenir Thala",
     },
-    androidNote: "La version Android arrive — demandez un accès anticipé dans l'application.",
+    androidNote: "Android bientôt disponible",
     highlights: [
-      "Rituels et rappels de cinq minutes ancrés dans les traditions kabyles",
-      "Cercles pour partager des notes audio avec famille, amis et aînés",
-      "Interface légère pensée pour les faibles débits et les voyages",
+      "Découvre des histoires de toute Tamazgha",
+      "Explore la musique qui porte ton héritage",
+      "Connecte-toi aux communautés proches et lointaines",
     ],
-    footnote: "Thala est actuellement accessible sur invitation pendant l'accueil des premières communautés.",
+    footnote: "Actuellement sur invitation uniquement",
   },
   footer: {
-    note: "Thala — créé avec les communautés amazighes du monde entier.",
+    note: "Fait avec amour pour Imazighen",
   },
 };

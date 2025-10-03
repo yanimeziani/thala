@@ -2,41 +2,41 @@ import type { Dictionary } from "@/i18n/types";
 
 export const enDictionary: Dictionary = {
   metadata: {
-    title: "Thala App | Amazigh culture, on the go",
+    title: "Thala — Stories worth keeping",
     description:
-      "Thala is the mobile home for Amazigh rituals, stories, and circles — available now on iOS.",
+      "Where Amazigh stories, music, and voices live on.",
     openGraph: {
-      title: "Thala App | Amazigh culture, on the go",
+      title: "Thala — Stories worth keeping",
       description:
-        "Download Thala on iOS to keep Kabyle rituals, voices, and circles close wherever you are.",
+        "Where Amazigh stories, music, and voices live on.",
     },
     twitter: {
-      title: "Thala App | Amazigh culture, on the go",
+      title: "Thala — Stories worth keeping",
       description:
-        "Download Thala on iOS to keep Kabyle rituals, voices, and circles close wherever you are.",
+        "Where Amazigh stories, music, and voices live on.",
     },
   },
   navigation: {
     languageToggleAria: "Change language",
   },
   hero: {
-    eyebrow: "Thala for iOS",
-    title: "Carry Kabyle culture with you, every day.",
+    eyebrow: "Now on iOS",
+    title: "Your stories. Your roots. Always close.",
     description:
-      "Thala gives you rituals, language drops, and trusted circles built by Amazigh organizers across the world.",
+      "Thala brings Amazigh voices, music, and traditions to your pocket—built by our communities, for our communities.",
     iosCta: {
       href: "https://apps.apple.com",
-      label: "Download for iPhone",
+      label: "Get Thala",
     },
-    androidNote: "Android is in development — request early access from inside the app.",
+    androidNote: "Android coming soon",
     highlights: [
-      "Five-minute rituals and reminders rooted in Kabyle traditions",
-      "Circles to share audio notes with family, friends, and elders",
-      "Lightweight design built for low bandwidth and travel",
+      "Swipe through stories from across Tamazgha",
+      "Discover music that moves with your heritage",
+      "Connect with communities near and far",
     ],
-    footnote: "Thala is currently invite-only while we onboard the first communities.",
+    footnote: "Currently invite-only",
   },
   footer: {
-    note: "Thala — built with Amazigh communities worldwide.",
+    note: "Made with love for Imazighen",
   },
 };
