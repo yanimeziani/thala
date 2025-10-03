@@ -15,17 +15,15 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Copy dependency files
+# Copy all application files
 COPY pyproject.toml ./
+COPY src/ ./src/
+COPY alembic/ ./alembic/
+COPY alembic.ini ./
 
 # Install Python dependencies
 RUN pip install --upgrade pip && \
     pip install -e .
-
-# Copy application code
-COPY src/ ./src/
-COPY alembic/ ./alembic/
-COPY alembic.ini ./
 
 # Create non-root user
 RUN useradd -m -u 1000 appuser && \
