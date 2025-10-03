@@ -7,14 +7,6 @@ import { defaultLocale, locales, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import thalaLogo from "@/public/logo.png";
 
-const AVATAR_LAYOUT = [
-  { id: "amira", initials: "AM", position: "top-24 left-10" },
-  { id: "ikram", initials: "IK", position: "bottom-36 left-20" },
-  { id: "farid", initials: "FA", position: "top-32 right-24" },
-  { id: "lila", initials: "LI", position: "bottom-24 right-[18%]" },
-  { id: "samir", initials: "SA", position: "top-[65%] right-[10%]" },
-] as const;
-
 type PageProps = {
   params: Promise<{
     locale: string;
@@ -64,12 +56,6 @@ export default async function HomePage({ params }: PageProps) {
   const dictionary = getDictionary(locale);
   const { navigation, hero, phoneShowcase, highlights, gallery } = dictionary;
 
-  const avatarLabels = new Map(dictionary.avatars.map((entry) => [entry.id, entry.label]));
-  const avatars = AVATAR_LAYOUT.map((avatar) => ({
-    ...avatar,
-    label: avatarLabels.get(avatar.id) ?? avatar.initials,
-  }));
-
   const bulletToneClass: Record<"accent" | "primary" | "positive", string> = {
     accent: "bg-[color:var(--accent-soft)]",
     primary: "bg-[color:var(--primary-soft)]",
@@ -80,7 +66,7 @@ export default async function HomePage({ params }: PageProps) {
     <div className="relative min-h-screen overflow-hidden text-ink transition-colors duration-500">
       <div className="absolute inset-0 -z-30 overflow-hidden" aria-hidden="true">
         <video
-          className="h-full w-full scale-110 object-cover blur-[1px] brightness-[0.7]"
+          className="h-full w-full object-cover"
           autoPlay
           loop
           muted
@@ -90,13 +76,10 @@ export default async function HomePage({ params }: PageProps) {
           src="/bg.mp4"
         />
       </div>
-      <div className="absolute inset-0 -z-20">
-        <div className="absolute inset-0 bg-gradient-to-br from-[var(--surface-strong)] via-[var(--background)] to-[var(--background-accent)] opacity-80 transition-[background] duration-500" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_var(--primary-glow),_transparent_55%)] opacity-60 transition-opacity duration-500" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,_var(--accent-glow),_transparent_52%)] opacity-50 transition-opacity duration-500" />
+      <div className="pointer-events-none absolute inset-0 -z-20">
         <svg
           viewBox="0 0 1440 900"
-          className="absolute inset-0 h-full w-full stroke-[color:var(--grid-stroke)] transition-colors duration-500"
+          className="absolute inset-0 h-full w-full stroke-[color:var(--grid-stroke)] opacity-20 transition-opacity duration-500"
           fill="none"
           aria-hidden="true"
         >
@@ -121,8 +104,8 @@ export default async function HomePage({ params }: PageProps) {
         </svg>
       </div>
 
-      <div className="relative mx-auto flex w-full max-w-6xl flex-col px-6 pb-32 pt-8 sm:px-10 lg:pb-36">
-        <header className="flex items-center justify-between">
+      <div className="relative flex min-h-screen w-full flex-col px-6 pb-24 pt-8 sm:px-10 lg:px-16 xl:px-24">
+        <header className="flex w-full items-center justify-between">
           <div className="flex items-center gap-3">
             <Image
               src={thalaLogo}
@@ -147,7 +130,7 @@ export default async function HomePage({ params }: PageProps) {
           </div>
         </header>
 
-        <main className="relative mt-16 flex flex-1 flex-col items-center gap-12 text-center transition-colors duration-500 lg:mt-24 lg:flex-row lg:items-start lg:text-left">
+        <main className="relative mt-16 flex w-full flex-1 flex-col items-center gap-12 text-center transition-colors duration-500 lg:mt-24 lg:flex-row lg:items-start lg:text-left">
           <div className="relative z-10 flex flex-1 flex-col items-center lg:items-start">
             <span className="inline-flex items-center gap-2 rounded-full border border-soft bg-surface-translucent px-5 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-primary shadow-soft transition duration-300">
               {hero.badge}
@@ -251,7 +234,7 @@ export default async function HomePage({ params }: PageProps) {
           </div>
         </main>
 
-        <section className="relative z-10 mt-24 grid gap-6 rounded-[36px] border border-strong bg-elevated p-8 shadow-card transition-colors duration-500 lg:grid-cols-3">
+        <section className="relative z-10 mt-24 w-full grid gap-6 rounded-[36px] border border-strong bg-elevated p-8 shadow-card transition-colors duration-500 lg:grid-cols-3">
           {highlights.map((item) => (
             <div
               key={item.title}
@@ -263,7 +246,7 @@ export default async function HomePage({ params }: PageProps) {
           ))}
         </section>
 
-        <section className="relative z-10 mt-24">
+        <section className="relative z-10 mt-24 w-full">
           <div className="flex flex-col items-center justify-between gap-6 text-center lg:flex-row lg:text-left">
             <div className="max-w-xl">
               <h2 className="text-2xl font-semibold text-ink sm:text-3xl">{gallery.heading}</h2>
@@ -273,7 +256,7 @@ export default async function HomePage({ params }: PageProps) {
               {gallery.instruction}
             </div>
           </div>
-          <div className="relative -mx-6 mt-10 sm:-mx-10">
+          <div className="relative -mx-6 mt-10 sm:-mx-10 lg:-mx-16 xl:-mx-24">
             <div className="pointer-events-none absolute inset-y-0 left-0 hidden w-12 bg-gradient-to-r from-[var(--background)] to-transparent sm:block" aria-hidden="true" />
             <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-12 bg-gradient-to-l from-[var(--background)] to-transparent sm:block" aria-hidden="true" />
             <div className="scrollbar-none flex gap-6 overflow-x-auto px-6 pb-6 pt-1 sm:px-10 snap-x snap-mandatory">
@@ -310,19 +293,6 @@ export default async function HomePage({ params }: PageProps) {
         </section>
       </div>
 
-      <div className="pointer-events-none absolute inset-x-0 top-24 -z-10 hidden h-[480px] w-full max-w-6xl translate-x-[-50%] lg:left-1/2 lg:block">
-        <div className="relative h-full w-full">
-          {avatars.map((avatar) => (
-            <div
-              key={avatar.id}
-              className={`absolute ${avatar.position} flex h-16 w-16 items-center justify-center rounded-full border border-soft bg-elevated text-base font-semibold tracking-wide text-primary shadow-float transition-colors duration-500`}
-            >
-              <span aria-hidden="true">{avatar.initials}</span>
-              <span className="sr-only">{avatar.label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
     </div>
   );
 }
