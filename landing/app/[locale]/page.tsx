@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { AndroidWaitlistForm } from "@/components/android-waitlist-form";
 import { defaultLocale, locales, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 import thalaLogo from "@/public/logo.png";
@@ -96,25 +97,12 @@ export default async function HomePage({ params }: PageProps) {
           </Link>
 
           {/* Android waitlist */}
-          <div className="pt-6 border-t border-white/10">
-            <p className="text-sm text-white/70 mb-3">
-              {hero.androidWaitlistLabel}
-            </p>
-            <form className="flex gap-2" onSubmit={(e) => e.preventDefault()}>
-              <input
-                type="email"
-                placeholder={hero.androidEmailPlaceholder}
-                className="flex-1 h-12 px-4 bg-white/5 border border-white/20 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:border-[#ff9569] transition-colors"
-                required
-              />
-              <button
-                type="submit"
-                className="px-6 h-12 rounded-lg bg-[#ff9569]/20 border border-[#ff9569]/40 text-[#ff9569] font-medium hover:bg-[#ff9569]/30 transition-colors"
-              >
-                {hero.androidSubmitButton}
-              </button>
-            </form>
-          </div>
+          <AndroidWaitlistForm
+            locale={locale}
+            waitlistLabel={hero.androidWaitlistLabel}
+            emailPlaceholder={hero.androidEmailPlaceholder}
+            submitButton={hero.androidSubmitButton}
+          />
         </div>
 
         <footer className="mt-12 flex flex-col items-center gap-4">
