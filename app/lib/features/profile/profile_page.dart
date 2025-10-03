@@ -11,7 +11,7 @@ import '../../models/user_profile.dart';
 import '../../services/preference_store.dart';
 import '../../ui/widgets/thala_snackbar.dart';
 import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
-import '../auth/email_password_login_page.dart';
+import '../auth/google_login_page.dart';
 import '../legal/copyright_page.dart';
 import 'help_center_page.dart';
 import 'language_settings_page.dart';
@@ -133,7 +133,7 @@ class _ProfilePageBody extends StatelessWidget {
                       auth.clearError();
                       Navigator.of(context).push<void>(
                         MaterialPageRoute<void>(
-                          builder: (_) => const EmailPasswordLoginPage(),
+                          builder: (_) => const GoogleLoginPage(),
                         ),
                       );
                     },

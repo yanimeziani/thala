@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../data/user_profile_repository.dart';
 import '../models/user_profile.dart';
@@ -44,8 +43,7 @@ class UserProfileController extends ChangeNotifier {
   }
 
   Future<bool> save(UserProfile profile) async {
-    final session = _authController.session;
-    final user = session?.user;
+    final user = _authController.user;
     if (user == null) {
       _error = 'You need to be signed in to update your profile.';
       notifyListeners();
@@ -61,16 +59,10 @@ class UserProfileController extends ChangeNotifier {
         userId: user.id,
         email: user.email ?? profile.email,
       );
-      try {
-        final remote = await _repository.saveProfile(next);
-        if (remote != null) {
-          next = remote;
-        }
-      } on AuthException catch (error) {
-        _error = error.message;
-        _isSaving = false;
-        notifyListeners();
-        return false;
+
+      final remote = await _repository.saveProfile(next);
+      if (remote != null) {
+        next = remote;
       }
 
       _profile = next;
@@ -95,8 +87,7 @@ class UserProfileController extends ChangeNotifier {
     _error = null;
     notifyListeners();
 
-    final session = _authController.session;
-    final user = session?.user;
+    final user = _authController.user;
     if (user == null) {
       _profile = null;
       _isLoading = false;
@@ -105,7 +96,7 @@ class UserProfileController extends ChangeNotifier {
     }
 
     final cached = await _preferenceStore.loadUserProfile(user.id);
-    var profile = UserProfile.fromUser(user, fallback: cached);
+    var profile = cached ?? UserProfile.defaultProfile(userId: user.id, email: user.email);
 
     final remote = await _repository.refreshProfile(fallback: profile);
     profile = remote ?? profile;
@@ -118,8 +109,7 @@ class UserProfileController extends ChangeNotifier {
   }
 
   void _handleAuthChanged() {
-    final session = _authController.session;
-    final user = session?.user;
+    final user = _authController.user;
     final currentId = _profile?.userId;
     final needsReload =
         user == null ? currentId != null : currentId != user.id;

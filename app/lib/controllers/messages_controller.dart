@@ -6,7 +6,6 @@ import '../data/messages_repository.dart';
 import '../models/contact_handle.dart';
 import '../models/message.dart';
 import '../models/message_thread.dart';
-import '../services/supabase_manager.dart';
 
 class MessagesController extends ChangeNotifier {
   MessagesController({MessagesRepository? repository})
@@ -37,7 +36,7 @@ class MessagesController extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get hasData => _threads.isNotEmpty;
-  bool get isSupabaseEnabled => SupabaseManager.isConfigured;
+  bool get isRemoteEnabled => false; // Backend integration pending
 
   int get unreadCount => _threads.fold<int>(0, (int acc, MessageThread thread) {
     final int count = thread.unreadCount;

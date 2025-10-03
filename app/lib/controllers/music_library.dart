@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 
 import '../data/music_repository.dart';
 import '../models/music_track.dart';
-import '../services/supabase_manager.dart';
 
 class MusicLibrary extends ChangeNotifier {
   MusicLibrary({MusicRepository? repository, List<MusicTrack> fallback = const []})
@@ -31,10 +30,8 @@ class MusicLibrary extends ChangeNotifier {
     }
 
     if (!_repository.isRemoteEnabled) {
-      if (!SupabaseManager.isConfigured) {
-        _error = 'Supabase not configured';
-        notifyListeners();
-      }
+      _error = 'Backend not configured';
+      notifyListeners();
       return;
     }
 

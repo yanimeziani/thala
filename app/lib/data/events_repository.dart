@@ -1,116 +1,98 @@
-import 'dart:developer' as developer;
-
-import 'package:flutter/foundation.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 import '../models/cultural_event.dart';
 import '../models/localized_text.dart';
-import '../services/supabase_manager.dart';
+import '../services/backend_auth_service.dart';
 import 'sample_events.dart';
 
 class EventsRepository {
-  EventsRepository({SupabaseClient? client})
-      : _client = client ?? SupabaseManager.client;
+  EventsRepository({this.accessToken});
 
-  final SupabaseClient? _client;
+  final String? accessToken;
 
-  bool get isRemoteEnabled => _client != null;
+  bool get isRemoteEnabled => true;
 
   Future<List<CulturalEvent>> fetchUpcomingEvents() async {
-    final client = _client;
-    if (client == null) {
+    try {
+      final url = Uri.parse('${BackendAuthService.apiUrl}/events?upcoming_only=true');
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body) as List<dynamic>;
+        return data
+            .map((json) => _eventFromJson(json as Map<String, dynamic>))
+            .toList();
+      } else {
+        // Fallback to sample data on error
+        return sampleEvents;
+      }
+    } catch (e) {
+      // Fallback to sample data on network error
       return sampleEvents;
+    }
+  }
+
+  Future<void> toggleInterest(String eventId) async {
+    if (accessToken == null) {
+      throw Exception('Must be authenticated to toggle interest');
     }
 
     try {
-      final response = await client
-          .from('cultural_events')
-          .select(
-            'id, title, date_label, location, description, additional_detail, mode, start_at, end_at, tags, cta_label, cta_note, background_colors, hero_image_url',
-          )
-          .order('start_at', ascending: true);
+      final url = Uri.parse('${BackendAuthService.apiUrl}/events/$eventId/interested');
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
 
-      return response
-          .whereType<Map<String, dynamic>>()
-          .map(_mapEvent)
-          .toList(growable: false);
-    } on PostgrestException catch (error, stackTrace) {
-      if (kDebugMode) {
-        developer.log(
-          'Failed to load cultural events from Supabase',
-          name: 'EventsRepository',
-          error: error,
-          stackTrace: stackTrace,
-          level: 1000,
-        );
+      if (response.statusCode != 200) {
+        throw Exception('Failed to toggle interest');
       }
-      return sampleEvents;
-    } catch (error, stackTrace) {
-      if (kDebugMode) {
-        developer.log(
-          'Unexpected error loading cultural events',
-          name: 'EventsRepository',
-          error: error,
-          stackTrace: stackTrace,
-          level: 1000,
-        );
-      }
-      return sampleEvents;
+    } catch (e) {
+      rethrow;
     }
   }
 
-  CulturalEvent _mapEvent(Map<String, dynamic> row) {
-    final tagsValue = row['tags'];
-    final tags = <LocalizedText>[];
-    if (tagsValue is List) {
-      for (final item in tagsValue) {
-        tags.add(_parseLocalized(item));
-      }
-    }
-
-    final colorsValue = row['background_colors'];
-    final List<String> colors;
-    if (colorsValue is List) {
-      colors = colorsValue.whereType<String>().toList(growable: false);
-    } else {
-      colors = const <String>[];
-    }
-
+  CulturalEvent _eventFromJson(Map<String, dynamic> json) {
     return CulturalEvent(
-      id: row['id']?.toString() ?? '',
-      title: _parseLocalized(row['title']),
-      dateLabel: _parseLocalized(row['date_label']),
-      location: _parseLocalized(row['location']),
-      description: _parseLocalized(row['description']),
-      additionalDetail: _maybeLocalized(row['additional_detail']),
-      mode: modeFromString(row['mode']?.toString() ?? ''),
-      startAt: DateTime.tryParse(row['start_at']?.toString() ?? '') ??
-          DateTime.now(),
-      endAt: row['end_at'] != null
-          ? DateTime.tryParse(row['end_at'].toString())
+      id: json['id'] as String,
+      title: _localizedTextFromJson(json['title']),
+      dateLabel: _localizedTextFromJson(json['date_label']),
+      location: _localizedTextFromJson(json['location']),
+      description: _localizedTextFromJson(json['description']),
+      additionalDetail: json['additional_detail'] != null
+          ? _localizedTextFromJson(json['additional_detail'])
           : null,
-      tags: tags,
-      ctaLabel: _parseLocalized(row['cta_label']),
-      ctaNote: _parseLocalized(row['cta_note']),
-      backgroundColorHex: colors,
-      heroImageUrl: row['hero_image_url']?.toString(),
+      mode: modeFromString(json['mode'] as String),
+      startAt: DateTime.parse(json['start_at'] as String),
+      endAt: json['end_at'] != null
+          ? DateTime.parse(json['end_at'] as String)
+          : null,
+      tags: (json['tags'] as List<dynamic>?)
+              ?.map((tag) => _localizedTextFromJson(tag as Map<String, dynamic>))
+              .toList() ??
+          [],
+      ctaLabel: _localizedTextFromJson(json['cta_label']),
+      ctaNote: _localizedTextFromJson(json['cta_note']),
+      backgroundColorHex: (json['background_colors'] as List<dynamic>?)
+              ?.map((c) => c.toString())
+              .toList() ??
+          [],
+      heroImageUrl: json['hero_image_url'] as String?,
+      hostName: json['host_name'] as String?,
+      hostHandle: json['host_handle'] as String?,
+      isHostVerified: json['is_host_verified'] as bool? ?? false,
+      interestedCount: json['interested_count'] as int? ?? 0,
     );
   }
 
-  LocalizedText? _maybeLocalized(dynamic value) {
-    if (value == null) {
-      return null;
-    }
-    return _parseLocalized(value);
-  }
-
-  LocalizedText _parseLocalized(dynamic value) {
-    if (value is Map) {
-      final en = value['en']?.toString() ?? '';
-      final fr = value['fr']?.toString() ?? en;
-      return LocalizedText(en: en, fr: fr);
-    }
-    final fallback = value?.toString() ?? '';
-    return LocalizedText(en: fallback, fr: fallback);
+  LocalizedText _localizedTextFromJson(Map<String, dynamic> json) {
+    return LocalizedText(
+      en: json['en'] as String? ?? '',
+      fr: json['fr'] as String? ?? '',
+    );
   }
 }

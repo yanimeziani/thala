@@ -7,9 +7,11 @@ import 'package:provider/provider.dart';
 import 'app/app_theme.dart';
 import 'app/home_shell.dart';
 import 'controllers/auth_controller.dart';
+import 'controllers/events_controller.dart';
 import 'controllers/localization_controller.dart';
 import 'controllers/music_library.dart';
-import 'features/auth/email_password_login_page.dart';
+import 'data/events_repository.dart';
+import 'features/auth/google_login_page.dart';
 import 'features/onboarding/onboarding_flow.dart';
 import 'features/splash/splash_page.dart';
 import 'l10n/app_translations.dart';
@@ -93,6 +95,19 @@ class ThalaRoot extends StatelessWidget {
             preferenceStore: context.read<PreferenceStore>(),
           ),
         ),
+        ChangeNotifierProxyProvider<AuthController, EventsController>(
+          create: (context) {
+            final auth = context.read<AuthController>();
+            return EventsController(
+              repository: EventsRepository(accessToken: auth.accessToken),
+            );
+          },
+          update: (context, auth, previous) {
+            return EventsController(
+              repository: EventsRepository(accessToken: auth.accessToken),
+            );
+          },
+        ),
       ],
       child: const ThalaApp(),
     );
@@ -158,7 +173,7 @@ class _AuthGateState extends State<AuthGate> {
       case AuthStatus.loading:
         return const _AuthLoadingView();
       case AuthStatus.unauthenticated:
-        return const EmailPasswordLoginPage();
+        return const GoogleLoginPage();
       case AuthStatus.authenticated:
       case AuthStatus.guest:
         return Stack(

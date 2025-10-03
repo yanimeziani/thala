@@ -464,8 +464,8 @@ class _VideoStoryPageState extends State<VideoStoryPage>
   }
 
   Future<void> _handleComment(FeedController feed, AuthController auth) async {
-    final session = auth.session;
-    if (session == null) {
+    final user = auth.user;
+    if (user == null) {
       _showAuthRequiredMessage();
       return;
     }
@@ -482,7 +482,7 @@ class _VideoStoryPageState extends State<VideoStoryPage>
 
     final success = await feed.submitComment(
       post: widget.post,
-      userId: session.user.id,
+      userId: user.id,
       comment: comment,
     );
 
@@ -605,7 +605,7 @@ class _VideoStoryPageState extends State<VideoStoryPage>
     }
 
     if (result == null) {
-      await feed.recordShare(post: widget.post, userId: auth.session?.user.id);
+      await feed.recordShare(post: widget.post, userId: auth.user?.id);
       return;
     }
 
@@ -613,7 +613,7 @@ class _VideoStoryPageState extends State<VideoStoryPage>
       case ShareResultStatus.success:
         await feed.recordShare(
           post: widget.post,
-          userId: auth.session?.user.id,
+          userId: auth.user?.id,
         );
         break;
       case ShareResultStatus.unavailable:
@@ -630,7 +630,7 @@ class _VideoStoryPageState extends State<VideoStoryPage>
   ) async {
     final success = await feed.recordShare(
       post: widget.post,
-      userId: auth.session?.user.id,
+      userId: auth.user?.id,
     );
     if (!success || !mounted) {
       return;

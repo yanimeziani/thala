@@ -7,7 +7,6 @@ import '../../data/archive_repository.dart';
 import '../../data/sample_archive_entries.dart';
 import '../../l10n/app_translations.dart';
 import '../../models/archive_entry.dart';
-import '../../services/supabase_manager.dart';
 import '../../ui/widgets/thala_glass_surface.dart';
 
 class ArchivePage extends StatefulWidget {
@@ -61,9 +60,7 @@ class _ArchivePageState extends State<ArchivePage> {
         _allEntries = entries;
         _isLoading = false;
         if (!_repository.isRemoteEnabled) {
-          _errorMessage = SupabaseManager.isConfigured
-              ? 'Archive library has no records yet. Showing curated examples.'
-              : 'Supabase is not configured. Showing curated examples.';
+          _errorMessage = 'Backend is not configured. Showing curated examples.';
         }
       });
     } catch (error, stackTrace) {

@@ -1,9 +1,11 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../app/app_theme.dart';
-import '../../data/events_repository.dart';
+import '../../controllers/auth_controller.dart';
+import '../../controllers/events_controller.dart';
 import '../../l10n/app_translations.dart';
 import '../../models/cultural_event.dart';
 import '../../ui/widgets/thala_glass_surface.dart';
@@ -16,48 +18,12 @@ class EventsPage extends StatefulWidget {
 }
 
 class _EventsPageState extends State<EventsPage> {
-  final EventsRepository _repository = EventsRepository();
-  List<CulturalEvent> _events = const <CulturalEvent>[];
-  bool _isLoading = true;
-  String? _errorMessage;
-
   @override
   void initState() {
     super.initState();
-    _loadEvents();
-  }
-
-  Future<void> _loadEvents() async {
-    if (!_repository.isRemoteEnabled) {
-      setState(() {
-        _isLoading = false;
-        _errorMessage = 'Supabase is not configured. Events will appear once connected.';
-      });
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<EventsController>().loadEvents();
     });
-
-    try {
-      final remote = await _repository.fetchUpcomingEvents();
-      setState(() {
-        _events = remote;
-        _isLoading = false;
-        if (remote.isEmpty) {
-          _errorMessage = 'No events published yet. Add events in Supabase to showcase them here.';
-        }
-      });
-    } catch (error, stackTrace) {
-      debugPrint('Failed to load cultural events: $error\n$stackTrace');
-      setState(() {
-        _events = const <CulturalEvent>[];
-        _isLoading = false;
-        _errorMessage = 'Unable to reach Supabase. Events will return once the connection recovers.';
-      });
-    }
   }
 
   @override
@@ -70,101 +36,105 @@ class _EventsPageState extends State<EventsPage> {
 
     String tr(AppText key) => AppTranslations.of(context, key);
 
-    if (_isLoading) {
-      return const Scaffold(
-        extendBody: true,
-        backgroundColor: Colors.transparent,
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
+    return Consumer<EventsController>(
+      builder: (context, controller, _) {
+        if (controller.isLoading) {
+          return const Scaffold(
+            extendBody: true,
+            backgroundColor: Colors.transparent,
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-    if (_events.isEmpty) {
-      return Scaffold(
-        extendBody: true,
-        backgroundColor: Colors.transparent,
-        body: ThalaPageBackground(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32.0),
-              child: Text(
-                _errorMessage ?? 'No gatherings are scheduled yet. Add events in Supabase to light up this space.',
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: palette.textSecondary,
+        if (controller.events.isEmpty) {
+          return Scaffold(
+            extendBody: true,
+            backgroundColor: Colors.transparent,
+            body: ThalaPageBackground(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                  child: Text(
+                    controller.errorMessage ?? 'No gatherings are scheduled yet.',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: palette.textSecondary,
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
-        ),
-      );
-    }
+          );
+        }
 
-    return Scaffold(
-      extendBody: true,
-      backgroundColor: Colors.transparent,
-      body: ThalaPageBackground(
-        child: SafeArea(
-          bottom: false,
-          child: ListView(
-            padding: EdgeInsets.fromLTRB(20, 20, 20, bottomPadding),
-            children: [
-              ThalaGlassSurface(
-                enableBorder: false,
-                cornerRadius: 24,
-                backgroundOpacity: theme.brightness == Brightness.dark
-                    ? 0.16
-                    : 0.48,
-                padding: const EdgeInsets.fromLTRB(18, 20, 18, 20),
-                child: Row(
-                  children: [
-                    Container(
-                      height: 44,
-                      width: 44,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: palette.iconPrimary.withOpacity(0.12),
-                      ),
-                      alignment: Alignment.center,
-                      child: Icon(
-                        Icons.event_available,
-                        color: palette.iconPrimary,
-                        size: 22,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            tr(AppText.eventsTitle),
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: -0.1,
-                            ),
+        return Scaffold(
+          extendBody: true,
+          backgroundColor: Colors.transparent,
+          body: ThalaPageBackground(
+            child: SafeArea(
+              bottom: false,
+              child: ListView(
+                padding: EdgeInsets.fromLTRB(20, 20, 20, bottomPadding),
+                children: [
+                  ThalaGlassSurface(
+                    enableBorder: false,
+                    cornerRadius: 24,
+                    backgroundOpacity: theme.brightness == Brightness.dark
+                        ? 0.16
+                        : 0.48,
+                    padding: const EdgeInsets.fromLTRB(18, 20, 18, 20),
+                    child: Row(
+                      children: [
+                        Container(
+                          height: 44,
+                          width: 44,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: palette.iconPrimary.withOpacity(0.12),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            tr(AppText.eventsSubtitle),
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: palette.textSecondary,
-                            ),
+                          alignment: Alignment.center,
+                          child: Icon(
+                            Icons.event_available,
+                            color: palette.iconPrimary,
+                            size: 22,
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                tr(AppText.eventsTitle),
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: -0.1,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                tr(AppText.eventsSubtitle),
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: palette.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
+                  ),
+                  const SizedBox(height: 20),
+                  for (final event in controller.events) ...[
+                    _EventCard(event: event, locale: locale),
+                    const SizedBox(height: 18),
                   ],
-                ),
+                ],
               ),
-              const SizedBox(height: 20),
-              for (final event in _events) ...[
-                _EventCard(event: event, locale: locale),
-                const SizedBox(height: 18),
-              ],
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -192,9 +162,23 @@ class _EventCard extends StatelessWidget {
 
     final borderRadius = BorderRadius.circular(22);
 
-    void _handleAction() {
-      // TODO: Implement interest toggle logic with controller
-      // Removed SnackBar to prevent off-screen presentation errors
+    Future<void> _handleAction() async {
+      final controller = context.read<EventsController>();
+      final authController = context.read<AuthController>();
+
+      if (!authController.isAuthenticated) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please sign in to mark interest')),
+        );
+        return;
+      }
+
+      final success = await controller.toggleInterest(event.id);
+      if (!success && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to update interest')),
+        );
+      }
     }
 
     return Container(

@@ -39,7 +39,7 @@ class _MessagesPageState extends State<MessagesPage> {
     final bool isSearching = controller.isSearching;
     final String subtitle = AppTranslations.of(
       context,
-      controller.isSupabaseEnabled
+      controller.isRemoteEnabled
           ? AppText.messagesSubtitle
           : AppText.messagesConnectSupabase,
     );
@@ -78,7 +78,7 @@ class _MessagesPageState extends State<MessagesPage> {
         ),
       );
     } else {
-      final placeholderKey = controller.isSupabaseEnabled
+      final placeholderKey = controller.isRemoteEnabled
           ? AppText.messagesEmpty
           : AppText.messagesConnectSupabase;
       bodyContent = _MessagesPlaceholder(

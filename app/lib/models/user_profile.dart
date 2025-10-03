@@ -1,5 +1,3 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
-
 class UserProfile {
   const UserProfile({
     required this.userId,
@@ -22,29 +20,17 @@ class UserProfile {
   static const _pronounsKey = 'pronouns';
   static const _bioKey = 'bio';
 
-  factory UserProfile.fromUser(User user, {UserProfile? fallback}) {
-    final metadata = user.userMetadata ?? <String, dynamic>{};
-    final displayName = _coalesceString(
-      metadata[_displayNameKey],
-      fallback?.displayName,
-    );
-    final community = _coalesceString(
-      metadata[_communityKey],
-      fallback?.community,
-    );
-    final pronouns = _coalesceString(
-      metadata[_pronounsKey],
-      fallback?.pronouns,
-    );
-    final bio = _coalesceString(metadata[_bioKey], fallback?.bio);
-
+  factory UserProfile.defaultProfile({
+    required String userId,
+    required String? email,
+  }) {
     return UserProfile(
-      userId: user.id,
-      email: user.email ?? fallback?.email ?? '',
-      displayName: displayName,
-      community: community,
-      pronouns: pronouns,
-      bio: bio,
+      userId: userId,
+      email: email ?? '',
+      displayName: null,
+      community: null,
+      pronouns: null,
+      bio: null,
     );
   }
 

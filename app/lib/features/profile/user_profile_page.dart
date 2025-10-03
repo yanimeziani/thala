@@ -104,7 +104,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
     final MessagesController? messagesController = _maybeReadMessages(context);
     final bool messagingEnabled =
-        messagesController != null && messagesController.isSupabaseEnabled;
+        messagesController != null && messagesController.isRemoteEnabled;
 
     final String messageLabel =
         AppTranslations.of(context, AppText.profileMessageAction);
@@ -219,14 +219,14 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   Future<void> _startDirectMessage(String displayName) async {
     final MessagesController? messages = _maybeReadMessages(context);
-    if (messages == null || !messages.isSupabaseEnabled) {
+    if (messages == null || !messages.isRemoteEnabled) {
       _showSnack('Messaging is unavailable right now.');
       return;
     }
 
     final AuthController auth = context.read<AuthController>();
-    final session = auth.session;
-    if (session == null) {
+    final user = auth.user;
+    if (user == null) {
       _showSnack('Sign in to send a direct message.');
       return;
     }
@@ -677,8 +677,8 @@ class _FollowButton extends StatelessWidget {
 
     Future<void> handleFollow() async {
       final auth = context.read<AuthController>();
-      final session = auth.session;
-      if (session == null) {
+      final user = auth.user;
+      if (user == null) {
         _showSnack(context, 'Sign in to continue.');
         return;
       }
@@ -686,7 +686,7 @@ class _FollowButton extends StatelessWidget {
         _showSnack(context, 'Connect Supabase to continue.');
         return;
       }
-      await feed.toggleFollow(post: post, userId: session.user.id);
+      await feed.toggleFollow(post: post, userId: user.id);
     }
 
     return FilledButton.icon(

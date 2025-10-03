@@ -1,39 +1,21 @@
 import 'dart:developer' as developer;
 
-import 'package:supabase_flutter/supabase_flutter.dart';
-
-import '../services/supabase_manager.dart';
-
+/// Repository for community-related operations
+/// Currently uses local/sample data since backend integration is not yet implemented
 class CommunityRepository {
-  CommunityRepository({SupabaseClient? client})
-    : _client = client ?? SupabaseManager.client;
+  CommunityRepository();
 
-  final SupabaseClient? _client;
-
-  bool get isRemoteEnabled => _client != null;
+  bool get isRemoteEnabled => false;
 
   Future<void> recordCommunityView({
     required String communityId,
     required String? userId,
   }) async {
-    final client = _client;
-    if (client == null) {
-      return;
-    }
-
-    try {
-      await client.from('community_views').insert(<String, dynamic>{
-        'community_id': communityId,
-        'user_id': userId,
-      });
-    } on PostgrestException catch (error, stackTrace) {
-      developer.log(
-        'Failed to record community view',
-        name: 'CommunityRepository',
-        error: error,
-        stackTrace: stackTrace,
-      );
-    }
+    // Backend integration pending - no-op for now
+    developer.log(
+      'Community view recorded locally (backend integration pending)',
+      name: 'CommunityRepository',
+    );
   }
 
   Future<void> submitHostRequest({
@@ -42,26 +24,10 @@ class CommunityRepository {
     required String message,
     String? userId,
   }) async {
-    final client = _client;
-    if (client == null) {
-      return;
-    }
-
-    try {
-      await client.from('community_host_requests').insert(<String, dynamic>{
-        'name': name,
-        'email': email,
-        'message': message,
-        'user_id': userId,
-      });
-    } on PostgrestException catch (error, stackTrace) {
-      developer.log(
-        'Failed to submit host request',
-        name: 'CommunityRepository',
-        error: error,
-        stackTrace: stackTrace,
-      );
-      rethrow;
-    }
+    // Backend integration pending - no-op for now
+    developer.log(
+      'Host request submitted locally (backend integration pending)',
+      name: 'CommunityRepository',
+    );
   }
 }

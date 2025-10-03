@@ -88,7 +88,7 @@ class _CommunityPageState extends State<CommunityPage> {
       return;
     }
     final auth = context.read<AuthController>();
-    final userId = auth.session?.user.id;
+    final userId = auth.user?.id;
     _repository.recordCommunityView(
       communityId: profile.space.id,
       userId: userId,
@@ -130,7 +130,7 @@ class _CommunityPageState extends State<CommunityPage> {
         name: data.name,
         email: data.email,
         message: data.message,
-        userId: auth.session?.user.id,
+        userId: auth.user?.id,
       );
       if (!mounted) {
         return;

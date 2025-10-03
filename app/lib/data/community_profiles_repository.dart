@@ -1,61 +1,16 @@
-import 'dart:developer' as developer;
-
-import 'package:flutter/foundation.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-
 import '../models/community_profile.dart';
 import '../models/community_space.dart';
 import '../models/localized_text.dart';
-import '../services/supabase_manager.dart';
 import 'sample_community_profiles.dart';
 
 class CommunityProfilesRepository {
-  CommunityProfilesRepository({SupabaseClient? client})
-      : _client = client ?? SupabaseManager.client;
+  CommunityProfilesRepository();
 
-  final SupabaseClient? _client;
-
-  bool get isRemoteEnabled => _client != null;
+  bool get isRemoteEnabled => false;
 
   Future<List<CommunityProfile>> fetchProfiles() async {
-    final client = _client;
-    if (client == null) {
-      return sampleCommunityProfiles;
-    }
-
-    try {
-      final response = await client
-          .from('community_profiles')
-          .select('id, space, region, languages, priority, cards')
-          .order('priority', ascending: false);
-
-      return response
-          .whereType<Map<String, dynamic>>()
-          .map(_mapProfile)
-          .toList(growable: false);
-    } on PostgrestException catch (error, stackTrace) {
-      if (kDebugMode) {
-        developer.log(
-          'Failed to load community profiles from Supabase',
-          name: 'CommunityProfilesRepository',
-          error: error,
-          stackTrace: stackTrace,
-          level: 1000,
-        );
-      }
-      return sampleCommunityProfiles;
-    } catch (error, stackTrace) {
-      if (kDebugMode) {
-        developer.log(
-          'Unexpected error loading community profiles',
-          name: 'CommunityProfilesRepository',
-          error: error,
-          stackTrace: stackTrace,
-          level: 1000,
-        );
-      }
-      return sampleCommunityProfiles;
-    }
+    // Backend integration pending - return sample data
+    return sampleCommunityProfiles;
   }
 
   CommunityProfile _mapProfile(Map<String, dynamic> row) {
