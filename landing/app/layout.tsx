@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
+
+import { defaultLocale, locales, type Locale } from "@/i18n/config";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -20,30 +21,27 @@ const plausibleScriptSrc =
   "https://plausible.io/js/script.outbound-links.js";
 const plausibleApiEndpoint = process.env.NEXT_PUBLIC_PLAUSIBLE_API_ENDPOINT;
 
-export const metadata: Metadata = {
-  title: "Thala | Kabyle Heritage Companion",
-  description:
-    "Discover and celebrate Kabyle culture with Thala. Explore curated experiences, learn traditions, and stay connected with your heritage.",
-  openGraph: {
-    title: "Thala | Kabyle Heritage Companion",
-    description:
-      "Discover Kabyle culture, personalized recommendations, and community stories in the Thala app.",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Thala | Kabyle Heritage Companion",
-    description:
-      "Discover Kabyle culture, personalized recommendations, and community stories in the Thala app.",
-  },
+type RootLayoutProps = {
+  children: React.ReactNode;
+  params: {
+    locale?: string;
+  };
+};
+
+const resolveLocale = (raw?: string): Locale => {
+  return (locales as readonly string[]).includes(raw ?? "")
+    ? (raw as Locale)
+    : defaultLocale;
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+  params,
+}: Readonly<RootLayoutProps>) {
+  const locale = resolveLocale(params.locale);
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <head>
         <Script
           data-domain={plausibleDataDomain}
