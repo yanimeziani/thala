@@ -33,12 +33,6 @@ services:
       - meilisearch_data:/meili_data
     ports:
       - "${MEILISEARCH_PORT:-7700}:7700"
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:7700/health || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
     networks:
       - thela-network
 
@@ -109,7 +103,7 @@ services:
       db:
         condition: service_healthy
       meilisearch:
-        condition: service_healthy
+        condition: service_started
       minio:
         condition: service_healthy
     healthcheck:
