@@ -18,6 +18,13 @@ CREATE TABLE IF NOT EXISTS public.music_tracks (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE public.music_tracks ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Read music tracks" ON public.music_tracks;
+CREATE POLICY "Read music tracks" ON public.music_tracks
+  FOR SELECT
+  USING (true);
+
 CREATE TABLE IF NOT EXISTS public.video_effects (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
@@ -25,6 +32,13 @@ CREATE TABLE IF NOT EXISTS public.video_effects (
   config JSONB,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE public.video_effects ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Read video effects" ON public.video_effects;
+CREATE POLICY "Read video effects" ON public.video_effects
+  FOR SELECT
+  USING (true);
 
 -- ---------- Core media tables ----------
 
@@ -61,10 +75,30 @@ CREATE TABLE IF NOT EXISTS public.videos (
 CREATE INDEX IF NOT EXISTS videos_created_at_idx ON public.videos (created_at DESC);
 CREATE INDEX IF NOT EXISTS videos_creator_handle_idx ON public.videos (creator_handle);
 
+ALTER TABLE public.videos ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Read videos" ON public.videos;
+CREATE POLICY "Read videos" ON public.videos
+  FOR SELECT
+  USING (true);
+
+DROP POLICY IF EXISTS "Update video counters" ON public.videos;
+CREATE POLICY "Update video counters" ON public.videos
+  FOR UPDATE
+  USING (true)
+  WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Publish videos when authenticated" ON public.videos;
+CREATE POLICY "Publish videos when authenticated" ON public.videos
+  FOR INSERT
+  WITH CHECK (auth.uid() IS NOT NULL);
+
 -- Maintain updated_at on change.
 CREATE OR REPLACE FUNCTION public.touch_updated_at()
 RETURNS TRIGGER
-LANGUAGE plpgsql AS $$
+LANGUAGE plpgsql
+SET search_path = ''
+AS $$
 BEGIN
   NEW.updated_at := NOW();
   RETURN NEW;
@@ -89,6 +123,18 @@ CREATE TABLE IF NOT EXISTS public.video_comments (
 CREATE INDEX IF NOT EXISTS video_comments_video_idx
   ON public.video_comments (video_id, created_at DESC);
 
+ALTER TABLE public.video_comments ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Read video comments" ON public.video_comments;
+CREATE POLICY "Read video comments" ON public.video_comments
+  FOR SELECT
+  USING (true);
+
+DROP POLICY IF EXISTS "Insert own video comments" ON public.video_comments;
+CREATE POLICY "Insert own video comments" ON public.video_comments
+  FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
 -- Shares of videos.
 CREATE TABLE IF NOT EXISTS public.video_shares (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -100,10 +146,24 @@ CREATE TABLE IF NOT EXISTS public.video_shares (
 CREATE INDEX IF NOT EXISTS video_shares_video_idx
   ON public.video_shares (video_id, shared_at DESC);
 
+ALTER TABLE public.video_shares ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Read video shares" ON public.video_shares;
+CREATE POLICY "Read video shares" ON public.video_shares
+  FOR SELECT
+  USING (true);
+
+DROP POLICY IF EXISTS "Insert own video shares" ON public.video_shares;
+CREATE POLICY "Insert own video shares" ON public.video_shares
+  FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
 -- Maintain aggregate counters on videos for comments and shares.
 CREATE OR REPLACE FUNCTION public.sync_video_comment_counter()
 RETURNS TRIGGER
-LANGUAGE plpgsql AS $$
+LANGUAGE plpgsql
+SET search_path = ''
+AS $$
 BEGIN
   IF TG_OP = 'INSERT' THEN
     UPDATE public.videos
@@ -136,7 +196,9 @@ EXECUTE FUNCTION public.sync_video_comment_counter();
 
 CREATE OR REPLACE FUNCTION public.sync_video_share_counter()
 RETURNS TRIGGER
-LANGUAGE plpgsql AS $$
+LANGUAGE plpgsql
+SET search_path = ''
+AS $$
 BEGIN
   IF TG_OP = 'INSERT' THEN
     UPDATE public.videos
@@ -178,6 +240,14 @@ CREATE TABLE IF NOT EXISTS public.creator_followers (
 CREATE INDEX IF NOT EXISTS creator_followers_user_idx
   ON public.creator_followers (user_id);
 
+ALTER TABLE public.creator_followers ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Manage own creator follows" ON public.creator_followers;
+CREATE POLICY "Manage own creator follows" ON public.creator_followers
+  FOR ALL
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
 -- ---------- Messaging tables ----------
 
 CREATE TABLE IF NOT EXISTS public.message_threads (
@@ -195,6 +265,13 @@ CREATE TABLE IF NOT EXISTS public.message_threads (
 
 CREATE INDEX IF NOT EXISTS message_threads_updated_idx
   ON public.message_threads (updated_at DESC);
+
+ALTER TABLE public.message_threads ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Read message threads" ON public.message_threads;
+CREATE POLICY "Read message threads" ON public.message_threads
+  FOR SELECT
+  USING (auth.uid() IS NOT NULL);
 
 DROP TRIGGER IF EXISTS message_threads_touch_updated_at ON public.message_threads;
 CREATE TRIGGER message_threads_touch_updated_at
@@ -216,9 +293,18 @@ CREATE TABLE IF NOT EXISTS public.messages (
 CREATE INDEX IF NOT EXISTS messages_thread_idx
   ON public.messages (thread_id, created_at DESC);
 
+ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Read messages" ON public.messages;
+CREATE POLICY "Read messages" ON public.messages
+  FOR SELECT
+  USING (auth.uid() IS NOT NULL);
+
 CREATE OR REPLACE FUNCTION public.update_thread_from_message()
 RETURNS TRIGGER
-LANGUAGE plpgsql AS $$
+LANGUAGE plpgsql
+SET search_path = ''
+AS $$
 BEGIN
   UPDATE public.message_threads
     SET last_message_en = NEW.body,
@@ -247,6 +333,18 @@ CREATE TABLE IF NOT EXISTS public.community_views (
 CREATE INDEX IF NOT EXISTS community_views_community_idx
   ON public.community_views (community_id, created_at DESC);
 
+ALTER TABLE public.community_views ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Read community views" ON public.community_views;
+CREATE POLICY "Read community views" ON public.community_views
+  FOR SELECT
+  USING (auth.uid() IS NOT NULL);
+
+DROP POLICY IF EXISTS "Record community view" ON public.community_views;
+CREATE POLICY "Record community view" ON public.community_views
+  FOR INSERT
+  WITH CHECK (user_id IS NULL OR auth.uid() = user_id);
+
 CREATE TABLE IF NOT EXISTS public.community_host_requests (
   id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   name TEXT NOT NULL,
@@ -261,7 +359,593 @@ CREATE TABLE IF NOT EXISTS public.community_host_requests (
 CREATE INDEX IF NOT EXISTS community_host_requests_status_idx
   ON public.community_host_requests (status, created_at DESC);
 
+ALTER TABLE public.community_host_requests ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Read community host requests" ON public.community_host_requests;
+CREATE POLICY "Read community host requests" ON public.community_host_requests
+  FOR SELECT
+  USING (auth.uid() IS NOT NULL);
+
+DROP POLICY IF EXISTS "Submit community host requests" ON public.community_host_requests;
+CREATE POLICY "Submit community host requests" ON public.community_host_requests
+  FOR INSERT
+  WITH CHECK (user_id IS NULL OR auth.uid() = user_id);
+
+-- Cultural knowledge and discovery tables.
+
+CREATE TABLE IF NOT EXISTS public.community_profiles (
+  id TEXT PRIMARY KEY,
+  space JSONB NOT NULL,
+  region TEXT NOT NULL,
+  languages TEXT[] NOT NULL DEFAULT '{}',
+  priority NUMERIC NOT NULL DEFAULT 0,
+  cards JSONB NOT NULL DEFAULT '[]'::JSONB,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS community_profiles_priority_idx
+  ON public.community_profiles (priority DESC, created_at DESC);
+
+ALTER TABLE public.community_profiles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Read community profiles" ON public.community_profiles;
+CREATE POLICY "Read community profiles" ON public.community_profiles
+  FOR SELECT
+  USING (true);
+
+CREATE TABLE IF NOT EXISTS public.archive_entries (
+  id TEXT PRIMARY KEY,
+  title JSONB NOT NULL,
+  summary JSONB NOT NULL,
+  era JSONB NOT NULL,
+  category TEXT,
+  thumbnail_url TEXT NOT NULL,
+  community_upvotes INTEGER NOT NULL DEFAULT 0,
+  registered_users INTEGER NOT NULL DEFAULT 0,
+  required_approval_percent NUMERIC NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS archive_entries_created_idx
+  ON public.archive_entries (created_at DESC);
+
+ALTER TABLE public.archive_entries ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Read archive entries" ON public.archive_entries;
+CREATE POLICY "Read archive entries" ON public.archive_entries
+  FOR SELECT
+  USING (true);
+
+CREATE TABLE IF NOT EXISTS public.cultural_events (
+  id TEXT PRIMARY KEY,
+  title JSONB NOT NULL,
+  date_label JSONB NOT NULL,
+  location JSONB NOT NULL,
+  description JSONB NOT NULL,
+  additional_detail JSONB,
+  mode TEXT NOT NULL CHECK (mode IN ('in_person', 'online', 'hybrid')),
+  start_at TIMESTAMPTZ NOT NULL,
+  end_at TIMESTAMPTZ,
+  tags JSONB NOT NULL DEFAULT '[]'::JSONB,
+  cta_label JSONB NOT NULL,
+  cta_note JSONB NOT NULL,
+  background_colors TEXT[] NOT NULL DEFAULT '{}',
+  hero_image_url TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS cultural_events_schedule_idx
+  ON public.cultural_events (start_at DESC, created_at DESC);
+
+ALTER TABLE public.cultural_events ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Read cultural events" ON public.cultural_events;
+CREATE POLICY "Read cultural events" ON public.cultural_events
+  FOR SELECT
+  USING (true);
+
+CREATE TABLE IF NOT EXISTS public.content_profiles (
+  content_id TEXT PRIMARY KEY,
+  cultural_families TEXT[] NOT NULL DEFAULT '{}',
+  regions TEXT[] NOT NULL DEFAULT '{}',
+  languages TEXT[] NOT NULL DEFAULT '{}',
+  topics TEXT[] NOT NULL DEFAULT '{}',
+  energy TEXT,
+  sacred_level TEXT,
+  is_guardian_approved BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+ALTER TABLE public.content_profiles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Read content profiles" ON public.content_profiles;
+CREATE POLICY "Read content profiles" ON public.content_profiles
+  FOR SELECT
+  USING (true);
+
 -- ---------- Seeds ----------
+
+INSERT INTO public.content_profiles (
+  content_id,
+  cultural_families,
+  regions,
+  languages,
+  topics,
+  energy,
+  sacred_level,
+  is_guardian_approved
+)
+VALUES
+  (
+    'imzad-rhythms',
+    ARRAY['Tuareg'],
+    ARRAY['Hoggar', 'Algeria', 'Sahara'],
+    ARRAY['Tamahaq'],
+    ARRAY['Music', 'Instrumental', 'Heritage'],
+    'Calm',
+    'guardian_reviewed',
+    TRUE
+  ),
+  (
+    'agadir-dance',
+    ARRAY['Shilha / Tashelhit'],
+    ARRAY['Agadir', 'Morocco'],
+    ARRAY['Tashelhit'],
+    ARRAY['Dance', 'Festival', 'Community'],
+    'High',
+    'public_celebration',
+    FALSE
+  ),
+  (
+    'kabyle-poetry',
+    ARRAY['Kabyle'],
+    ARRAY['Kabylie', 'Algeria', 'Paris'],
+    ARRAY['Kabyle', 'French'],
+    ARRAY['Poetry', 'Diaspora', 'Spoken Word'],
+    'Reflective',
+    'public_celebration',
+    FALSE
+  ),
+  (
+    'rif-bread',
+    ARRAY['Rifian'],
+    ARRAY['Rif', 'Morocco', 'Nador'],
+    ARRAY['Tarifit'],
+    ARRAY['Food', 'Heritage', 'Everyday Life'],
+    'Warm',
+    'household_practice',
+    FALSE
+  )
+ON CONFLICT (content_id) DO UPDATE
+SET cultural_families = EXCLUDED.cultural_families,
+    regions = EXCLUDED.regions,
+    languages = EXCLUDED.languages,
+    topics = EXCLUDED.topics,
+    energy = EXCLUDED.energy,
+    sacred_level = EXCLUDED.sacred_level,
+    is_guardian_approved = EXCLUDED.is_guardian_approved;
+
+INSERT INTO public.archive_entries (
+  id,
+  title,
+  summary,
+  era,
+  category,
+  thumbnail_url,
+  community_upvotes,
+  registered_users,
+  required_approval_percent
+)
+VALUES
+  (
+    'ancestral-tar',
+    jsonb_build_object('en', 'Ancestral Tar Artwork', 'fr', 'Œuvre ancestrale du tar'),
+    jsonb_build_object(
+      'en', 'Exploring embroidered motifs from Aurès artisans preserved since 1920.',
+      'fr', 'Motifs brodés des artisanes de l''Aurès conservés depuis 1920.'
+    ),
+    jsonb_build_object('en', 'Aurès · 1920s', 'fr', 'Aurès · Années 1920'),
+    'Textile',
+    'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=800&q=80',
+    8200,
+    12000,
+    60
+  ),
+  (
+    'ahwach-oral',
+    jsonb_build_object('en', 'Ahouach Oral Histories', 'fr', 'Histoires orales ahouach'),
+    jsonb_build_object(
+      'en', 'Digitised chants celebrating the first harvest moon.',
+      'fr', 'Chants numérisés célébrant la première lune des récoltes.'
+    ),
+    jsonb_build_object('en', 'Agadir · 1968', 'fr', 'Agadir · 1968'),
+    'Audio',
+    'https://images.unsplash.com/photo-1523419409543-0c1df022bdd1?auto=format&fit=crop&w=800&q=80',
+    5400,
+    8600,
+    55
+  ),
+  (
+    'blue-tifinagh',
+    jsonb_build_object('en', 'Indigo Tifinagh Banner', 'fr', 'Bannière tifinagh indigo'),
+    jsonb_build_object(
+      'en', 'Handwoven banner used in Amazigh student movements.',
+      'fr', 'Bannière tissée utilisée par les mouvements étudiants amazighs.'
+    ),
+    jsonb_build_object('en', 'Rabat · 1984', 'fr', 'Rabat · 1984'),
+    'Archive',
+    'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80',
+    4800,
+    7000,
+    50
+  )
+ON CONFLICT (id) DO UPDATE
+SET title = EXCLUDED.title,
+    summary = EXCLUDED.summary,
+    era = EXCLUDED.era,
+    category = EXCLUDED.category,
+    thumbnail_url = EXCLUDED.thumbnail_url,
+    community_upvotes = EXCLUDED.community_upvotes,
+    registered_users = EXCLUDED.registered_users,
+    required_approval_percent = EXCLUDED.required_approval_percent;
+
+INSERT INTO public.cultural_events (
+  id,
+  title,
+  date_label,
+  location,
+  description,
+  additional_detail,
+  mode,
+  start_at,
+  end_at,
+  tags,
+  cta_label,
+  cta_note,
+  background_colors,
+  hero_image_url
+)
+VALUES
+  (
+    'agadir-film-night',
+    jsonb_build_object(
+      'en', 'Agadir Amazigh Film Night',
+      'fr', 'Soirée cinéma amazighe à Agadir'
+    ),
+    jsonb_build_object('en', 'March 23, 2024 · 19:00', 'fr', '23 mars 2024 · 19 h 00'),
+    jsonb_build_object('en', 'Agadir, Morocco', 'fr', 'Agadir, Maroc'),
+    jsonb_build_object(
+      'en', 'Screenings of shorts celebrating Amazigh storytellers followed by a Q&A with local directors.',
+      'fr', 'Projection de courts métrages mettant en lumière des conteurs amazighs, suivie d’une discussion avec des réalisateurs locaux.'
+    ),
+    jsonb_build_object(
+      'en', 'Hosted at Dar Lfenn. Doors open at 18:30. Seats are limited—RSVP required.',
+      'fr', 'Organisé à Dar Lfenn. Ouverture des portes à 18 h 30. Places limitées : réservation obligatoire.'
+    ),
+    'in_person',
+    TIMESTAMPTZ '2024-03-23T19:00:00+00',
+    TIMESTAMPTZ '2024-03-23T22:00:00+00',
+    to_jsonb(ARRAY[
+      jsonb_build_object('en', 'Cinema', 'fr', 'Cinéma'),
+      jsonb_build_object('en', 'Community', 'fr', 'Communauté')
+    ]),
+    jsonb_build_object('en', 'Reserve a seat', 'fr', 'Réserver une place'),
+    jsonb_build_object(
+      'en', 'We will follow up with availability details for Agadir Amazigh Film Night.',
+      'fr', 'Nous vous contacterons avec les détails de disponibilité pour la soirée cinéma amazighe d’Agadir.'
+    ),
+    ARRAY['#2A1B4A', '#36254F', '#4B2C6B'],
+    'https://images.unsplash.com/photo-1542204165-65bf26472b9b?auto=format&fit=crop&w=1200&q=80'
+  ),
+  (
+    'language-lab-livestream',
+    jsonb_build_object(
+      'en', 'Amazigh Language Lab Livestream',
+      'fr', 'Laboratoire de langue amazighe en direct'
+    ),
+    jsonb_build_object('en', 'April 5, 2024 · 16:00 GMT', 'fr', '5 avril 2024 · 16 h 00 GMT'),
+    jsonb_build_object('en', 'Online broadcast', 'fr', 'Diffusion en ligne'),
+    jsonb_build_object(
+      'en', 'Interactive session on new teaching tools for Tamazight educators, streamed with live captions.',
+      'fr', 'Session interactive sur les nouveaux outils pédagogiques pour les enseignants de tamazight, diffusée avec sous-titres en direct.'
+    ),
+    jsonb_build_object(
+      'en', 'Featuring guests from the Kabylia Language Cooperative and the Atlas Cultural Lab.',
+      'fr', 'Avec la participation de la Coopérative linguistique kabyle et du Laboratoire culturel de l’Atlas.'
+    ),
+    'online',
+    TIMESTAMPTZ '2024-04-05T16:00:00+00',
+    TIMESTAMPTZ '2024-04-05T18:00:00+00',
+    to_jsonb(ARRAY[
+      jsonb_build_object('en', 'Education', 'fr', 'Éducation'),
+      jsonb_build_object('en', 'Livestream', 'fr', 'Diffusion en direct')
+    ]),
+    jsonb_build_object('en', 'Get streaming link', 'fr', 'Recevoir le lien'),
+    jsonb_build_object(
+      'en', 'We will email the livestream link 24 hours before the Language Lab session.',
+      'fr', 'Nous enverrons le lien de diffusion 24 heures avant la session du Laboratoire de langue.'
+    ),
+    ARRAY['#0F2027', '#203A43', '#2C5364'],
+    'https://images.unsplash.com/photo-1522199755839-a2bacb67c546?auto=format&fit=crop&w=1200&q=80'
+  ),
+  (
+    'montreal-tifawin-week',
+    jsonb_build_object(
+      'en', 'Tifawin Cultural Week',
+      'fr', 'Semaine culturelle Tifawin'
+    ),
+    jsonb_build_object('en', 'April 18–21, 2024', 'fr', '18–21 avril 2024'),
+    jsonb_build_object('en', 'Montreal & online sessions', 'fr', 'Montréal & sessions en ligne'),
+    jsonb_build_object(
+      'en', 'A hybrid celebration featuring Amazigh film, poetry, and culinary pop-ups across Montreal.',
+      'fr', 'Un festival hybride mêlant cinéma, poésie et pop-ups culinaires amazighs à Montréal.'
+    ),
+    jsonb_build_object(
+      'en', 'Community partners include Tifawin Montréal and Amazigh Women of Canada.',
+      'fr', 'Avec la participation de Tifawin Montréal et du Collectif des femmes amazighes du Canada.'
+    ),
+    'hybrid',
+    TIMESTAMPTZ '2024-04-18T15:00:00+00',
+    TIMESTAMPTZ '2024-04-21T22:00:00+00',
+    to_jsonb(ARRAY[
+      jsonb_build_object('en', 'Festival', 'fr', 'Festival'),
+      jsonb_build_object('en', 'Diaspora', 'fr', 'Diaspora')
+    ]),
+    jsonb_build_object('en', 'Join the programme', 'fr', 'Découvrir le programme'),
+    jsonb_build_object(
+      'en', 'We will send the hybrid schedule and registration instructions for Tifawin Cultural Week.',
+      'fr', 'Vous recevrez le programme hybride et les modalités d’inscription pour la semaine culturelle Tifawin.'
+    ),
+    ARRAY['#1B3B5A', '#274D6A', '#3E6F8C'],
+    'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80'
+  )
+ON CONFLICT (id) DO UPDATE
+SET title = EXCLUDED.title,
+    date_label = EXCLUDED.date_label,
+    location = EXCLUDED.location,
+    description = EXCLUDED.description,
+    additional_detail = EXCLUDED.additional_detail,
+    mode = EXCLUDED.mode,
+    start_at = EXCLUDED.start_at,
+    end_at = EXCLUDED.end_at,
+    tags = EXCLUDED.tags,
+    cta_label = EXCLUDED.cta_label,
+    cta_note = EXCLUDED.cta_note,
+    background_colors = EXCLUDED.background_colors,
+    hero_image_url = EXCLUDED.hero_image_url;
+
+INSERT INTO public.community_profiles (
+  id,
+  space,
+  region,
+  languages,
+  priority,
+  cards
+)
+VALUES
+  (
+    'fk2q',
+    jsonb_build_object(
+      'id', 'fk2q',
+      'name', jsonb_build_object(
+        'en', 'Kabyle Forum of Québec City',
+        'fr', 'Forum Kabyle de la Ville de Québec'
+      ),
+      'description', jsonb_build_object('en', '', 'fr', ''),
+      'location', jsonb_build_object(
+        'en', 'Québec City, QC',
+        'fr', 'Ville de Québec, QC'
+      ),
+      'imageUrl',
+        'https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=900&q=80',
+      'memberCount', 420,
+      'tags', to_jsonb(ARRAY['Kabyle','Québec','Diaspora','Culture','Yennayer'])
+    ),
+    'Québec · Canada',
+    ARRAY['Kabyle', 'Français'],
+    1.0,
+    jsonb_build_array(
+      jsonb_build_object(
+        'id', 'mission',
+        'kind', 'mission',
+        'title', jsonb_build_object('en', 'Purpose & Mission', 'fr', 'But / Mission'),
+        'body', jsonb_build_object(
+          'en', 'Preserve and promote Amazigh and Kabyle culture in Québec through seasonal events, workshops, practical resources, and support for new arrivals.',
+          'fr', 'Préserver et promouvoir la culture amazighe et kabyle à Québec par des évènements, ateliers, ressources pratiques et un soutien aux nouveaux arrivants.'
+        )
+      ),
+      jsonb_build_object(
+        'id', 'activities',
+        'kind', 'activities',
+        'title', jsonb_build_object('en', 'Activity Pillars', 'fr', 'Catégories d’activités'),
+        'items', to_jsonb(ARRAY[
+          jsonb_build_object(
+            'en', 'Cultural events: Yennayer celebrations, community festivals, solidarity gatherings.',
+            'fr', 'Événements culturels : célébrations de Yennayer, fêtes communautaires, rencontres solidaires.'
+          ),
+          jsonb_build_object(
+            'en', 'Workshops: language school, Kabyle cooking, cultural heritage labs.',
+            'fr', 'Ateliers : école, ateliers de langue kabyle, cuisine et patrimoine.'
+          ),
+          jsonb_build_object(
+            'en', 'Information resources: newcomer toolkit, integration guidance, local partners.',
+            'fr', 'Ressources informationnelles : trousse de l’immigrant, accompagnement à l’intégration, partenaires locaux.'
+          ),
+          jsonb_build_object(
+            'en', 'Diaspora solidarity: fundraising drives such as Kabylie wildfire relief (2021).',
+            'fr', 'Solidarité diaspora : collectes de fonds, dont la campagne Feux de Kabylie (2021).'
+          ),
+          jsonb_build_object(
+            'en', 'Community archive: regular updates on members, elders, and ongoing initiatives.',
+            'fr', 'Archives communautaires : communications régulières autour des membres et initiatives.'
+          )
+        ])
+      ),
+      jsonb_build_object(
+        'id', 'resources',
+        'kind', 'resources',
+        'title', jsonb_build_object('en', 'Resources & Support', 'fr', 'Ressources & soutien'),
+        'items', to_jsonb(ARRAY[
+          jsonb_build_object('en', 'Newcomer welcome kit in Kabyle and French.', 'fr', 'Trousse d’accueil pour nouveaux arrivants en kabyle et en français.'),
+          jsonb_build_object('en', 'Integration mentorship circles with long-term residents.', 'fr', 'Cercles de mentorat pour faciliter l’intégration.'),
+          jsonb_build_object('en', 'Educational guides on Amazigh history for schools in Québec.', 'fr', 'Guides pédagogiques sur l’histoire amazighe pour les écoles de Québec.')
+        ])
+      ),
+      jsonb_build_object(
+        'id', 'contact',
+        'kind', 'contact',
+        'title', jsonb_build_object('en', 'Team & Contact', 'fr', 'Équipe & contact'),
+        'links', to_jsonb(ARRAY[
+          jsonb_build_object('type', 'email', 'label', 'Email', 'value', 'kabyles2quebec@gmail.com'),
+          jsonb_build_object('type', 'phone', 'label', 'Téléphone', 'value', '581-XXX-XXXX'),
+          jsonb_build_object('type', 'facebook', 'label', 'Facebook', 'value', 'facebook.com/Kabyles2quebec/'),
+          jsonb_build_object('type', 'website', 'label', 'Site officiel', 'value', 'kabyles2quebec.com/fk2q/')
+        ])
+      ),
+      jsonb_build_object(
+        'id', 'timeline',
+        'kind', 'timeline',
+        'title', jsonb_build_object('en', 'Key Dates', 'fr', 'Dates marquantes'),
+        'items', to_jsonb(ARRAY[
+          jsonb_build_object('en', '11 Sept 2022: community board renewed (11 elected members).', 'fr', '11 septembre 2022 : renouvellement du bureau (11 membres élus).'),
+          jsonb_build_object('en', 'Yennayer celebrations each January, including 2975 in 2024.', 'fr', 'Grandes célébrations de Yennayer chaque janvier, dont 2975 en 2024.'),
+          jsonb_build_object('en', 'Seasonal gatherings: corn roast, DJ nights, solidarity fundraisers.', 'fr', 'Fêtes saisonnières : épluchette, soirées DJ, collectes solidaires.')
+        ])
+      ),
+      jsonb_build_object(
+        'id', 'highlights',
+        'kind', 'highlights',
+        'title', jsonb_build_object('en', 'Feature Stories', 'fr', 'Articles phares'),
+        'items', to_jsonb(ARRAY[
+          jsonb_build_object('en', 'Tribute to Hamid Ouchen & Laou Smail (2025).', 'fr', 'Hommage à Hamid Ouchen & Laou Smail (2025).'),
+          jsonb_build_object('en', 'Yennayer celebrations 2975 (2024) & 2973 (2022-2023).', 'fr', 'Célébrations de Yennayer 2975 (2024) et 2973 (2022-2023).'),
+          jsonb_build_object('en', 'Kabylie wildfires solidarity campaign (2021).', 'fr', 'Solidarité Feux de Kabylie (2021).'),
+          jsonb_build_object('en', 'Immigrant toolkit for Amazigh and Kabyle newcomers.', 'fr', 'Trousse et ressources pour immigrants amazigh/kabyles.')
+        ])
+      ),
+      jsonb_build_object(
+        'id', 'tags',
+        'kind', 'tags',
+        'title', jsonb_build_object('en', 'Tags & Index', 'fr', 'Tags / Index'),
+        'items', to_jsonb(ARRAY[
+          jsonb_build_object('en', '#Kabyle', 'fr', '#Kabyle'),
+          jsonb_build_object('en', '#Amazigh', 'fr', '#Amazigh'),
+          jsonb_build_object('en', '#Québec', 'fr', '#Québec'),
+          jsonb_build_object('en', '#Culture', 'fr', '#Culture'),
+          jsonb_build_object('en', '#Diaspora', 'fr', '#Diaspora'),
+          jsonb_build_object('en', '#Yennayer', 'fr', '#Yennayer'),
+          jsonb_build_object('en', '#Solidarity', 'fr', '#Solidarité'),
+          jsonb_build_object('en', '#Workshops', 'fr', '#Ateliers'),
+          jsonb_build_object('en', '#KabyleSchool', 'fr', '#ÉcoleKabyle'),
+          jsonb_build_object('en', '#Immigration', 'fr', '#Immigration')
+        ])
+      )
+    )
+  ),
+  (
+    'women-imzad-circle',
+    jsonb_build_object(
+      'id', 'women-imzad-circle',
+      'name', jsonb_build_object('en', 'Women of Imzad Circle', 'fr', 'Cercle des femmes de l''imzad'),
+      'description', jsonb_build_object(
+        'en', 'Workshops and storytelling nights safeguarding Imzad music and Saharan women’s leadership.',
+        'fr', 'Ateliers et veillées de contes pour préserver l''imzad et le leadership des femmes touarègues.'
+      ),
+      'location', jsonb_build_object('en', 'Tamanrasset · Online', 'fr', 'Tamanrasset · En ligne'),
+      'imageUrl', 'https://images.unsplash.com/photo-1527358043728-909898958ceb?auto=format&fit=crop&w=900&q=80',
+      'memberCount', 438,
+      'tags', to_jsonb(ARRAY['Heritage','Music','Women'])
+    ),
+    'Tamanrasset · Algeria',
+    ARRAY['Tamasheq', 'Français'],
+    0.7,
+    jsonb_build_array(
+      jsonb_build_object(
+        'id', 'landing',
+        'kind', 'landing',
+        'title', jsonb_build_object('en', 'Keeping Imzad alive', 'fr', 'Préserver l''imzad'),
+        'body', jsonb_build_object(
+          'en', 'Weekly circles led by Imzad guardians blending music, oral history, and leadership workshops for young women.',
+          'fr', 'Cercles hebdomadaires animés par des gardiennes de l''imzad mêlant musique, histoires orales et leadership pour les jeunes femmes.'
+        )
+      ),
+      jsonb_build_object(
+        'id', 'programmes',
+        'kind', 'activities',
+        'title', jsonb_build_object('en', 'Programmes', 'fr', 'Programmes'),
+        'items', to_jsonb(ARRAY[
+          jsonb_build_object('en', 'Imzad apprenticeships with elders.', 'fr', 'Apprentissages de l''imzad avec des aînées.'),
+          jsonb_build_object('en', 'Story circles for young Saharan girls.', 'fr', 'Cercles de contes pour les jeunes sahariennes.'),
+          jsonb_build_object('en', 'Leadership coaching for community projects.', 'fr', 'Coaching en leadership pour des projets communautaires.')
+        ])
+      ),
+      jsonb_build_object(
+        'id', 'contact',
+        'kind', 'contact',
+        'title', jsonb_build_object('en', 'Reach out', 'fr', 'Nous contacter'),
+        'links', to_jsonb(ARRAY[
+          jsonb_build_object('type', 'email', 'label', 'Email', 'value', 'imzad.circle@example.org'),
+          jsonb_build_object('type', 'instagram', 'label', 'Instagram', 'value', '@womenofimzad'),
+          jsonb_build_object('type', 'website', 'label', 'Site web', 'value', 'imzadcircle.org')
+        ])
+      )
+    )
+  ),
+  (
+    'imghiwan-radio',
+    jsonb_build_object(
+      'id', 'imghiwan-radio',
+      'name', jsonb_build_object('en', 'Imghiwan Radio Collective', 'fr', 'Collectif radio Imghiwan'),
+      'description', jsonb_build_object(
+        'en', 'Community radio archiving Amazigh vinyl, oral histories, and contemporary remixes.',
+        'fr', 'Radio communautaire archivant vinyles amazighs, histoires orales et remixes contemporains.'
+      ),
+      'location', jsonb_build_object('en', 'Paris · Casablanca · Online', 'fr', 'Paris · Casablanca · En ligne'),
+      'imageUrl', 'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=900&q=80',
+      'memberCount', 512,
+      'tags', to_jsonb(ARRAY['Radio','Archive','Diaspora','Youth'])
+    ),
+    'Paris & Casablanca · France & Morocco',
+    ARRAY['Tamazight', 'Français', 'English'],
+    0.6,
+    jsonb_build_array(
+      jsonb_build_object(
+        'id', 'mission',
+        'kind', 'mission',
+        'title', jsonb_build_object('en', 'Broadcast mission', 'fr', 'Mission radio'),
+        'body', jsonb_build_object(
+          'en', 'Digitise and broadcast Amazigh sound archives while uplifting new diaspora voices.',
+          'fr', 'Numériser et diffuser les archives sonores amazighes tout en valorisant de nouvelles voix de la diaspora.'
+        )
+      ),
+      jsonb_build_object(
+        'id', 'shows',
+        'kind', 'highlights',
+        'title', jsonb_build_object('en', 'Featured shows', 'fr', 'Émissions phares'),
+        'items', to_jsonb(ARRAY[
+          jsonb_build_object('en', 'Imghiwan Archives: weekly dig through rare vinyl.', 'fr', 'Archives Imghiwan : exploration hebdomadaire de vinyles rares.'),
+          jsonb_build_object('en', 'Diaspora Frequencies: youth-led conversations on identity.', 'fr', 'Fréquences diaspora : conversations menées par les jeunes sur l’identité.'),
+          jsonb_build_object('en', 'Guardian Sessions: live mixes blessed by cultural guardians.', 'fr', 'Sessions gardiennes : mixes live approuvés par les gardiens culturels.')
+        ])
+      ),
+      jsonb_build_object(
+        'id', 'connect',
+        'kind', 'contact',
+        'title', jsonb_build_object('en', 'Stay tuned', 'fr', 'Restez à l’écoute'),
+        'links', to_jsonb(ARRAY[
+          jsonb_build_object('type', 'website', 'label', 'Site web', 'value', 'imghiwan.fm'),
+          jsonb_build_object('type', 'instagram', 'label', 'Instagram', 'value', '@imghiwan.fm'),
+          jsonb_build_object('type', 'link', 'label', 'Mixcloud', 'value', 'mixcloud.com/imghiwan')
+        ])
+      )
+    )
+  )
+ON CONFLICT (id) DO UPDATE
+SET space = EXCLUDED.space,
+    region = EXCLUDED.region,
+    languages = EXCLUDED.languages,
+    priority = EXCLUDED.priority,
+    cards = EXCLUDED.cards;
 
 INSERT INTO public.video_effects (id, name, description, config)
 VALUES
@@ -622,15 +1306,27 @@ ON CONFLICT DO NOTHING;
 
 INSERT INTO public.community_views (community_id, user_id)
 VALUES
-  ('aghouid-meetup', '00000000-0000-0000-0000-000000000001'),
   ('aghouid-meetup', NULL),
-  ('imzad-crafters', '00000000-0000-0000-0000-000000000002')
+  ('aghouid-meetup', NULL),
+  ('imzad-crafters', NULL)
 ON CONFLICT DO NOTHING;
 
 INSERT INTO public.community_host_requests (name, email, message, user_id, status)
 VALUES
-  ('Leila Amour', 'leila@example.com', 'Requesting to host a pop up radio hour featuring village choirs.', '00000000-0000-0000-0000-000000000001', 'pending'),
-  ('Yassine Merzouk', 'yassine@example.com', 'Looking to facilitate a workshop on renewable powered stages.', '00000000-0000-0000-0000-000000000002', 'reviewed')
+  (
+    'Leila Amour',
+    'leila@example.com',
+    'Requesting to host a pop up radio hour featuring village choirs.',
+    NULL,
+    'pending'
+  ),
+  (
+    'Yassine Merzouk',
+    'yassine@example.com',
+    'Looking to facilitate a workshop on renewable powered stages.',
+    NULL,
+    'reviewed'
+  )
 ON CONFLICT DO NOTHING;
 
 COMMIT;

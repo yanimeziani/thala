@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:video_player/video_player.dart';
 
 import '../../app/app_theme.dart';
 import '../../controllers/feed_controller.dart';
@@ -28,6 +29,7 @@ class _VideoFeedPageState extends State<VideoFeedPage> {
   bool _isMuted = false;
   final GlobalKey _headerKey = GlobalKey(debugLabel: 'feedHeader');
   double _headerHeight = 0;
+  final Map<String, VideoPlayerController> _preloadedControllers = {};
 
   @override
   void initState() {
@@ -37,6 +39,10 @@ class _VideoFeedPageState extends State<VideoFeedPage> {
 
   @override
   void dispose() {
+    for (final controller in _preloadedControllers.values) {
+      controller.dispose();
+    }
+    _preloadedControllers.clear();
     _pageController.dispose();
     super.dispose();
   }
@@ -44,6 +50,24 @@ class _VideoFeedPageState extends State<VideoFeedPage> {
   void _toggleMute() {
     setState(() {
       _isMuted = !_isMuted;
+    });
+  }
+
+  void _preloadVideo(VideoPost post) {
+    if (_preloadedControllers.containsKey(post.id)) return;
+
+    final controller = VideoPlayerController.networkUrl(Uri.parse(post.videoUrl));
+    _preloadedControllers[post.id] = controller;
+
+    controller.initialize().then((_) {
+      // Keep only last 3 preloaded videos to save memory
+      if (_preloadedControllers.length > 3) {
+        final firstKey = _preloadedControllers.keys.first;
+        _preloadedControllers[firstKey]?.dispose();
+        _preloadedControllers.remove(firstKey);
+      }
+    }).catchError((error) {
+      _preloadedControllers.remove(post.id);
     });
   }
 
@@ -130,6 +154,7 @@ class _VideoFeedPageState extends State<VideoFeedPage> {
                 controller: _pageController,
                 scrollDirection: Axis.vertical,
                 itemCount: itemCount,
+                physics: const ClampingScrollPhysics(),
                 onPageChanged: (index) => setState(() => _activeIndex = index),
                 itemBuilder: (context, index) {
                   if (showWelcome && index == 0) {
@@ -141,6 +166,19 @@ class _VideoFeedPageState extends State<VideoFeedPage> {
                   final postIndex = showWelcome ? index - 1 : index;
                   final post = posts[postIndex];
                   final isActive = index == _activeIndex && feed.isFeedVisible;
+
+                  // Preload adjacent videos
+                  if (isActive) {
+                    if (postIndex + 1 < posts.length) {
+                      final nextPost = posts[postIndex + 1];
+                      _preloadVideo(nextPost);
+                    }
+                    if (postIndex - 1 >= 0) {
+                      final prevPost = posts[postIndex - 1];
+                      _preloadVideo(prevPost);
+                    }
+                  }
+
                   return VideoStoryPage(
                     key: ValueKey(post.id),
                     post: post,
@@ -224,16 +262,17 @@ class _FeedHeader extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 ThalaLogo(
-                  size: 36,
+                  size: 32,
                   semanticLabel: AppTranslations.of(context, AppText.appName),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
                 Text(
                   AppTranslations.of(context, AppText.appName),
                   style: theme.textTheme.titleMedium?.copyWith(
                     color: palette.textPrimary,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.2,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: -0.1,
+                    fontSize: 16,
                   ),
                 ),
               ],
@@ -265,12 +304,6 @@ class _FeedHeader extends StatelessWidget {
         final Widget actions = Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _FeedActionIcon(
-              icon: Icons.refresh,
-              tooltip: 'Refresh feed',
-              onPressed: onRefresh,
-            ),
-            const SizedBox(width: 4),
             _FeedActionIcon(
               icon: Icons.person_outline,
               tooltip: AppTranslations.of(context, AppText.viewProfile),
@@ -311,12 +344,12 @@ class _FeedHeader extends StatelessWidget {
           child: ThalaGlassSurface(
             enableLiquid: useLiquidGlass,
             enableBorder: false,
-            cornerRadius: 28,
+            cornerRadius: 24,
             backgroundColor: palette.surfaceBright,
             backgroundOpacity: theme.brightness == Brightness.dark
-                ? 0.16
-                : 0.68,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ? 0.12
+                : 0.52,
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             child: headerRow,
           ),
         );
@@ -342,8 +375,10 @@ class _FeedActionIcon extends StatelessWidget {
     return IconButton(
       tooltip: tooltip,
       onPressed: onPressed,
-      splashRadius: 20,
-      icon: Icon(icon, color: palette.iconPrimary, size: 22),
+      splashRadius: 18,
+      padding: const EdgeInsets.all(8),
+      constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+      icon: Icon(icon, color: palette.iconPrimary.withOpacity(0.9), size: 20),
     );
   }
 }
@@ -369,17 +404,18 @@ class _ActiveStoryChip extends StatelessWidget {
     final row = Row(
       children: [
         CircleAvatar(
-          radius: 20,
-          backgroundColor: palette.surfaceSubtle,
+          radius: 18,
+          backgroundColor: palette.surfaceSubtle.withOpacity(0.6),
           child: Text(
             initials,
             style: theme.textTheme.labelLarge?.copyWith(
               color: palette.textPrimary,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
             ),
           ),
         ),
-        const SizedBox(width: 12),
+        const SizedBox(width: 10),
         Expanded(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -391,8 +427,9 @@ class _ActiveStoryChip extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: palette.textPrimary,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.1,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: -0.05,
+                  fontSize: 15,
                 ),
               ),
               if (handle.isNotEmpty)
@@ -401,8 +438,9 @@ class _ActiveStoryChip extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: palette.textSecondary,
-                    letterSpacing: 0.2,
+                    color: palette.textSecondary.withOpacity(0.8),
+                    letterSpacing: 0.1,
+                    fontSize: 12,
                   ),
                 ),
             ],
@@ -469,21 +507,21 @@ class _FeedWelcomePageState extends State<_FeedWelcomePage>
     super.initState();
     _backgroundController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 18),
+      duration: const Duration(seconds: 12),
     )..repeat();
     _pulseController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2600),
+      duration: const Duration(milliseconds: 2000),
       lowerBound: 0.0,
       upperBound: 1.0,
     )..repeat(reverse: true);
     _typographyController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3600),
+      duration: const Duration(milliseconds: 1800),
     );
     _typographyAnimation = CurvedAnimation(
       parent: _typographyController,
-      curve: const Interval(0.0, 1.0, curve: Curves.easeOutCubic),
+      curve: Curves.easeOutCubic,
     );
     _typographyController.forward();
   }
@@ -499,14 +537,6 @@ class _FeedWelcomePageState extends State<_FeedWelcomePage>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final handleText = _formatHandle(widget.nextHandle);
-    final swipeMessage = handleText.isEmpty
-        ? AppTranslations.of(context, AppText.feedWelcomeSwipe)
-        : AppTranslations.of(
-            context,
-            AppText.feedWelcomeSwipeHandle,
-          ).replaceFirst('{handle}', handleText);
-    final tipMessage = AppTranslations.of(context, AppText.feedWelcomeTip);
     final tagline = AppTranslations.of(context, AppText.tagline);
 
     return Stack(
@@ -521,8 +551,8 @@ class _FeedWelcomePageState extends State<_FeedWelcomePage>
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.black.withOpacity(0.05),
-                  Colors.black.withOpacity(0.35),
+                  Colors.black.withOpacity(0.1),
+                  Colors.black.withOpacity(0.4),
                 ],
               ),
             ),
@@ -530,41 +560,55 @@ class _FeedWelcomePageState extends State<_FeedWelcomePage>
         ),
         Center(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
+            padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
                 _PulsingLogo(animation: _pulseController),
-                const SizedBox(height: 32),
-                _AnimatedGradientHeadline(
-                  text: tagline,
-                  animation: _backgroundController,
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.2,
-                    color: Colors.white,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                _CinematicTypeLine(
-                  text: swipeMessage,
+                const SizedBox(height: 48),
+                AnimatedBuilder(
                   animation: _typographyAnimation,
-                  shimmer: _backgroundController,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    color: Colors.white.withOpacity(0.92),
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                _FloatingTip(
-                  text: tipMessage,
-                  animation: _pulseController,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: Colors.white.withOpacity(0.94),
-                    height: 1.35,
-                  ),
+                  builder: (context, child) {
+                    return Opacity(
+                      opacity: _typographyAnimation.value,
+                      child: Transform.translate(
+                        offset: Offset(0, (1 - _typographyAnimation.value) * 16),
+                        child: Column(
+                          children: [
+                            Text(
+                              tagline,
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.headlineLarge?.copyWith(
+                                fontWeight: FontWeight.w300,
+                                letterSpacing: -0.5,
+                                color: Colors.white,
+                                height: 1.15,
+                                fontSize: 36,
+                              ),
+                            ),
+                            const SizedBox(height: 56),
+                            Icon(
+                              Icons.keyboard_arrow_up_rounded,
+                              color: Colors.white.withOpacity(0.7),
+                              size: 48,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Swipe',
+                              textAlign: TextAlign.center,
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                color: Colors.white.withOpacity(0.85),
+                                fontWeight: FontWeight.w400,
+                                letterSpacing: 2,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -747,31 +791,31 @@ class _PulsingLogo extends StatelessWidget {
     return AnimatedBuilder(
       animation: animation,
       builder: (context, child) {
-        final scale = 0.92 + (animation.value * 0.08);
-        final glow = 0.3 + animation.value * 0.25;
+        final scale = 0.96 + (animation.value * 0.04);
+        final glow = 0.2 + animation.value * 0.15;
         return Container(
-          width: 160,
-          height: 160,
+          width: 140,
+          height: 140,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             gradient: RadialGradient(
               colors: [
-                Colors.white.withOpacity(glow * 0.6),
-                Colors.white.withOpacity(0.05),
+                Colors.white.withOpacity(glow * 0.4),
+                Colors.transparent,
               ],
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.white.withOpacity(glow),
-                blurRadius: 40 + (animation.value * 24),
-                spreadRadius: 2 + (animation.value * 4),
+                color: Colors.white.withOpacity(glow * 0.8),
+                blurRadius: 28 + (animation.value * 16),
+                spreadRadius: 1 + (animation.value * 2),
               ),
             ],
           ),
           child: Transform.scale(
             scale: scale,
             child: const Center(
-              child: ThalaLogo(size: 96, fit: BoxFit.contain),
+              child: ThalaLogo(size: 84, fit: BoxFit.contain),
             ),
           ),
         );

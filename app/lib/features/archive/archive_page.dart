@@ -3,9 +3,11 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../app/app_theme.dart';
+import '../../data/archive_repository.dart';
 import '../../data/sample_archive_entries.dart';
 import '../../l10n/app_translations.dart';
 import '../../models/archive_entry.dart';
+import '../../services/supabase_manager.dart';
 import '../../ui/widgets/thala_glass_surface.dart';
 
 class ArchivePage extends StatefulWidget {
@@ -19,11 +21,16 @@ class _ArchivePageState extends State<ArchivePage> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   String _query = '';
+  final ArchiveRepository _repository = ArchiveRepository();
+  List<ArchiveEntry> _allEntries = const <ArchiveEntry>[];
+  bool _isLoading = true;
+  String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
     _searchController.addListener(_handleQueryListener);
+    _loadEntries();
   }
 
   @override
@@ -42,9 +49,36 @@ class _ArchivePageState extends State<ArchivePage> {
     setState(() => _query = nextQuery);
   }
 
+  Future<void> _loadEntries() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final entries = await _repository.fetchEntries();
+      setState(() {
+        _allEntries = entries;
+        _isLoading = false;
+        if (!_repository.isRemoteEnabled) {
+          _errorMessage = SupabaseManager.isConfigured
+              ? 'Archive library has no records yet. Showing curated examples.'
+              : 'Supabase is not configured. Showing curated examples.';
+        }
+      });
+    } catch (error, stackTrace) {
+      debugPrint('Failed to load archive entries: $error\n$stackTrace');
+      setState(() {
+        _allEntries = const <ArchiveEntry>[];
+        _isLoading = false;
+        _errorMessage = 'Unable to load archive entries.';
+      });
+    }
+  }
+
   List<ArchiveEntry> _filteredEntries(Locale locale) {
     final query = _normalize(_query);
-    final entries = sampleArchiveEntries
+    final entries = _allEntries
         .where((entry) => entry.meetsCommunityThreshold)
         .where((entry) {
           if (query.isEmpty) {
@@ -68,7 +102,7 @@ class _ArchivePageState extends State<ArchivePage> {
     if (query.isEmpty) {
       return const Iterable<ArchiveEntry>.empty();
     }
-    final matches = sampleArchiveEntries.where((entry) {
+    final matches = _allEntries.where((entry) {
       return _buildSearchCandidates(
         entry,
         locale,
@@ -115,6 +149,14 @@ class _ArchivePageState extends State<ArchivePage> {
     final bottomPadding = keyboardInset > 0
         ? 12.0
         : mediaQuery.padding.bottom + 12.0;
+
+    if (_isLoading) {
+      return const Scaffold(
+        extendBody: true,
+        backgroundColor: Colors.transparent,
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
 
     return Scaffold(
       extendBody: true,
@@ -251,7 +293,7 @@ class _ArchivePageState extends State<ArchivePage> {
                                   key: ValueKey('empty-${_query.trim()}'),
                                   query: _query,
                                 ))
-                        : const _ArchiveIdleState(),
+                        : _ArchiveIdleState(message: _errorMessage),
                   ),
                 ),
               ],
@@ -337,16 +379,14 @@ class _ArchiveSearchBarState extends State<_ArchiveSearchBar> {
       duration: const Duration(milliseconds: 220),
       curve: Curves.easeOutCubic,
       child: ThalaGlassSurface(
-        cornerRadius: 24,
-        backgroundOpacity: opacity,
-        borderColor: theme.dividerColor.withValues(
-          alpha: widget.isActive ? 0.5 : 0.28,
-        ),
+        cornerRadius: 22,
+        backgroundOpacity: opacity * 0.8,
+        enableBorder: false,
         shadows: shadows,
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         child: Row(
           children: [
-            Icon(Icons.search, color: colorScheme.onSurfaceVariant, size: 22),
+            Icon(Icons.search, color: colorScheme.onSurfaceVariant.withOpacity(0.7), size: 22),
             const SizedBox(width: 12),
             Expanded(
               child: TextField(
@@ -355,7 +395,7 @@ class _ArchiveSearchBarState extends State<_ArchiveSearchBar> {
                 onSubmitted: widget.onSubmitted,
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
                 cursorColor: colorScheme.secondary,
                 textInputAction: TextInputAction.search,
@@ -367,8 +407,8 @@ class _ArchiveSearchBarState extends State<_ArchiveSearchBar> {
                     AppText.archiveSearchPlaceholder,
                   ),
                   hintStyle: theme.textTheme.titleMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
-                    fontWeight: FontWeight.w500,
+                    color: colorScheme.onSurfaceVariant.withOpacity(0.55),
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ),
@@ -380,10 +420,10 @@ class _ArchiveSearchBarState extends State<_ArchiveSearchBar> {
                 },
                 icon: Icon(
                   Icons.close,
-                  color: colorScheme.onSurfaceVariant,
+                  color: colorScheme.onSurfaceVariant.withOpacity(0.6),
                   size: 20,
                 ),
-                splashRadius: 20,
+                splashRadius: 18,
               ),
           ],
         ),
@@ -393,7 +433,9 @@ class _ArchiveSearchBarState extends State<_ArchiveSearchBar> {
 }
 
 class _ArchiveIdleState extends StatelessWidget {
-  const _ArchiveIdleState();
+  const _ArchiveIdleState({this.message});
+
+  final String? message;
 
   @override
   Widget build(BuildContext context) {
@@ -405,47 +447,43 @@ class _ArchiveIdleState extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32),
         child: ThalaGlassSurface(
-          cornerRadius: 28,
+          cornerRadius: 24,
           enableBorder: false,
-          backgroundOpacity: context.isDarkMode ? 0.22 : 0.55,
-          padding: const EdgeInsets.fromLTRB(24, 28, 24, 28),
+          backgroundOpacity: context.isDarkMode ? 0.16 : 0.42,
+          padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                height: 80,
-                width: 80,
+                height: 72,
+                width: 72,
                 decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest.withValues(
-                    alpha: 0.24,
-                  ),
-                  borderRadius: BorderRadius.circular(28),
-                  border: Border.all(
-                    color: theme.dividerColor.withValues(alpha: 0.28),
-                  ),
+                  color: colorScheme.surfaceContainerHighest.withOpacity(0.16),
+                  shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
                 child: Icon(
                   Icons.search_outlined,
-                  color: colorScheme.onSurfaceVariant,
-                  size: 30,
+                  color: colorScheme.onSurfaceVariant.withOpacity(0.8),
+                  size: 28,
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 18),
               Text(
                 message,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.titleMedium?.copyWith(
                   color: colorScheme.onSurface,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               Text(
-                'Begin typing to surface cultural treasures curated by the community.',
+                message ??
+                    'Begin typing to surface cultural treasures curated by the community.',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
+                  color: colorScheme.onSurfaceVariant.withOpacity(0.8),
                 ),
               ),
             ],
@@ -651,21 +689,21 @@ class _ArchivePlayerCard extends StatelessWidget {
         return Align(
           alignment: Alignment.topCenter,
           child: ThalaGlassSurface(
-            cornerRadius: 28,
-            backgroundOpacity: isDark ? 0.28 : 0.78,
+            cornerRadius: 24,
+            backgroundOpacity: isDark ? 0.22 : 0.62,
             enableBorder: false,
             shadows: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.18),
-                blurRadius: 26,
-                offset: const Offset(0, 18),
+                color: Colors.black.withOpacity(isDark ? 0.4 : 0.14),
+                blurRadius: 22,
+                offset: const Offset(0, 14),
               ),
             ],
             child: SizedBox(
               height: cardHeight,
               width: double.infinity,
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(28),
+                borderRadius: BorderRadius.circular(24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

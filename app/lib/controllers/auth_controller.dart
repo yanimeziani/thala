@@ -1,66 +1,89 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '../services/supabase_manager.dart';
+import '../services/backend_auth_service.dart';
 
-enum AuthStatus { loading, unauthenticated, authenticated, unavailable, guest }
+enum AuthStatus { loading, unauthenticated, authenticated, guest }
 
 class AuthController extends ChangeNotifier {
-  AuthController({SupabaseClient? client})
-    : _client = client ?? SupabaseManager.client {
+  AuthController() {
     _init();
   }
 
-  final SupabaseClient? _client;
-  StreamSubscription<AuthState>? _authSubscription;
-
   AuthStatus _status = AuthStatus.loading;
-  Session? _session;
   bool _isAuthenticating = false;
   String? _errorMessage;
+  UserProfile? _user;
+  String? _accessToken;
+  String? _refreshToken;
+
+  static const String _accessTokenKey = 'thala_access_token';
+  static const String _refreshTokenKey = 'thala_refresh_token';
+  static const String _userProfileKey = 'thala_user_profile';
 
   AuthStatus get status => _status;
-  Session? get session => _session;
   bool get isAuthenticating => _isAuthenticating;
   String? get errorMessage => _errorMessage;
+  UserProfile? get user => _user;
+  String? get accessToken => _accessToken;
   bool get isGuest => _status == AuthStatus.guest;
+  bool get isAuthenticated => _status == AuthStatus.authenticated;
 
-  void _init() {
-    final client = _client;
-    if (client == null) {
-      _status = AuthStatus.guest;
-      notifyListeners();
-      return;
-    }
+  Future<void> _init() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString(_accessTokenKey);
+      final refreshToken = prefs.getString(_refreshTokenKey);
+      final userJson = prefs.getString(_userProfileKey);
 
-    _session = client.auth.currentSession;
-    _status = _session == null
-        ? AuthStatus.unauthenticated
-        : AuthStatus.authenticated;
+      if (accessToken != null && refreshToken != null && userJson != null) {
+        _accessToken = accessToken;
+        _refreshToken = refreshToken;
+        _user = UserProfile.fromJson(
+          jsonDecode(userJson) as Map<String, dynamic>,
+        );
 
-    _authSubscription = client.auth.onAuthStateChange.listen(
-      (data) => _handleAuthStateChange(data.event, data.session),
-      onError: (error, stackTrace) {
-        if (kDebugMode) {
-          debugPrint('Auth listener error: $error');
+        // Try to verify the token is still valid
+        try {
+          final user = await BackendAuthService.getCurrentUser(
+            accessToken: accessToken,
+          );
+          _user = user;
+          await _saveUserProfile(user);
+          _status = AuthStatus.authenticated;
+        } catch (e) {
+          // Token might be expired, try to refresh
+          if (refreshToken != null) {
+            try {
+              await _refreshAccessToken();
+              _status = AuthStatus.authenticated;
+            } catch (_) {
+              // Refresh failed, need to login again
+              await _clearSession();
+              _status = AuthStatus.unauthenticated;
+            }
+          } else {
+            await _clearSession();
+            _status = AuthStatus.unauthenticated;
+          }
         }
-      },
-    );
+      } else {
+        _status = AuthStatus.unauthenticated;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Auth initialization error: $e');
+      }
+      _status = AuthStatus.unauthenticated;
+    }
 
     notifyListeners();
   }
 
   Future<bool> signInWithEmailPassword(String email, String password) async {
-    final client = _client;
-    if (client == null) {
-      _errorMessage =
-          'Supabase is not configured. Provide credentials to enable sign-in.';
-      notifyListeners();
-      return false;
-    }
-
     final trimmed = email.trim();
     if (trimmed.isEmpty) {
       _errorMessage = 'Please enter an email address.';
@@ -79,13 +102,117 @@ class AuthController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      await client.auth.signInWithPassword(email: trimmed, password: password);
+      final response = await BackendAuthService.login(
+        email: trimmed,
+        password: password,
+      );
+
+      _accessToken = response.accessToken;
+      _refreshToken = response.refreshToken;
+      _user = response.user;
+      _status = AuthStatus.authenticated;
+
+      await _saveSession(response);
       return true;
-    } on AuthException catch (error) {
-      _errorMessage = error.message;
+    } on BackendAuthException catch (e) {
+      _errorMessage = e.message;
       return false;
-    } catch (error) {
+    } catch (e) {
       _errorMessage = 'Unexpected error. Please try again.';
+      if (kDebugMode) {
+        debugPrint('Login error: $e');
+      }
+      return false;
+    } finally {
+      _isAuthenticating = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> registerWithEmailPassword({
+    required String email,
+    required String password,
+    required String fullName,
+  }) async {
+    final trimmedEmail = email.trim();
+    final trimmedName = fullName.trim();
+
+    if (trimmedEmail.isEmpty) {
+      _errorMessage = 'Please enter an email address.';
+      notifyListeners();
+      return false;
+    }
+
+    if (trimmedName.isEmpty) {
+      _errorMessage = 'Please enter your name.';
+      notifyListeners();
+      return false;
+    }
+
+    if (password.isEmpty) {
+      _errorMessage = 'Please enter a password.';
+      notifyListeners();
+      return false;
+    }
+
+    _isAuthenticating = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await BackendAuthService.register(
+        email: trimmedEmail,
+        password: password,
+        fullName: trimmedName,
+      );
+
+      _accessToken = response.accessToken;
+      _refreshToken = response.refreshToken;
+      _user = response.user;
+      _status = AuthStatus.authenticated;
+
+      await _saveSession(response);
+      return true;
+    } on BackendAuthException catch (e) {
+      _errorMessage = e.message;
+      return false;
+    } catch (e) {
+      _errorMessage = 'Unexpected error. Please try again.';
+      if (kDebugMode) {
+        debugPrint('Registration error: $e');
+      }
+      return false;
+    } finally {
+      _isAuthenticating = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> signInWithGoogle(String idToken) async {
+    _isAuthenticating = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await BackendAuthService.loginWithGoogle(
+        idToken: idToken,
+      );
+
+      _accessToken = response.accessToken;
+      _refreshToken = response.refreshToken;
+      _user = response.user;
+      _status = AuthStatus.authenticated;
+
+      await _saveSession(response);
+      return true;
+    } on BackendAuthException catch (e) {
+      _errorMessage = e.message;
+      return false;
+    } catch (e) {
+      _errorMessage = 'Unexpected error. Please try again.';
+      if (kDebugMode) {
+        debugPrint('Google login error: $e');
+      }
       return false;
     } finally {
       _isAuthenticating = false;
@@ -94,12 +221,8 @@ class AuthController extends ChangeNotifier {
   }
 
   Future<void> signOut() async {
-    final client = _client;
-    if (client == null) {
-      return;
-    }
-    await client.auth.signOut();
-    _setSession(null);
+    await _clearSession();
+    notifyListeners();
   }
 
   void clearError() {
@@ -109,39 +232,43 @@ class AuthController extends ChangeNotifier {
     }
   }
 
-  void _handleAuthStateChange(AuthChangeEvent event, Session? session) {
-    switch (event) {
-      case AuthChangeEvent.signedIn:
-      case AuthChangeEvent.tokenRefreshed:
-      case AuthChangeEvent.userUpdated:
-      case AuthChangeEvent.initialSession:
-        _errorMessage = null;
-        _setSession(session);
-        break;
-      case AuthChangeEvent.signedOut:
-        _setSession(null);
-        break;
-      default:
-        if (session != null) {
-          _setSession(session);
-        }
+  Future<void> _refreshAccessToken() async {
+    if (_refreshToken == null) {
+      throw Exception('No refresh token available');
     }
+
+    final response = await BackendAuthService.refreshToken(
+      refreshToken: _refreshToken!,
+    );
+
+    _accessToken = response.accessToken;
+    _refreshToken = response.refreshToken;
+    _user = response.user;
+
+    await _saveSession(response);
   }
 
-  void _setSession(Session? session) {
-    _session = session;
-    final nextStatus = session == null
-        ? AuthStatus.unauthenticated
-        : AuthStatus.authenticated;
-    if (_status != nextStatus) {
-      _status = nextStatus;
-    }
-    notifyListeners();
+  Future<void> _saveSession(AuthTokenResponse response) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_accessTokenKey, response.accessToken);
+    await prefs.setString(_refreshTokenKey, response.refreshToken);
+    await _saveUserProfile(response.user);
   }
 
-  @override
-  void dispose() {
-    _authSubscription?.cancel();
-    super.dispose();
+  Future<void> _saveUserProfile(UserProfile user) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_userProfileKey, jsonEncode(user.toJson()));
+  }
+
+  Future<void> _clearSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_accessTokenKey);
+    await prefs.remove(_refreshTokenKey);
+    await prefs.remove(_userProfileKey);
+
+    _accessToken = null;
+    _refreshToken = null;
+    _user = null;
+    _status = AuthStatus.unauthenticated;
   }
 }

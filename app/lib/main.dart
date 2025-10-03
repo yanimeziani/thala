@@ -8,13 +8,16 @@ import 'app/app_theme.dart';
 import 'app/home_shell.dart';
 import 'controllers/auth_controller.dart';
 import 'controllers/localization_controller.dart';
+import 'controllers/music_library.dart';
 import 'features/auth/email_password_login_page.dart';
 import 'features/onboarding/onboarding_flow.dart';
+import 'features/splash/splash_page.dart';
 import 'l10n/app_translations.dart';
 import 'models/onboarding_answers.dart';
+import 'data/sample_tracks.dart';
+import 'services/meili_search_manager.dart';
 import 'services/preference_store.dart';
 import 'services/recommendation_service.dart';
-import 'services/supabase_manager.dart';
 import 'ui/widgets/thala_snackbar.dart';
 
 Future<void> main() async {
@@ -30,7 +33,15 @@ class ThalaBootstrap extends StatefulWidget {
 }
 
 class _ThalaBootstrapState extends State<ThalaBootstrap> {
-  late final Future<void> _initialization = SupabaseManager.ensureInitialized();
+  late final Future<void> _initialization = _initialize();
+
+  Future<void> _initialize() async {
+    // Initialize optional services
+    await MeiliSearchManager.ensureInitialized();
+
+    // Add a small delay for splash screen visibility
+    await Future.delayed(const Duration(milliseconds: 1500));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,46 +52,13 @@ class _ThalaBootstrapState extends State<ThalaBootstrap> {
           return const ThalaRoot();
         }
 
-        if (snapshot.hasError) {
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            theme: buildThalaLightTheme(),
-            darkTheme: buildThalaDarkTheme(),
-            themeMode: ThemeMode.system,
-            home: Builder(
-              builder: (context) {
-                final palette = context.thalaPalette;
-                final textTheme = Theme.of(context).textTheme;
-                return Scaffold(
-                  backgroundColor: Theme.of(context).colorScheme.background,
-                  body: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                      child: Text(
-                        'Unable to reach Supabase. Check your credentials or network and restart the app.',
-                        textAlign: TextAlign.center,
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: palette.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          );
-        }
-
+        // Show splash screen while initializing
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: buildThalaLightTheme(),
           darkTheme: buildThalaDarkTheme(),
           themeMode: ThemeMode.system,
-          home: Builder(
-            builder: (context) => const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            ),
-          ),
+          home: const SplashPage(),
         );
       },
     );
@@ -106,6 +84,9 @@ class ThalaRoot extends StatelessWidget {
           },
         ),
         ChangeNotifierProvider(create: (_) => AuthController()),
+        ChangeNotifierProvider(
+          create: (_) => MusicLibrary(fallback: sampleTracks),
+        ),
         Provider(create: (_) => PreferenceStore()),
         Provider(
           create: (context) => RecommendationService(
@@ -176,8 +157,6 @@ class _AuthGateState extends State<AuthGate> {
     switch (auth.status) {
       case AuthStatus.loading:
         return const _AuthLoadingView();
-      case AuthStatus.unavailable:
-        return const _AuthUnavailableView();
       case AuthStatus.unauthenticated:
         return const EmailPasswordLoginPage();
       case AuthStatus.authenticated:
@@ -250,32 +229,6 @@ class _AuthLoadingView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: CircularProgressIndicator()));
-  }
-}
-
-class _AuthUnavailableView extends StatelessWidget {
-  const _AuthUnavailableView();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final palette = context.thalaPalette;
-
-    return Scaffold(
-      backgroundColor: theme.colorScheme.background,
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32.0),
-          child: Text(
-            'Remote login is disabled. Provide Supabase credentials (SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY or SUPABASE_ANON_KEY) using --dart-define to enable sign-in.',
-            textAlign: TextAlign.center,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: palette.textSecondary,
-            ),
-          ),
-        ),
-      ),
-    );
+    return const SplashPage();
   }
 }

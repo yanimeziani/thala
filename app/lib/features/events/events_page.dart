@@ -3,12 +3,62 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../app/app_theme.dart';
+import '../../data/events_repository.dart';
 import '../../l10n/app_translations.dart';
-import '../../models/localized_text.dart';
+import '../../models/cultural_event.dart';
 import '../../ui/widgets/thala_glass_surface.dart';
 
-class EventsPage extends StatelessWidget {
+class EventsPage extends StatefulWidget {
   const EventsPage({super.key});
+
+  @override
+  State<EventsPage> createState() => _EventsPageState();
+}
+
+class _EventsPageState extends State<EventsPage> {
+  final EventsRepository _repository = EventsRepository();
+  List<CulturalEvent> _events = const <CulturalEvent>[];
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadEvents();
+  }
+
+  Future<void> _loadEvents() async {
+    if (!_repository.isRemoteEnabled) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Supabase is not configured. Events will appear once connected.';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final remote = await _repository.fetchUpcomingEvents();
+      setState(() {
+        _events = remote;
+        _isLoading = false;
+        if (remote.isEmpty) {
+          _errorMessage = 'No events published yet. Add events in Supabase to showcase them here.';
+        }
+      });
+    } catch (error, stackTrace) {
+      debugPrint('Failed to load cultural events: $error\n$stackTrace');
+      setState(() {
+        _events = const <CulturalEvent>[];
+        _isLoading = false;
+        _errorMessage = 'Unable to reach Supabase. Events will return once the connection recovers.';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +69,35 @@ class EventsPage extends StatelessWidget {
     final bottomPadding = mediaQuery.padding.bottom + 96;
 
     String tr(AppText key) => AppTranslations.of(context, key);
+
+    if (_isLoading) {
+      return const Scaffold(
+        extendBody: true,
+        backgroundColor: Colors.transparent,
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_events.isEmpty) {
+      return Scaffold(
+        extendBody: true,
+        backgroundColor: Colors.transparent,
+        body: ThalaPageBackground(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: Text(
+                _errorMessage ?? 'No gatherings are scheduled yet. Add events in Supabase to light up this space.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: palette.textSecondary,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       extendBody: true,
@@ -31,30 +110,28 @@ class EventsPage extends StatelessWidget {
             children: [
               ThalaGlassSurface(
                 enableBorder: false,
-                cornerRadius: 28,
+                cornerRadius: 24,
                 backgroundOpacity: theme.brightness == Brightness.dark
-                    ? 0.24
-                    : 0.62,
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+                    ? 0.16
+                    : 0.48,
+                padding: const EdgeInsets.fromLTRB(18, 20, 18, 20),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      height: 52,
-                      width: 52,
+                      height: 44,
+                      width: 44,
                       decoration: BoxDecoration(
-                        color: palette.surfaceSubtle,
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(color: palette.border),
+                        shape: BoxShape.circle,
+                        color: palette.iconPrimary.withOpacity(0.12),
                       ),
                       alignment: Alignment.center,
                       child: Icon(
                         Icons.event_available,
                         color: palette.iconPrimary,
-                        size: 28,
+                        size: 22,
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 14),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,16 +139,15 @@ class EventsPage extends StatelessWidget {
                           Text(
                             tr(AppText.eventsTitle),
                             style: theme.textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: -0.2,
+                              fontWeight: FontWeight.w600,
+                              letterSpacing: -0.1,
                             ),
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height: 4),
                           Text(
                             tr(AppText.eventsSubtitle),
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: palette.textSecondary,
-                              height: 1.4,
                             ),
                           ),
                         ],
@@ -80,7 +156,7 @@ class EventsPage extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               for (final event in _events) ...[
                 _EventCard(event: event, locale: locale),
                 const SizedBox(height: 18),
@@ -96,7 +172,7 @@ class EventsPage extends StatelessWidget {
 class _EventCard extends StatelessWidget {
   const _EventCard({required this.event, required this.locale});
 
-  final _Event event;
+  final CulturalEvent event;
   final Locale locale;
 
   @override
@@ -107,59 +183,84 @@ class _EventCard extends StatelessWidget {
     final pills = <Widget>[
       _EventPill(icon: _modeIcon(event.mode), label: modeLabel),
       ...event.tags.map(
-        (tag) =>
-            _EventPill(label: tag.resolve(locale), icon: Icons.label_outline),
+        (tag) => _EventPill(
+          label: tag.resolve(locale),
+          icon: Icons.label_outline,
+        ),
       ),
     ];
 
-    final borderRadius = BorderRadius.circular(26);
-    final Color surfaceTint = palette.surfaceBright.withValues(
-      alpha: theme.brightness == Brightness.dark ? 0.52 : 0.68,
-    );
+    final borderRadius = BorderRadius.circular(22);
 
     void _handleAction() {
-      final messenger = ScaffoldMessenger.of(context);
-      messenger
-        ..hideCurrentSnackBar()
-        ..showSnackBar(
-          SnackBar(
-            content: Text(event.ctaNote.resolve(locale)),
-          ),
-        );
+      // TODO: Implement interest toggle logic with controller
+      // Removed SnackBar to prevent off-screen presentation errors
     }
 
-    return ClipRRect(
-      borderRadius: borderRadius,
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: event.backgroundColors,
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
-            ),
-          ),
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-              child: Container(color: surfaceTint),
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: palette.border.withValues(alpha: 0.35),
-              ),
-              borderRadius: borderRadius,
-            ),
-            padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+    return Container(
+      decoration: BoxDecoration(
+        color: palette.surfaceSubtle.withOpacity(theme.brightness == Brightness.dark ? 0.18 : 0.32),
+        borderRadius: borderRadius,
+      ),
+      child: ClipRRect(
+        borderRadius: borderRadius,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+                if (event.hostName != null) ...[
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 16,
+                        backgroundColor: palette.surfaceSubtle,
+                        child: Icon(
+                          Icons.groups,
+                          size: 16,
+                          color: palette.iconPrimary,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          event.hostName!,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: palette.textPrimary,
+                          ),
+                        ),
+                      ),
+                      if (event.isHostVerified)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.primary.withOpacity(0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.verified,
+                                size: 14,
+                                color: theme.colorScheme.primary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Verified',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                ],
                 Text(
                   event.title.resolve(locale),
                   style: theme.textTheme.titleMedium?.copyWith(
@@ -227,22 +328,61 @@ class _EventCard extends StatelessWidget {
                 ],
                 const SizedBox(height: 18),
                 Wrap(spacing: 10, runSpacing: 10, children: pills),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton.icon(
-                    onPressed: _handleAction,
-                    icon: const Icon(Icons.event_available_outlined),
-                    label: Text(event.ctaLabel.resolve(locale)),
-                    style: FilledButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                  ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    if (event.interestedCount > 0) ...[
+                      Icon(
+                        Icons.people_outline,
+                        size: 16,
+                        color: palette.iconPrimary,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        '${event.interestedCount} interested',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: palette.textSecondary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
-              ],
-            ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton.tonalIcon(
+                        onPressed: _handleAction,
+                        icon: Icon(
+                          event.isUserInterested
+                              ? Icons.star
+                              : Icons.star_border,
+                        ),
+                        label: Text(
+                          event.isUserInterested ? 'Interested' : 'Mark Interested',
+                        ),
+                        style: FilledButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    if (event.isUserInterested && event.isHostVerified) ...[
+                      IconButton(
+                        onPressed: _handleAction,
+                        icon: const Icon(Icons.info_outline),
+                        tooltip: 'Event details',
+                        style: IconButton.styleFrom(
+                          backgroundColor: palette.surfaceSubtle.withOpacity(0.5),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -260,24 +400,23 @@ class _EventPill extends StatelessWidget {
     final palette = context.thalaPalette;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
-        color: palette.surfaceSubtle.withValues(alpha: 0.8),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: palette.border.withValues(alpha: 0.6)),
+        color: palette.surfaceSubtle.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 16, color: palette.iconPrimary),
+            Icon(icon, size: 15, color: palette.iconPrimary.withOpacity(0.8)),
             const SizedBox(width: 6),
           ],
           Text(
             label,
             style: theme.textTheme.labelMedium?.copyWith(
               color: palette.textSecondary,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -286,162 +425,24 @@ class _EventPill extends StatelessWidget {
   }
 }
 
-enum _EventMode { inPerson, online, hybrid }
-
-IconData _modeIcon(_EventMode mode) {
+IconData _modeIcon(CulturalEventMode mode) {
   switch (mode) {
-    case _EventMode.inPerson:
+    case CulturalEventMode.inPerson:
       return Icons.groups_2_outlined;
-    case _EventMode.online:
+    case CulturalEventMode.online:
       return Icons.wifi_tethering;
-    case _EventMode.hybrid:
+    case CulturalEventMode.hybrid:
       return Icons.hub_outlined;
   }
 }
 
-String _modeLabel(BuildContext context, _EventMode mode) {
+String _modeLabel(BuildContext context, CulturalEventMode mode) {
   switch (mode) {
-    case _EventMode.inPerson:
+    case CulturalEventMode.inPerson:
       return AppTranslations.of(context, AppText.eventsInPersonLabel);
-    case _EventMode.online:
+    case CulturalEventMode.online:
       return AppTranslations.of(context, AppText.eventsOnlineLabel);
-    case _EventMode.hybrid:
+    case CulturalEventMode.hybrid:
       return AppTranslations.of(context, AppText.eventsHybridLabel);
   }
 }
-
-class _Event {
-  const _Event({
-    required this.id,
-    required this.title,
-    required this.dateLabel,
-    required this.location,
-    required this.description,
-    required this.mode,
-    required this.ctaLabel,
-    required this.ctaNote,
-    required this.backgroundColors,
-    this.additionalDetail,
-    this.tags = const <LocalizedText>[],
-  });
-
-  final String id;
-  final LocalizedText title;
-  final LocalizedText dateLabel;
-  final LocalizedText location;
-  final LocalizedText description;
-  final LocalizedText ctaLabel;
-  final LocalizedText ctaNote;
-  final LocalizedText? additionalDetail;
-  final _EventMode mode;
-  final List<LocalizedText> tags;
-  final List<Color> backgroundColors;
-}
-
-const List<_Event> _events = <_Event>[
-  _Event(
-    id: 'agadir-film-night',
-    title: LocalizedText(
-      en: 'Agadir Amazigh Film Night',
-      fr: 'Soirée cinéma amazighe à Agadir',
-    ),
-    dateLabel: LocalizedText(
-      en: 'March 23, 2024 · 19:00',
-      fr: '23 mars 2024 · 19 h 00',
-    ),
-    location: LocalizedText(en: 'Agadir, Morocco', fr: 'Agadir, Maroc'),
-    description: LocalizedText(
-      en: 'Screenings of shorts celebrating Amazigh storytellers followed by a Q&A with local directors.',
-      fr: 'Projection de courts métrages mettant en lumière des conteurs amazighs, suivie d’une discussion avec des réalisateurs locaux.',
-    ),
-    additionalDetail: LocalizedText(
-      en: 'Hosted at Dar Lfenn. Doors open at 18:30. Seats are limited—RSVP required.',
-      fr: 'Organisé à Dar Lfenn. Ouverture des portes à 18 h 30. Places limitées : réservation obligatoire.',
-    ),
-    mode: _EventMode.inPerson,
-    ctaLabel: LocalizedText(en: 'Reserve a seat', fr: 'Réserver une place'),
-    ctaNote: LocalizedText(
-      en: 'We will follow up with availability details for Agadir Amazigh Film Night.',
-      fr: 'Nous vous contacterons avec les détails de disponibilité pour la soirée cinéma amazighe d’Agadir.',
-    ),
-    backgroundColors: <Color>[
-      Color(0xFF2A1B4A),
-      Color(0xFF36254F),
-      Color(0xFF4B2C6B),
-    ],
-    tags: <LocalizedText>[
-      LocalizedText(en: 'Cinema', fr: 'Cinéma'),
-      LocalizedText(en: 'Community', fr: 'Communauté'),
-    ],
-  ),
-  _Event(
-    id: 'language-lab-livestream',
-    title: LocalizedText(
-      en: 'Amazigh Language Lab Livestream',
-      fr: 'Laboratoire de langue amazighe en direct',
-    ),
-    dateLabel: LocalizedText(
-      en: 'April 5, 2024 · 16:00 GMT',
-      fr: '5 avril 2024 · 16 h 00 GMT',
-    ),
-    location: LocalizedText(en: 'Online broadcast', fr: 'Diffusion en ligne'),
-    description: LocalizedText(
-      en: 'Interactive session on new teaching tools for Tamazight educators, streamed with live captions.',
-      fr: 'Session interactive sur les nouveaux outils pédagogiques pour les enseignants de tamazight, diffusée avec sous-titres en direct.',
-    ),
-    additionalDetail: LocalizedText(
-      en: 'Featuring guests from the Kabylia Language Cooperative and the Atlas Cultural Lab.',
-      fr: 'Avec la participation de la Coopérative linguistique kabyle et du Laboratoire culturel de l’Atlas.',
-    ),
-    mode: _EventMode.online,
-    ctaLabel: LocalizedText(en: 'Get streaming link', fr: 'Recevoir le lien'),
-    ctaNote: LocalizedText(
-      en: 'We will email the livestream link 24 hours before the Language Lab session.',
-      fr: 'Nous enverrons le lien de diffusion 24 heures avant la session du Laboratoire de langue.',
-    ),
-    backgroundColors: <Color>[
-      Color(0xFF0F2027),
-      Color(0xFF203A43),
-      Color(0xFF2C5364),
-    ],
-    tags: <LocalizedText>[
-      LocalizedText(en: 'Education', fr: 'Éducation'),
-      LocalizedText(en: 'Livestream', fr: 'Diffusion en direct'),
-    ],
-  ),
-  _Event(
-    id: 'montreal-tifawin-week',
-    title: LocalizedText(
-      en: 'Tifawin Cultural Week',
-      fr: 'Semaine culturelle Tifawin',
-    ),
-    dateLabel: LocalizedText(en: 'April 18–21, 2024', fr: '18–21 avril 2024'),
-    location: LocalizedText(
-      en: 'Montreal & online sessions',
-      fr: 'Montréal et sessions en ligne',
-    ),
-    description: LocalizedText(
-      en: 'Four days of talks, culinary workshops, and live music bridging Amazigh communities and allies.',
-      fr: 'Quatre jours de conférences, d’ateliers culinaires et de concerts rapprochant communautés amazighes et alliés.',
-    ),
-    additionalDetail: LocalizedText(
-      en: 'Hybrid program with limited in-person passes and open virtual circles each evening.',
-      fr: 'Programme hybride avec places limitées sur site et cercles virtuels ouverts chaque soir.',
-    ),
-    mode: _EventMode.hybrid,
-    ctaLabel: LocalizedText(en: 'Join the program', fr: 'Participer au programme'),
-    ctaNote: LocalizedText(
-      en: 'Hybrid access links and venue passes will be delivered after confirmation.',
-      fr: 'Les liens d’accès hybrides et les laissez-passer seront envoyés après confirmation.',
-    ),
-    backgroundColors: <Color>[
-      Color(0xFF42275A),
-      Color(0xFF734B6D),
-      Color(0xFF8F6B8F),
-    ],
-    tags: <LocalizedText>[
-      LocalizedText(en: 'Festival', fr: 'Festival'),
-      LocalizedText(en: 'Heritage', fr: 'Patrimoine'),
-    ],
-  ),
-];

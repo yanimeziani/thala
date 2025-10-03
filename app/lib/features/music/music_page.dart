@@ -7,8 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:provider/provider.dart';
 
-import '../../data/sample_tracks.dart';
+import '../../app/app_theme.dart';
+import '../../controllers/music_library.dart';
 import '../../l10n/app_translations.dart';
 import '../../models/music_track.dart';
 import '../../ui/widgets/section_header.dart';
@@ -86,24 +88,50 @@ class _MusicPageState extends State<MusicPage>
 
   @override
   Widget build(BuildContext context) {
-    final tracks = sampleTracks;
+    final library = context.watch<MusicLibrary>();
+    final tracks = library.tracks;
     String tr(AppText key) => AppTranslations.of(context, key);
     final title = tr(AppText.musicTitle);
     final subtitle = tr(AppText.musicSubtitle);
     final nowPlayingLabel = tr(AppText.musicNowPlaying);
     final loadingLabel = tr(AppText.musicLoading);
-    MusicTrack? activeTrack;
-    if (_activeTrackId != null) {
-      try {
-        activeTrack = tracks.firstWhere((track) => track.id == _activeTrackId);
-      } catch (_) {
-        activeTrack = null;
-      }
-    }
+    final activeTrack = library.trackById(_activeTrackId);
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final visualEnergy = _energyFromTime(_time);
+
+    if (library.isLoading && tracks.isEmpty) {
+      return const Scaffold(
+        extendBody: true,
+        backgroundColor: Colors.transparent,
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (tracks.isEmpty) {
+      final palette = context.thalaPalette;
+      final message = library.error ??
+          'No tracks available yet. Add music via Supabase to energise this space.';
+      return Scaffold(
+        extendBody: true,
+        backgroundColor: Colors.transparent,
+        body: ThalaPageBackground(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32.0),
+              child: Text(
+                message,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: palette.textSecondary,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       extendBody: true,
@@ -123,25 +151,25 @@ class _MusicPageState extends State<MusicPage>
                     children: [
                       ThalaGlassSurface(
                         enableBorder: false,
-                        cornerRadius: 28,
+                        cornerRadius: 24,
                         backgroundOpacity: theme.brightness == Brightness.dark
-                            ? 0.26
-                            : 0.62,
-                        padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+                            ? 0.18
+                            : 0.48,
+                        padding: const EdgeInsets.fromLTRB(18, 20, 18, 18),
                         child: SectionHeader(
                           leading: const _MusicGlyph(),
                           title: Text(title),
                           subtitle: Text(subtitle),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 16),
                       ThalaGlassSurface(
                         enableBorder: false,
-                        cornerRadius: 28,
+                        cornerRadius: 24,
                         backgroundOpacity: theme.brightness == Brightness.dark
-                            ? 0.22
-                            : 0.4,
-                        padding: const EdgeInsets.all(12),
+                            ? 0.16
+                            : 0.32,
+                        padding: const EdgeInsets.all(10),
                         child: _MusicVisualizer(
                           program: _program,
                           shaderError: _shaderError,
@@ -149,7 +177,7 @@ class _MusicPageState extends State<MusicPage>
                           energyLevel: visualEnergy,
                         ),
                       ),
-                      if (_activeTrackId != null)
+                      if (_activeTrackId != null && activeTrack != null)
                         Padding(
                           padding: const EdgeInsets.only(top: 16),
                           child: ThalaGlassSurface(
@@ -344,17 +372,14 @@ class _MusicGlyph extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final accent = colorScheme.secondary;
     return Container(
-      height: 48,
-      width: 48,
+      height: 44,
+      width: 44,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: accent.withOpacity(0.36)),
-        color: accent.withOpacity(
-          colorScheme.brightness == Brightness.dark ? 0.22 : 0.18,
-        ),
+        shape: BoxShape.circle,
+        color: accent.withOpacity(0.14),
       ),
       alignment: Alignment.center,
-      child: Icon(Icons.graphic_eq, color: accent),
+      child: Icon(Icons.graphic_eq, color: accent, size: 22),
     );
   }
 }
@@ -490,43 +515,44 @@ class _TrackTile extends StatelessWidget {
 
     return ThalaGlassSurface(
       enableBorder: false,
-      cornerRadius: 24,
-      backgroundOpacity: isActive ? 0.42 : 0.28,
+      cornerRadius: 20,
+      backgroundOpacity: isActive ? 0.32 : 0.18,
       padding: EdgeInsets.zero,
       child: Material(
         type: MaterialType.transparency,
         child: InkWell(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(20),
           onTap: () {
             HapticFeedback.selectionClick();
             onPressed();
           },
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.all(14),
             child: Row(
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(12),
                   child: SizedBox(
-                    width: 60,
-                    height: 60,
+                    width: 56,
+                    height: 56,
                     child: Image.network(
                       track.artworkUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
-                          color: colorScheme.surfaceVariant,
+                          color: colorScheme.surfaceVariant.withOpacity(0.3),
                           alignment: Alignment.center,
                           child: Icon(
                             Icons.music_note,
                             color: colorScheme.onSurfaceVariant,
+                            size: 24,
                           ),
                         );
                       },
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -535,82 +561,44 @@ class _TrackTile extends StatelessWidget {
                         track.title,
                         style: theme.textTheme.titleMedium?.copyWith(
                           color: colorScheme.onSurface,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 3),
                       Text(
                         track.artist,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Container(
-                        height: 6,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              accent.withOpacity(0.85),
-                              accent.withOpacity(0.25),
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(999),
+                          color: colorScheme.onSurfaceVariant.withOpacity(0.75),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      _formatDuration(track.duration),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant,
-                        fontFeatures: const [ui.FontFeature.tabularFigures()],
-                      ),
+                const SizedBox(width: 12),
+                if (isLoading)
+                  SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(accent),
                     ),
-                    const SizedBox(height: 8),
-                    if (isLoading)
-                      SizedBox(
-                        width: 22,
-                        height: 22,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            colorScheme.secondary,
-                          ),
-                        ),
-                      )
-                    else
-                      IconButton(
-                        iconSize: 30,
-                        splashRadius: 24,
-                        tooltip: isPlaying ? pauseLabel : playLabel,
-                        onPressed: () {
-                          HapticFeedback.selectionClick();
-                          onPressed();
-                        },
-                        icon: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 220),
-                          transitionBuilder: (child, animation) =>
-                              ScaleTransition(scale: animation, child: child),
-                          child: Icon(
-                            isPlaying
-                                ? Icons.pause_circle_filled_rounded
-                                : Icons.play_circle_filled_rounded,
-                            key: ValueKey<bool>(isPlaying),
-                            color: accent,
-                            size: 32,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
+                  )
+                else
+                  IconButton(
+                    iconSize: 28,
+                    splashRadius: 20,
+                    tooltip: isPlaying ? pauseLabel : playLabel,
+                    onPressed: () {
+                      HapticFeedback.selectionClick();
+                      onPressed();
+                    },
+                    icon: Icon(
+                      isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
+                      color: accent,
+                      size: 28,
+                    ),
+                  ),
               ],
             ),
           ),

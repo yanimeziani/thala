@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:share_plus/share_plus.dart';
@@ -12,7 +13,7 @@ import '../../../app/app_theme.dart';
 import '../../../controllers/auth_controller.dart';
 import '../../../controllers/feed_controller.dart';
 import '../../../data/effect_presets.dart';
-import '../../../data/sample_tracks.dart';
+import '../../../controllers/music_library.dart';
 import '../../../l10n/app_translations.dart';
 import '../../../models/video_effect.dart';
 import '../../../models/music_track.dart';
@@ -67,22 +68,36 @@ class _VideoStoryPageState extends State<VideoStoryPage>
     super.initState();
     _likeAnimationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 640),
+      duration: const Duration(milliseconds: 800),
     );
     _likeScaleAnimation = TweenSequence<double>([
       TweenSequenceItem<double>(
         tween: Tween<double>(
-          begin: 0.7,
-          end: 1.08,
+          begin: 0.5,
+          end: 1.25,
         ).chain(CurveTween(curve: Curves.easeOutBack)),
-        weight: 60,
+        weight: 45,
       ),
       TweenSequenceItem<double>(
         tween: Tween<double>(
-          begin: 1.08,
+          begin: 1.25,
+          end: 0.95,
+        ).chain(CurveTween(curve: Curves.easeInOutCubic)),
+        weight: 20,
+      ),
+      TweenSequenceItem<double>(
+        tween: Tween<double>(
+          begin: 0.95,
+          end: 1.05,
+        ).chain(CurveTween(curve: Curves.easeInOutCubic)),
+        weight: 15,
+      ),
+      TweenSequenceItem<double>(
+        tween: Tween<double>(
+          begin: 1.05,
           end: 1.0,
-        ).chain(CurveTween(curve: Curves.easeIn)),
-        weight: 40,
+        ).chain(CurveTween(curve: Curves.easeOut)),
+        weight: 20,
       ),
     ]).animate(_likeAnimationController);
     _likeOpacityAnimation = TweenSequence<double>([
@@ -90,16 +105,16 @@ class _VideoStoryPageState extends State<VideoStoryPage>
         tween: Tween<double>(
           begin: 0.0,
           end: 1.0,
-        ).chain(CurveTween(curve: Curves.easeOut)),
-        weight: 35,
+        ).chain(CurveTween(curve: Curves.easeOutCubic)),
+        weight: 25,
       ),
-      TweenSequenceItem<double>(tween: ConstantTween<double>(1.0), weight: 30),
+      TweenSequenceItem<double>(tween: ConstantTween<double>(1.0), weight: 45),
       TweenSequenceItem<double>(
         tween: Tween<double>(
           begin: 1.0,
           end: 0.0,
-        ).chain(CurveTween(curve: Curves.easeIn)),
-        weight: 35,
+        ).chain(CurveTween(curve: Curves.easeInCubic)),
+        weight: 30,
       ),
     ]).animate(_likeAnimationController);
     _sharePulseController = AnimationController(
@@ -427,7 +442,16 @@ class _VideoStoryPageState extends State<VideoStoryPage>
 
   void _handleDoubleTap(FeedController feed, bool isLiked) {
     _likeAnimationController.forward(from: 0);
+
+    // Addictive haptic sequence
     HapticFeedback.mediumImpact();
+    Future.delayed(const Duration(milliseconds: 100), () {
+      HapticFeedback.lightImpact();
+    });
+    Future.delayed(const Duration(milliseconds: 200), () {
+      HapticFeedback.lightImpact();
+    });
+
     if (feed.isBusy(widget.post.id) || isLiked) {
       return;
     }
@@ -1042,10 +1066,8 @@ class _VideoStoryBackground extends StatelessWidget {
         effect: effect,
       );
     }
-    if (post.isImage) {
-      return _ImageMediaBackground(post: post);
-    }
-    return _PostMediaBackground(post: post, locale: locale);
+    // Only support video and image carousel - no text-only posts
+    return _ImageMediaBackground(post: post);
   }
 }
 
@@ -1298,28 +1320,41 @@ class _ImageMediaBackgroundState extends State<_ImageMediaBackground> {
                             ? _buildMediaImage(activeImage, fit: BoxFit.cover)
                             : const ColoredBox(color: Colors.black),
                       )
-                    : PageView.builder(
-                        controller: _pageController,
-                        physics: const BouncingScrollPhysics(),
-                        onPageChanged: (index) {
-                          setState(() => _currentIndex = index);
-                        },
-                        itemCount: _gallery.length,
-                        itemBuilder: (context, index) {
-                          final imageUrl = _gallery[index];
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 6),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(
-                                frame.borderRadius,
-                              ),
-                              child: _buildMediaImage(
-                                imageUrl,
-                                fit: BoxFit.cover,
-                              ),
+                    : Stack(
+                        children: [
+                          PageView.builder(
+                            controller: _pageController,
+                            physics: const ClampingScrollPhysics(),
+                            onPageChanged: (index) {
+                              setState(() => _currentIndex = index);
+                            },
+                            itemCount: _gallery.length,
+                            itemBuilder: (context, index) {
+                              final imageUrl = _gallery[index];
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 4),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(
+                                    frame.borderRadius,
+                                  ),
+                                  child: _buildMediaImage(
+                                    imageUrl,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                          Positioned(
+                            bottom: 12,
+                            left: 0,
+                            right: 0,
+                            child: _CarouselIndicator(
+                              count: _gallery.length,
+                              currentIndex: _currentIndex,
                             ),
-                          );
-                        },
+                          ),
+                        ],
                       ),
               ),
             ),
@@ -1361,7 +1396,7 @@ class _ImageMediaBackgroundState extends State<_ImageMediaBackground> {
     if (image != null && image.trim().isNotEmpty) {
       return image;
     }
-    final MusicTrack? track = trackForId(post.musicTrackId);
+    final MusicTrack? track = context.read<MusicLibrary>().trackById(post.musicTrackId);
     final String? artwork = track?.artworkUrl;
     if (artwork != null && artwork.trim().isNotEmpty) {
       return artwork;
@@ -1416,7 +1451,7 @@ class _PostMediaBackgroundState extends State<_PostMediaBackground> {
         .toList(growable: false);
     final bool hasSlides = slides.isNotEmpty;
 
-    final MusicTrack? track = trackForId(post.musicTrackId);
+    final MusicTrack? track = context.read<MusicLibrary>().trackById(post.musicTrackId);
     final String? baseBackdrop = _firstNonEmpty([
       post.thumbnailUrl,
       post.imageUrl,
@@ -1980,32 +2015,158 @@ class _BottomBlend extends StatelessWidget {
   }
 }
 
-class _LikeHeart extends StatelessWidget {
+class _LikeHeart extends StatefulWidget {
   const _LikeHeart({required this.size, required this.accentColor});
 
   final double size;
   final Color accentColor;
 
   @override
+  State<_LikeHeart> createState() => _LikeHeartState();
+}
+
+class _LikeHeartState extends State<_LikeHeart>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _rippleController;
+  late Animation<double> _rippleScale;
+  late Animation<double> _rippleOpacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _rippleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    );
+    _rippleScale = Tween<double>(begin: 0.5, end: 2.5).animate(
+      CurvedAnimation(parent: _rippleController, curve: Curves.easeOut),
+    );
+    _rippleOpacity = Tween<double>(begin: 0.8, end: 0.0).animate(
+      CurvedAnimation(parent: _rippleController, curve: Curves.easeOut),
+    );
+    _rippleController.forward();
+  }
+
+  @override
+  void dispose() {
+    _rippleController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final Color strokeColor = Colors.white.withOpacity(0.55);
 
     return SizedBox(
-      width: size,
-      height: size,
+      width: widget.size * 2,
+      height: widget.size * 2,
       child: Stack(
-        fit: StackFit.expand,
+        alignment: Alignment.center,
         children: [
-          CustomPaint(painter: _HeartFillPainter(fillColor: accentColor)),
-          CustomPaint(
-            painter: _HeartStrokePainter(
-              color: strokeColor,
-              strokeWidth: size * 0.045,
+          // Ripple wave effect
+          AnimatedBuilder(
+            animation: _rippleController,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: _rippleScale.value,
+                child: Opacity(
+                  opacity: _rippleOpacity.value,
+                  child: Container(
+                    width: widget.size,
+                    height: widget.size,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: widget.accentColor,
+                        width: 3,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+          // Particle burst effects
+          ...List.generate(8, (index) {
+            final angle = (index * 3.14159 * 2) / 8;
+            return AnimatedBuilder(
+              animation: _rippleController,
+              builder: (context, child) {
+                final distance = _rippleScale.value * widget.size * 0.6;
+                return Transform.translate(
+                  offset: Offset(
+                    distance * cos(angle),
+                    distance * sin(angle),
+                  ),
+                  child: Opacity(
+                    opacity: _rippleOpacity.value,
+                    child: Container(
+                      width: 6,
+                      height: 6,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: widget.accentColor,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          }),
+          // Main heart
+          SizedBox(
+            width: widget.size,
+            height: widget.size,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                CustomPaint(
+                    painter: _HeartFillPainter(fillColor: widget.accentColor)),
+                CustomPaint(
+                  painter: _HeartStrokePainter(
+                    color: strokeColor,
+                    strokeWidth: widget.size * 0.045,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
+  }
+}
+
+double cos(double radians) => radians.cosine();
+double sin(double radians) => radians.sine();
+
+extension on double {
+  double cosine() {
+    return (this * 180 / 3.14159).cosineFromDegrees();
+  }
+
+  double sine() {
+    return (this * 180 / 3.14159).sineFromDegrees();
+  }
+
+  double cosineFromDegrees() {
+    final rad = this * 3.14159 / 180;
+    return _cos(rad);
+  }
+
+  double sineFromDegrees() {
+    final rad = this * 3.14159 / 180;
+    return _sin(rad);
+  }
+
+  double _cos(double x) {
+    // Taylor series approximation
+    return 1 - (x * x) / 2 + (x * x * x * x) / 24;
+  }
+
+  double _sin(double x) {
+    // Taylor series approximation
+    return x - (x * x * x) / 6 + (x * x * x * x * x) / 120;
   }
 }
 
@@ -2196,10 +2357,6 @@ class _MuteToggleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final bool isDark = theme.brightness == Brightness.dark;
-    final Color background = Colors.black.withOpacity(isDark ? 0.45 : 0.55);
-    final Color borderColor = Colors.white.withOpacity(0.18);
     final IconData icon = isMuted ? Icons.volume_off : Icons.volume_up;
     final String tooltipMessage = isMuted
         ? AppTranslations.of(context, AppText.feedUnmute)
@@ -2212,18 +2369,17 @@ class _MuteToggleButton extends StatelessWidget {
         message: tooltipMessage,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            color: background,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: borderColor),
+            color: Colors.black.withOpacity(0.32),
+            shape: BoxShape.circle,
           ),
           child: Material(
             color: Colors.transparent,
             child: InkWell(
               onTap: onPressed,
-              borderRadius: BorderRadius.circular(24),
+              customBorder: const CircleBorder(),
               child: Padding(
                 padding: const EdgeInsets.all(10),
-                child: Icon(icon, color: Colors.white, size: 24),
+                child: Icon(icon, color: Colors.white, size: 22),
               ),
             ),
           ),
@@ -2248,20 +2404,10 @@ class _StoryDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final MusicTrack? track = trackForId(post.musicTrackId);
+    final MusicTrack? track = context.read<MusicLibrary>().trackById(post.musicTrackId);
     final String name = post.creatorName.resolve(locale);
-    final String title = post.title.resolve(locale);
-    final String description = post.description.resolve(locale);
-    final String location = post.location.resolve(locale);
-
-    final bool hasDescription = description.trim().isNotEmpty;
-    final bool hasLocation = location.trim().isNotEmpty;
-    final bool hasTags = post.tags.isNotEmpty;
-    final bool hasExplanation = explanations.isNotEmpty;
 
     final Color primaryText = Colors.white;
-    final Color secondaryText = Colors.white.withOpacity(0.78);
     final Color mutedText = Colors.white.withOpacity(0.6);
 
     final List<Widget> children = <Widget>[
@@ -2272,86 +2418,12 @@ class _StoryDetails extends StatelessWidget {
         textColor: primaryText,
         subtleColor: mutedText,
       ),
-      const SizedBox(height: 8),
-      Text(
-        title,
-        maxLines: dense ? 2 : 3,
-        overflow: TextOverflow.ellipsis,
-        style: theme.textTheme.headlineSmall?.copyWith(
-          color: primaryText,
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.3,
-        ),
-      ),
     ];
-
-    if (hasDescription) {
-      children
-        ..add(const SizedBox(height: 8))
-        ..add(
-          Text(
-            description,
-            maxLines: dense ? 3 : 4,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              color: secondaryText,
-              height: 1.5,
-            ),
-          ),
-        );
-    }
 
     if (track != null) {
       children
-        ..add(const SizedBox(height: 10))
+        ..add(const SizedBox(height: 8))
         ..add(_StoryMusicPill(track: track, dense: dense));
-    }
-
-    if (hasLocation) {
-      children
-        ..add(const SizedBox(height: 12))
-        ..add(
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Icon(Icons.place_outlined, size: 18, color: Colors.white70),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  location,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: mutedText,
-                    letterSpacing: 0.2,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-    }
-
-    if (hasTags) {
-      children
-        ..add(const SizedBox(height: 12))
-        ..add(
-          _TagWrap(
-            values: post.tags,
-            color: Colors.white.withOpacity(0.08),
-            borderColor: Colors.white.withOpacity(0.18),
-            textStyle: theme.textTheme.labelMedium?.copyWith(
-              color: primaryText,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        );
-    }
-
-    if (hasExplanation) {
-      children
-        ..add(const SizedBox(height: 10))
-        ..add(_ExplanationWrap(values: explanations));
     }
 
     return Column(
@@ -2566,49 +2638,71 @@ class _VideoStoryActionRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final bool isDark = theme.brightness == Brightness.dark;
-    final Color background = Colors.black.withOpacity(isDark ? 0.45 : 0.55);
-    final Color borderColor = Colors.white.withOpacity(0.18);
+    final shouldUseLiquidGlass = !kIsWeb && (defaultTargetPlatform == TargetPlatform.iOS || defaultTargetPlatform == TargetPlatform.android);
+
+    Widget railContent = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 14),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _VideoStoryRailButton(
+            icon: isLiked ? Icons.favorite : Icons.favorite_border,
+            label: _formatCount(likes),
+            highlighted: isLiked,
+            busy: likeBusy,
+            onPressed: onLike,
+          ),
+          const SizedBox(height: 12),
+          _VideoStoryRailButton(
+            icon: Icons.chat_bubble_outline,
+            label: _formatCount(comments),
+            highlighted: false,
+            busy: commentBusy,
+            onPressed: onComment,
+          ),
+          const SizedBox(height: 12),
+          _VideoStoryRailButton(
+            icon: Icons.share,
+            label: _formatCount(shares),
+            highlighted: false,
+            busy: shareBusy,
+            onPressed: onShare,
+            scaleAnimation: sharePulseScale,
+            glowAnimation: sharePulseGlow,
+          ),
+        ],
+      ),
+    );
+
+    if (shouldUseLiquidGlass) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: LiquidGlass(
+          glassContainsChild: false,
+          shape: const LiquidRoundedSuperellipse(borderRadius: Radius.circular(24)),
+          settings: const LiquidGlassSettings(
+            thickness: 8,
+            blur: 18,
+            glassColor: Color(0x22FFFFFF),
+            lightIntensity: 1.2,
+            ambientStrength: 0.48,
+            blend: 32,
+            saturation: 1.04,
+            lightness: 1.02,
+          ),
+          child: railContent,
+        ),
+      );
+    }
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(24),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         decoration: BoxDecoration(
-          color: background,
+          color: Colors.black.withOpacity(0.42),
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: borderColor),
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _VideoStoryRailButton(
-              icon: isLiked ? Icons.favorite : Icons.favorite_border,
-              label: _formatCount(likes),
-              highlighted: isLiked,
-              busy: likeBusy,
-              onPressed: onLike,
-            ),
-            const SizedBox(height: 14),
-            _VideoStoryRailButton(
-              icon: Icons.chat_bubble_outline,
-              label: _formatCount(comments),
-              highlighted: false,
-              busy: commentBusy,
-              onPressed: onComment,
-            ),
-            const SizedBox(height: 14),
-            _VideoStoryRailButton(
-              icon: Icons.share,
-              label: _formatCount(shares),
-              highlighted: false,
-              busy: shareBusy,
-              onPressed: onShare,
-              scaleAnimation: sharePulseScale,
-              glowAnimation: sharePulseGlow,
-            ),
-          ],
-        ),
+        child: railContent,
       ),
     );
   }
@@ -2786,6 +2880,42 @@ class _CenterPlayIndicator extends StatelessWidget {
 }
 
 enum _ShareAction { copyLink }
+
+class _CarouselIndicator extends StatelessWidget {
+  const _CarouselIndicator({
+    required this.count,
+    required this.currentIndex,
+  });
+
+  final int count;
+  final int currentIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    if (count <= 1) return const SizedBox.shrink();
+
+    return Center(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(count, (index) {
+          final isActive = index == currentIndex;
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            margin: const EdgeInsets.symmetric(horizontal: 3),
+            width: isActive ? 24 : 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: isActive
+                ? Colors.white
+                : Colors.white.withOpacity(0.4),
+              borderRadius: BorderRadius.circular(3),
+            ),
+          );
+        }),
+      ),
+    );
+  }
+}
 
 String _formatCount(int value) {
   if (value >= 1000000) {

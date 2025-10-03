@@ -61,21 +61,22 @@ class _ProfilePageBody extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            isDark ? const Color(0xFF101010) : palette.surfaceBright,
-            isDark ? const Color(0xFF040404) : palette.surfaceDim,
+            isDark ? const Color(0xFF0A0A0A) : const Color(0xFFFAFAFA),
+            isDark ? const Color(0xFF000000) : const Color(0xFFF0F0F0),
           ],
         ),
       ),
       child: SafeArea(
         bottom: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 120),
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(24, 32, 24, 120),
           children: [
             _ProfileHeader(
               profile: profileController.profile,
               isLoading: profileController.isLoading,
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 48),
             _SettingsGroup(
               title: 'Account',
               children: [
@@ -302,99 +303,95 @@ class _ProfileHeader extends StatelessWidget {
     final bio = _clean(profile?.bio);
     final initial = _initialFor(profile);
 
-    return wrapWithGlass(
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      decoration: BoxDecoration(
+        color: palette.surfaceBright.withOpacity(theme.brightness == Brightness.dark ? 0.08 : 0.4),
+        borderRadius: BorderRadius.circular(32),
+      ),
+      padding: const EdgeInsets.all(24),
+      child: Column(
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                height: 56,
-                width: 56,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: theme.colorScheme.surface,
-                  border: Border.all(color: palette.border),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  initial,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: palette.textPrimary,
-                  ),
-                ),
+          Container(
+            height: 88,
+            width: 88,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  theme.colorScheme.primary.withOpacity(0.2),
+                  theme.colorScheme.secondary.withOpacity(0.2),
+                ],
               ),
-              const SizedBox(width: 18),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      displayName,
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        color: palette.textPrimary,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: -0.4,
-                      ),
-                    ),
-                    if (pronouns != null) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        pronouns,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: palette.textSecondary,
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 4),
-                    Text(
-                      email,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: palette.textSecondary,
-                      ),
-                    ),
-                  ],
-                ),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              initial,
+              style: theme.textTheme.headlineLarge?.copyWith(
+                fontSize: 36,
+                fontWeight: FontWeight.w300,
+                color: palette.textPrimary,
               ),
-            ],
+            ),
           ),
+          const SizedBox(height: 20),
+          Text(
+            displayName,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              color: palette.textPrimary,
+              fontWeight: FontWeight.w500,
+              letterSpacing: -0.5,
+            ),
+          ),
+          if (pronouns != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              pronouns,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: palette.textSecondary.withOpacity(0.7),
+                letterSpacing: 0.3,
+              ),
+            ),
+          ],
           if (community != null) ...[
             const SizedBox(height: 16),
-            Row(
-              children: [
-                const Icon(
-                  Icons.landscape_outlined,
-                  size: 18,
-                  color: Colors.orangeAccent,
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.location_on,
+                    size: 16,
+                    color: theme.colorScheme.primary,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
                     community,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: palette.textSecondary,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
           if (bio != null) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: 18),
             Text(
               bio,
+              textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: palette.textSecondary,
-                height: 1.4,
+                height: 1.5,
               ),
             ),
-          ],
-          if (isLoading && profile != null) ...[
-            const SizedBox(height: 12),
-            const LinearProgressIndicator(minHeight: 2),
           ],
         ],
       ),
@@ -451,30 +448,28 @@ class _SettingsGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final palette = context.thalaPalette;
-    final isDark = context.isDarkMode;
-    final blockColor = isDark ? palette.surfaceStrong : palette.surfaceBright;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: theme.textTheme.titleSmall?.copyWith(
-            color: palette.textSecondary,
-            letterSpacing: 0.2,
+        Padding(
+          padding: const EdgeInsets.only(left: 6, bottom: 12),
+          child: Text(
+            title.toUpperCase(),
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: palette.textSecondary.withOpacity(0.6),
+              letterSpacing: 1.2,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
-        const SizedBox(height: 12),
-        Material(
-          color: blockColor,
-          borderRadius: BorderRadius.circular(22),
+        Container(
+          decoration: BoxDecoration(
+            color: palette.surfaceBright.withOpacity(theme.brightness == Brightness.dark ? 0.06 : 0.3),
+            borderRadius: BorderRadius.circular(24),
+          ),
           child: Column(
-            children: [
-              for (var index = 0; index < children.length; index++)
-                _SettingsTileRow(
-                  tile: children[index],
-                  showDivider: index != children.length - 1,
-                ),
-            ],
+            children: children,
           ),
         ),
       ],
@@ -499,36 +494,58 @@ class _SettingsTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final palette = context.thalaPalette;
-    return ListTile(
-      onTap: onTap,
-      leading: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: theme.colorScheme.surface,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: palette.border),
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+          child: Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: theme.colorScheme.primary.withOpacity(0.08),
+                ),
+                alignment: Alignment.center,
+                child: Icon(icon, color: theme.colorScheme.primary, size: 20),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: palette.textPrimary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: palette.textSecondary.withOpacity(0.7),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(
+                Icons.arrow_forward_ios,
+                color: palette.iconMuted.withOpacity(0.4),
+                size: 14,
+              ),
+            ],
+          ),
         ),
-        alignment: Alignment.center,
-        child: Icon(icon, color: palette.iconPrimary, size: 22),
-      ),
-      title: Text(
-        title,
-        style: theme.textTheme.titleMedium?.copyWith(
-          color: palette.textPrimary,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-      subtitle: Text(
-        subtitle,
-        style: theme.textTheme.bodySmall?.copyWith(
-          color: palette.textSecondary,
-        ),
-      ),
-      trailing: Icon(
-        Icons.arrow_forward_ios,
-        color: palette.iconMuted,
-        size: 16,
       ),
     );
   }

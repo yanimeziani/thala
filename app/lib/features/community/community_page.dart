@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../app/app_theme.dart';
 import '../../controllers/auth_controller.dart';
+import '../../data/community_profiles_repository.dart';
 import '../../data/community_repository.dart';
 import '../../data/sample_community_profiles.dart';
 import '../../l10n/app_translations.dart';
@@ -21,29 +22,61 @@ class CommunityPage extends StatefulWidget {
 
 class _CommunityPageState extends State<CommunityPage> {
   late final PageController _pageController;
-  late final List<CommunityProfile> _profiles;
+  final CommunityProfilesRepository _profilesRepository =
+      CommunityProfilesRepository();
+  List<CommunityProfile> _profiles = const <CommunityProfile>[];
   final CommunityRepository _repository = CommunityRepository();
   final Set<String> _recordedCommunities = <String>{};
+  bool _isLoading = true;
+  String? _errorMessage;
   int _activeIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _profiles = List<CommunityProfile>.from(sampleCommunityProfiles)
-      ..sort((a, b) => b.priority.compareTo(a.priority));
     _pageController = PageController(viewportFraction: 0.88);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || _profiles.isEmpty) {
-        return;
-      }
-      _recordView(0);
-    });
+    _loadProfiles();
   }
 
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadProfiles() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final profiles = await _profilesRepository.fetchProfiles();
+      final sorted = List<CommunityProfile>.from(profiles)
+        ..sort((a, b) => b.priority.compareTo(a.priority));
+      setState(() {
+        _profiles = sorted;
+        _isLoading = false;
+        if (!_profilesRepository.isRemoteEnabled) {
+          _errorMessage = 'Supabase is not configured. Showing curated communities.';
+        }
+      });
+      if (sorted.isNotEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) {
+            return;
+          }
+          _recordView(0);
+        });
+      }
+    } catch (error, stackTrace) {
+      debugPrint('Failed to load community profiles: $error\n$stackTrace');
+      setState(() {
+        _profiles = const <CommunityProfile>[];
+        _isLoading = false;
+        _errorMessage = 'Unable to load community profiles.';
+      });
+    }
   }
 
   void _recordView(int index) {
@@ -143,12 +176,19 @@ class _CommunityPageState extends State<CommunityPage> {
     final theme = Theme.of(context);
     final palette = context.thalaPalette;
 
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     if (_profiles.isEmpty) {
       return Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         body: Center(
           child: Text(
-            AppTranslations.of(context, AppText.communityEmpty),
+            _errorMessage ?? AppTranslations.of(context, AppText.communityEmpty),
             style: theme.textTheme.bodyLarge,
           ),
         ),
@@ -244,13 +284,14 @@ class _CommunityHeader extends StatelessWidget {
     final title = AppTranslations.of(context, AppText.communityTab);
 
     return ThalaGlassSurface(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      cornerRadius: 28,
-      backgroundOpacity: theme.brightness == Brightness.dark ? 0.22 : 0.68,
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+      cornerRadius: 24,
+      backgroundOpacity: theme.brightness == Brightness.dark ? 0.16 : 0.52,
+      enableBorder: false,
       child: Row(
         children: [
           ThalaLogo(
-            size: 48,
+            size: 42,
             fit: BoxFit.contain,
             semanticLabel: AppTranslations.of(context, AppText.appName),
           ),
@@ -262,23 +303,25 @@ class _CommunityHeader extends StatelessWidget {
                 Text(
                   title,
                   style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.2,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: -0.1,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 3),
                 Text(
                   AppTranslations.of(context, AppText.browseCommunities),
-                  style: theme.textTheme.bodySmall,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.textTheme.bodySmall?.color?.withOpacity(0.75),
+                  ),
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 6),
           IconButton(
             tooltip: AppTranslations.of(context, AppText.communityHostAction),
             onPressed: onHostRequest,
-            icon: const Icon(Icons.add_moderator_outlined),
+            icon: const Icon(Icons.add_moderator_outlined, size: 22),
           ),
         ],
       ),
@@ -323,31 +366,31 @@ class _CommunityCard extends StatelessWidget {
     return AnimatedPadding(
       duration: const Duration(milliseconds: 280),
       padding: EdgeInsets.only(
-        top: isActive ? 0 : 18,
-        bottom: 24,
-        left: isActive ? 0 : 8,
-        right: isActive ? 0 : 8,
+        top: isActive ? 0 : 14,
+        bottom: 20,
+        left: isActive ? 0 : 6,
+        right: isActive ? 0 : 6,
       ),
       child: AnimatedScale(
-        duration: const Duration(milliseconds: 320),
+        duration: const Duration(milliseconds: 280),
         curve: Curves.easeOutCubic,
-        scale: isActive ? 1.0 : 0.95,
+        scale: isActive ? 1.0 : 0.96,
         child: AnimatedOpacity(
-          duration: const Duration(milliseconds: 260),
-          opacity: isActive ? 1.0 : 0.6,
+          duration: const Duration(milliseconds: 240),
+          opacity: isActive ? 1.0 : 0.65,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(32),
+              borderRadius: BorderRadius.circular(28),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(isActive ? 0.25 : 0.12),
-                  blurRadius: isActive ? 32 : 20,
-                  offset: const Offset(0, 18),
+                  color: Colors.black.withOpacity(isActive ? 0.22 : 0.1),
+                  blurRadius: isActive ? 28 : 18,
+                  offset: Offset(0, isActive ? 16 : 12),
                 ),
               ],
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(32),
+              borderRadius: BorderRadius.circular(28),
               child: Stack(
                 children: [
                   Positioned.fill(

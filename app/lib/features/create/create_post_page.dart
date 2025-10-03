@@ -12,12 +12,12 @@ import 'package:liquid_glass_renderer/liquid_glass_renderer.dart';
 import '../../app/app_theme.dart';
 import '../../controllers/create_post_controller.dart';
 import '../../data/effect_presets.dart';
-import '../../data/sample_tracks.dart';
 import '../../l10n/app_translations.dart';
 import '../../models/video_effect.dart';
 import '../../models/video_post.dart';
 import '../../models/music_track.dart';
 import '../../ui/widgets/thala_snackbar.dart';
+import '../../controllers/music_library.dart';
 
 enum _CreateStage { capture, review }
 
@@ -51,24 +51,6 @@ class _CreatePostView extends StatefulWidget {
 
 class _CreatePostViewState extends State<_CreatePostView>
     with WidgetsBindingObserver {
-  static const List<_CaptureModeData> _captureModes = <_CaptureModeData>[
-    _CaptureModeData(
-      label: 'Story',
-      helper: 'Quick vertical storytelling',
-      icon: Icons.auto_awesome_motion,
-    ),
-    _CaptureModeData(
-      label: 'Clips',
-      helper: 'Up to 90s across multiple takes',
-      icon: Icons.video_call_outlined,
-    ),
-    _CaptureModeData(
-      label: 'Dual',
-      helper: 'Front + rear reactions simultaneously',
-      icon: Icons.flip_camera_android_outlined,
-    ),
-  ];
-
   final _formKey = GlobalKey<FormState>();
   final _titleEnController = TextEditingController();
   final _titleFrController = TextEditingController();
@@ -92,7 +74,6 @@ class _CreatePostViewState extends State<_CreatePostView>
   FlashMode _flashMode = FlashMode.off;
   String? _cameraErrorMessage;
   bool _showEffectTray = false;
-  int _selectedCaptureModeIndex = 0;
 
   bool _isRecording = false;
   Duration _recordedDuration = Duration.zero;
@@ -188,185 +169,103 @@ class _CreatePostViewState extends State<_CreatePostView>
 
     final palette = context.thalaPalette;
     final MusicTrack? track = controller.selectedTrack;
-    final bool useLiquidGlass =
-        !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
-    final String helper = _captureModes[_selectedCaptureModeIndex].helper;
 
     return Stack(
       key: const ValueKey<_CreateStage>(_CreateStage.capture),
       children: [
         Positioned.fill(child: _buildCameraPreview(effect)),
-        SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final bool isCompactHeight = constraints.maxHeight < 760;
-                final int captureFlex = isCompactHeight ? 6 : 1;
-                final int footerFlex = isCompactHeight ? 5 : 0;
-                final double railWidth = isCompactHeight ? 96 : 112;
-
-                final Widget warningBanner = AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  child: _cameraErrorMessage == null
-                      ? const SizedBox.shrink()
-                      : Padding(
-                          padding: const EdgeInsets.only(top: 12),
-                          child: _WarningBanner(message: _cameraErrorMessage!),
-                        ),
-                );
-
-                final Widget bottomContent = Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _EffectTray(
-                      visible: _showEffectTray,
-                      selectedEffect: effect,
-                      onSelect: (value) {
-                        setState(() => _showEffectTray = false);
-                        controller.selectEffect(value);
-                      },
-                    ),
-                    _CaptureFooter(
-                      useLiquidGlass: useLiquidGlass,
-                      isRecording: _isRecording,
-                      recordedDuration: _recordedDuration,
-                      helperText: _isRecording
-                          ? tr(AppText.createCaptureTapStop)
-                          : '${tr(AppText.createCaptureTapRecord)} • $helper',
-                      galleryLabel: tr(AppText.createCaptureGallery),
-                      timerLabel: tr(AppText.createCaptureTimer),
-                      effectsLabel: tr(AppText.createCaptureEffects),
-                      modes: _captureModes,
-                      selectedModeIndex: _selectedCaptureModeIndex,
-                      onModeSelected: (index) {
-                        setState(() => _selectedCaptureModeIndex = index);
-                      },
-                      onRecordTap: _toggleRecording,
-                      onGalleryTap: _pickFromGallery,
-                      onTimerTap: () => _showSoonToast(
-                        context,
-                        tr(AppText.createCaptureTimerSoon),
-                      ),
-                      selectedEffect: effect,
-                      onEffectSelected: (value) {
-                        setState(() => _showEffectTray = false);
-                        controller.selectEffect(value);
-                      },
-                      onOpenEffectLibrary: () =>
-                          setState(() => _showEffectTray = !_showEffectTray),
-                    ),
-                  ],
-                );
-
-                final Widget soundBadge = ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: math.min(280, constraints.maxWidth * 0.62),
+        // Top controls
+        Positioned(
+          top: mediaQuery.padding.top + 12,
+          left: 16,
+          right: 16,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _GlassIconButton(
+                icon: Icons.close,
+                tooltip: tr(AppText.createCaptureClose),
+                onPressed: () => Navigator.of(context).maybePop(),
+              ),
+              _GlassIconButton(
+                icon: Icons.cameraswitch,
+                tooltip: tr(AppText.createCaptureFlip),
+                onPressed: _switchCamera,
+              ),
+            ],
+          ),
+        ),
+        // Right action rail
+        Positioned(
+          right: 16,
+          bottom: 180,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _CircleIconButton(
+                icon: _flashIconForMode(_flashMode),
+                onTap: _toggleFlashMode,
+              ),
+              const SizedBox(height: 20),
+              _CircleIconButton(
+                icon: Icons.auto_awesome,
+                onTap: () => setState(() => _showEffectTray = !_showEffectTray),
+              ),
+              const SizedBox(height: 20),
+              _CircleIconButton(
+                icon: Icons.music_note,
+                onTap: () => _showMusicPeek(context),
+              ),
+            ],
+          ),
+        ),
+        // Bottom controls
+        Positioned(
+          bottom: mediaQuery.padding.bottom + 24,
+          left: 0,
+          right: 0,
+          child: Column(
+            children: [
+              if (_isRecording)
+                _RecordingTicker(duration: _recordedDuration),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _CircleIconButton(
+                    icon: Icons.photo_library_outlined,
+                    onTap: _pickFromGallery,
+                    size: 48,
                   ),
-                  child: _CaptureSoundBadge(
-                    useLiquidGlass: useLiquidGlass,
-                    palette: palette,
-                    title: track?.title ?? tr(AppText.createCaptureMusic),
-                    subtitle:
-                        track?.artist ?? tr(AppText.createStoryMusicLibrary),
-                    artworkUrl: track?.artworkUrl,
-                    onTap: () => _showMusicPeek(context),
+                  GestureDetector(
+                    onTap: _toggleRecording,
+                    child: _RecordButton(isRecording: _isRecording),
                   ),
-                );
-
-                final Widget actionsRail = _CaptureActionRail(
-                  useLiquidGlass: useLiquidGlass,
-                  palette: palette,
-                  actions: [
-                    _CaptureAction(
-                      icon: _flashIconForMode(_flashMode),
-                      label: tr(AppText.createCaptureFlash),
-                      onTap: _toggleFlashMode,
-                    ),
-                    _CaptureAction(
-                      icon: Icons.auto_awesome,
-                      label: tr(AppText.createCaptureEffects),
-                      onTap: () =>
-                          setState(() => _showEffectTray = !_showEffectTray),
-                    ),
-                    _CaptureAction(
-                      icon: Icons.music_note,
-                      label: tr(AppText.createCaptureMusic),
-                      onTap: () => _showMusicPeek(context),
-                    ),
-                    _CaptureAction(
-                      icon: Icons.timer_outlined,
-                      label: tr(AppText.createCaptureTimer),
-                      onTap: () => _showSoonToast(
-                        context,
-                        tr(AppText.createCaptureTimerSoon),
-                      ),
-                    ),
-                  ],
-                );
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _CaptureTopBar(
-                      useLiquidGlass: useLiquidGlass,
-                      closeTooltip: tr(AppText.createCaptureClose),
-                      title: tr(AppText.createCaptureTitle),
-                      flipTooltip: tr(AppText.createCaptureFlip),
-                      effectsTooltip: tr(AppText.createCaptureEffects),
-                      onClose: () => Navigator.of(context).maybePop(),
-                      onFlipCamera: _switchCamera,
-                      onToggleLenses: () =>
-                          setState(() => _showEffectTray = !_showEffectTray),
-                    ),
-                    const SizedBox(height: 20),
-                    Expanded(
-                      flex: captureFlex,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                soundBadge,
-                                const Spacer(),
-                                warningBanner,
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          SizedBox(
-                            width: railWidth,
-                            child: SingleChildScrollView(
-                              clipBehavior: Clip.none,
-                              physics: const ClampingScrollPhysics(),
-                              child: actionsRail,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    if (isCompactHeight)
-                      Flexible(
-                        flex: footerFlex,
-                        fit: FlexFit.loose,
-                        child: SingleChildScrollView(
-                          padding: EdgeInsets.zero,
-                          physics: const ClampingScrollPhysics(),
-                          child: bottomContent,
-                        ),
-                      )
-                    else
-                      bottomContent,
-                  ],
-                );
+                  _CircleIconButton(
+                    icon: Icons.stop,
+                    onTap: _isRecording ? _stopRecording : null,
+                    size: 48,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        // Effect tray overlay
+        if (_showEffectTray)
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: _EffectTray(
+              visible: _showEffectTray,
+              selectedEffect: effect,
+              onSelect: (value) {
+                setState(() => _showEffectTray = false);
+                controller.selectEffect(value);
               },
             ),
           ),
-        ),
       ],
     );
   }
@@ -421,15 +320,58 @@ class _CreatePostViewState extends State<_CreatePostView>
                     },
                   ),
                   const Spacer(),
-                  _GlassIconButton(
-                    icon: Icons.cloud_upload_outlined,
-                    tooltip: AppTranslations.of(
-                      context,
-                      AppText.createStoryPublish,
+                ],
+              ),
+            ),
+          ),
+        ),
+        // Big quick publish button at bottom
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Quick publish button
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton(
+                      onPressed: controller.isProcessing
+                          ? null
+                          : () => _handlePublish(controller),
+                      style: FilledButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: controller.isProcessing
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(Icons.check_circle),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Publish',
+                                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
                     ),
-                    onPressed: controller.isProcessing
-                        ? null
-                        : () => _handlePublish(controller),
                   ),
                 ],
               ),
@@ -514,7 +456,7 @@ class _CreatePostViewState extends State<_CreatePostView>
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return const Center(
-            child: CircularProgressIndicator(color: Colors.white70),
+            child: CircularProgressIndicator(color: Colors.white70, strokeWidth: 2),
           );
         }
         if (snapshot.hasError) {
@@ -530,6 +472,8 @@ class _CreatePostViewState extends State<_CreatePostView>
 
         Widget preview = CameraPreview(controller);
         final previewSize = controller.value.previewSize;
+
+        // Force 9:16 aspect ratio crop
         if (previewSize != null &&
             previewSize.width != 0 &&
             previewSize.height != 0) {
@@ -549,13 +493,18 @@ class _CreatePostViewState extends State<_CreatePostView>
             previewHeight = temp;
           }
 
-          // Preserve the camera aspect ratio while allowing it to cover the viewport.
-          preview = FittedBox(
-            fit: BoxFit.cover,
-            child: SizedBox(
-              width: previewWidth,
-              height: previewHeight,
-              child: cameraPreview,
+          // Crop to 9:16 aspect ratio
+          preview = Center(
+            child: AspectRatio(
+              aspectRatio: 9 / 16,
+              child: FittedBox(
+                fit: BoxFit.cover,
+                child: SizedBox(
+                  width: previewWidth,
+                  height: previewHeight,
+                  child: cameraPreview,
+                ),
+              ),
             ),
           );
         }
@@ -935,7 +884,7 @@ class _CreatePostViewState extends State<_CreatePostView>
                   ),
                 ),
                 const SizedBox(height: 12),
-                for (final track in sampleTracks)
+                for (final track in context.read<MusicLibrary>().tracks)
                   ListTile(
                     leading: CircleAvatar(
                       backgroundImage: NetworkImage(track.artworkUrl),
@@ -1005,41 +954,45 @@ class _CreatePostViewState extends State<_CreatePostView>
   }
 
   Future<void> _handlePublish(CreatePostController controller) async {
-    final form = _formKey.currentState;
-    if (form == null) {
-      return;
-    }
     if (!controller.hasVideo) {
       _showError(
         AppTranslations.of(context, AppText.createStorySelectVideoFirst),
       );
       return;
     }
-    if (!form.validate()) {
-      return;
-    }
 
     try {
+      // Auto-generate defaults for quick publish
+      final now = DateTime.now();
+      final defaultTitle = 'Story ${now.month}/${now.day}';
+      final defaultCreator = 'Creator';
+
+      final titleEn = _titleEnController.text.trim().isEmpty
+          ? defaultTitle
+          : _titleEnController.text.trim();
+
+      final descEn = _descriptionEnController.text.trim().isEmpty
+          ? ''
+          : _descriptionEnController.text.trim();
+
+      final creatorEn = _creatorNameEnController.text.trim().isEmpty
+          ? defaultCreator
+          : _creatorNameEnController.text.trim();
+
       final post = await controller.buildPost(
-        titleEn: _titleEnController.text.trim(),
-        titleFr: _titleFrController.text.trim().isEmpty
-            ? _titleEnController.text.trim()
-            : _titleFrController.text.trim(),
-        descriptionEn: _descriptionEnController.text.trim(),
-        descriptionFr: _descriptionFrController.text.trim().isEmpty
-            ? _descriptionEnController.text.trim()
-            : _descriptionFrController.text.trim(),
+        titleEn: titleEn,
+        titleFr: _titleFrController.text.trim().isEmpty ? titleEn : _titleFrController.text.trim(),
+        descriptionEn: descEn,
+        descriptionFr: _descriptionFrController.text.trim().isEmpty ? descEn : _descriptionFrController.text.trim(),
         locationEn: _locationEnController.text.trim().isEmpty
             ? AppTranslations.of(context, AppText.createStoryDefaultLocationEn)
             : _locationEnController.text.trim(),
         locationFr: _locationFrController.text.trim().isEmpty
             ? AppTranslations.of(context, AppText.createStoryDefaultLocationFr)
             : _locationFrController.text.trim(),
-        creatorNameEn: _creatorNameEnController.text.trim(),
-        creatorNameFr: _creatorNameFrController.text.trim().isEmpty
-            ? _creatorNameEnController.text.trim()
-            : _creatorNameFrController.text.trim(),
-        creatorHandle: _creatorHandleController.text.trim(),
+        creatorNameEn: creatorEn,
+        creatorNameFr: _creatorNameFrController.text.trim().isEmpty ? creatorEn : _creatorNameFrController.text.trim(),
+        creatorHandle: _creatorHandleController.text.trim().isEmpty ? '@creator' : _creatorHandleController.text.trim(),
       );
 
       if (!mounted) {
@@ -1252,16 +1205,51 @@ class _GlassIconButton extends StatelessWidget {
     return Tooltip(
       message: tooltip,
       child: InkWell(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
         onTap: onPressed,
         child: Ink(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.35),
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+            color: Colors.black.withOpacity(0.28),
+            borderRadius: BorderRadius.circular(16),
           ),
-          child: Icon(icon, color: Colors.white, size: 24),
+          child: Icon(icon, color: Colors.white, size: 22),
+        ),
+      ),
+    );
+  }
+}
+
+class _CircleIconButton extends StatelessWidget {
+  const _CircleIconButton({
+    required this.icon,
+    required this.onTap,
+    this.size = 54,
+  });
+
+  final IconData icon;
+  final VoidCallback? onTap;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: onTap == null
+            ? Colors.black.withOpacity(0.15)
+            : Colors.black.withOpacity(0.32),
+        ),
+        child: Icon(
+          icon,
+          color: onTap == null
+            ? Colors.white.withOpacity(0.3)
+            : Colors.white,
+          size: size * 0.45,
         ),
       ),
     );
@@ -2228,6 +2216,7 @@ class _DetailSheet extends StatelessWidget {
     final controller = context.watch<CreatePostController>();
     final theme = Theme.of(context);
     final palette = context.thalaPalette;
+    final musicTracks = context.watch<MusicLibrary>().tracks;
     final handleColor = context.elevatedOverlay(0.18);
     final titleStyle = theme.textTheme.titleLarge?.copyWith(
       color: palette.textPrimary,
@@ -2361,7 +2350,7 @@ class _DetailSheet extends StatelessWidget {
                       selected: controller.selectedTrack == null,
                       onSelected: (_) => controller.selectTrack(null),
                     ),
-                    for (final track in sampleTracks)
+                    for (final track in musicTracks)
                       ChoiceChip(
                         avatar: CircleAvatar(
                           backgroundImage: NetworkImage(track.artworkUrl),
