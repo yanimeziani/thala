@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:math' as math;
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../app/app_theme.dart';
 import '../../controllers/auth_controller.dart';
@@ -77,15 +78,54 @@ class _GoogleLoginPageState extends State<GoogleLoginPage>
   }
 
   Future<void> _handleGoogleSignIn() async {
-    // TODO: Implement Google Sign-In
-    // This will require google_sign_in package integration
-    // For now, show a message
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Google Sign-In not yet implemented'),
-        ),
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        clientId: '622637204479-afmv3jontq583poaqefe1r0vlinjembo.apps.googleusercontent.com',
+        scopes: ['email', 'profile'],
       );
+
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        // User cancelled the sign-in
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final String? idToken = googleAuth.idToken;
+
+      if (idToken == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Failed to get authentication token'),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Sign in with the backend
+      if (mounted) {
+        final authController = context.read<AuthController>();
+        final success = await authController.signInWithGoogle(idToken);
+
+        if (!success && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(authController.errorMessage ?? 'Sign in failed'),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: ${e.toString()}'),
+          ),
+        );
+      }
     }
   }
 

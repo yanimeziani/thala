@@ -84,6 +84,77 @@ class AuthController extends ChangeNotifier {
   }
 
 
+  Future<bool> signInWithEmailPassword(String email, String password) async {
+    _isAuthenticating = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await BackendAuthService.loginWithEmailPassword(
+        email: email,
+        password: password,
+      );
+
+      _accessToken = response.accessToken;
+      _refreshToken = response.refreshToken;
+      _user = response.user;
+      _status = AuthStatus.authenticated;
+
+      await _saveSession(response);
+      return true;
+    } on BackendAuthException catch (e) {
+      _errorMessage = e.message;
+      return false;
+    } catch (e) {
+      _errorMessage = 'Unexpected error. Please try again.';
+      if (kDebugMode) {
+        debugPrint('Email login error: $e');
+      }
+      return false;
+    } finally {
+      _isAuthenticating = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> registerWithEmailPassword({
+    required String email,
+    required String password,
+    required String fullName,
+  }) async {
+    _isAuthenticating = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await BackendAuthService.registerWithEmailPassword(
+        email: email,
+        password: password,
+        fullName: fullName,
+      );
+
+      _accessToken = response.accessToken;
+      _refreshToken = response.refreshToken;
+      _user = response.user;
+      _status = AuthStatus.authenticated;
+
+      await _saveSession(response);
+      return true;
+    } on BackendAuthException catch (e) {
+      _errorMessage = e.message;
+      return false;
+    } catch (e) {
+      _errorMessage = 'Unexpected error. Please try again.';
+      if (kDebugMode) {
+        debugPrint('Registration error: $e');
+      }
+      return false;
+    } finally {
+      _isAuthenticating = false;
+      notifyListeners();
+    }
+  }
+
   Future<bool> signInWithGoogle(String idToken) async {
     _isAuthenticating = true;
     _errorMessage = null;
