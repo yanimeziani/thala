@@ -1,7 +1,7 @@
 import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 
-import { defaultLocale, locales, type Locale } from "@/i18n/config";
+import { defaultLocale } from "@/i18n/config";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -23,25 +23,11 @@ const plausibleApiEndpoint = process.env.NEXT_PUBLIC_PLAUSIBLE_API_ENDPOINT;
 
 type RootLayoutProps = {
   children: React.ReactNode;
-  params: {
-    locale?: string;
-  };
 };
 
-const resolveLocale = (raw?: string): Locale => {
-  return (locales as readonly string[]).includes(raw ?? "")
-    ? (raw as Locale)
-    : defaultLocale;
-};
-
-export default function RootLayout({
-  children,
-  params,
-}: Readonly<RootLayoutProps>) {
-  const locale = resolveLocale(params.locale);
-
+export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
   return (
-    <html lang={locale}>
+    <html lang={defaultLocale}>
       <head>
         <Script
           data-domain={plausibleDataDomain}
