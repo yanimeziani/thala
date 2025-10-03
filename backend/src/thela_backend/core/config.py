@@ -1,7 +1,7 @@
 from functools import lru_cache
-from typing import List, Optional
+from typing import List, Optional, Union
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -34,6 +34,18 @@ class Settings(BaseSettings):
         alias="CORS_ALLOWED_ORIGINS",
         description="Origins permitted to access the API."
     )
+
+    @field_validator("cors_allowed_origins", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
+        """Parse CORS origins from comma-separated string or JSON array."""
+        if isinstance(v, str):
+            # Handle empty string
+            if not v or v.strip() == "":
+                return []
+            # Handle comma-separated values
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
+        return v if v else []
 
     # MeiliSearch settings
     meilisearch_host: Optional[str] = Field(default=None, alias="MEILISEARCH_HOST")
