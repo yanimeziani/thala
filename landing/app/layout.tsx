@@ -13,6 +13,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const plausibleDataDomain =
+  process.env.NEXT_PUBLIC_PLAUSIBLE_DATA_DOMAIN ?? "thala.app";
+const plausibleScriptSrc =
+  process.env.NEXT_PUBLIC_PLAUSIBLE_SCRIPT_SRC ??
+  "https://plausible.io/js/script.outbound-links.js";
+const plausibleApiEndpoint = process.env.NEXT_PUBLIC_PLAUSIBLE_API_ENDPOINT;
+
 export const metadata: Metadata = {
   title: "Thala | Kabyle Heritage Companion",
   description:
@@ -39,8 +46,9 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <Script
-          data-domain="thala.app"
-          src="http://thala-plausible-edba5a-89-116-170-202.traefik.me/js/script.outbound-links.js"
+          data-domain={plausibleDataDomain}
+          data-api={plausibleApiEndpoint || undefined}
+          src={plausibleScriptSrc}
           strategy="afterInteractive"
         />
       </head>

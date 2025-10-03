@@ -55,6 +55,18 @@ const screenshots = [
 export default function Home() {
   return (
     <div className="relative min-h-screen overflow-hidden bg-[var(--background)] text-ink transition-colors duration-500">
+      <div className="absolute inset-0 -z-30 overflow-hidden" aria-hidden="true">
+        <video
+          className="h-full w-full scale-110 object-cover blur-sm brightness-[0.7]"
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          poster="/bg.png"
+          src="/bg.mp4"
+        />
+      </div>
       <div className="absolute inset-0 -z-20">
         <div className="absolute inset-0 bg-gradient-to-br from-[var(--surface-strong)] via-[var(--background)] to-[var(--background-accent)] transition-[background] duration-500" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_var(--primary-glow),_transparent_55%)] transition-opacity duration-500" />
