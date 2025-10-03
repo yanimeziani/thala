@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// Semantic color palette used across the app for colors that aren't
 /// represented directly in the stock Material [ColorScheme].
@@ -231,23 +232,24 @@ ThemeData _buildThalaTheme(Brightness brightness) {
     onError: Colors.white,
   );
 
-  final textTheme = (isDark ? ThemeData.dark() : ThemeData.light()).textTheme
-      .apply(bodyColor: onSurface, displayColor: onSurface)
-      .copyWith(
-        headlineSmall: TextStyle(
-          fontWeight: FontWeight.w600,
-          letterSpacing: -0.5,
-          color: onSurface,
-        ),
-        titleLarge: TextStyle(
-          fontWeight: FontWeight.w700,
-          letterSpacing: -0.4,
-          color: onSurface,
-        ),
-        bodyLarge: const TextStyle(fontSize: 16, height: 1.5),
-        bodyMedium: const TextStyle(fontSize: 14, height: 1.5),
-        labelSmall: const TextStyle(letterSpacing: 0.4),
-      );
+  final textTheme = GoogleFonts.bricolageGrotesqueTextTheme(
+    (isDark ? ThemeData.dark() : ThemeData.light()).textTheme
+        .apply(bodyColor: onSurface, displayColor: onSurface),
+  ).copyWith(
+    headlineSmall: GoogleFonts.bricolageGrotesque(
+      fontWeight: FontWeight.w600,
+      letterSpacing: -0.5,
+      color: onSurface,
+    ),
+    titleLarge: GoogleFonts.bricolageGrotesque(
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.4,
+      color: onSurface,
+    ),
+    bodyLarge: GoogleFonts.bricolageGrotesque(fontSize: 16, height: 1.5),
+    bodyMedium: GoogleFonts.bricolageGrotesque(fontSize: 14, height: 1.5),
+    labelSmall: GoogleFonts.bricolageGrotesque(letterSpacing: 0.4),
+  );
 
   return ThemeData(
     useMaterial3: true,

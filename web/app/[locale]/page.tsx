@@ -59,11 +59,13 @@ export default async function HomePage({ params }: PageProps) {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center overflow-hidden">
-      {/* Softer gradient background with warmth */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0f1419] via-[#1a1f2e] to-[#0a0e14]" />
+      {/* Warm sunset gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#1a0f0a] via-[#2d1810] to-[#0a0604]" />
 
-      {/* Subtle ambient glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-gradient-radial from-[#ff9569]/5 via-transparent to-transparent blur-3xl pointer-events-none" />
+      {/* Sunset glow - multiple layers for depth */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[1200px] bg-gradient-radial from-[#ff8844]/15 via-[#ff6633]/8 to-transparent blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-[800px] h-[800px] bg-gradient-radial from-[#ffaa66]/10 via-transparent to-transparent blur-3xl pointer-events-none" />
+      <div className="absolute top-1/3 left-0 w-[600px] h-[600px] bg-gradient-radial from-[#ff9569]/12 via-transparent to-transparent blur-3xl pointer-events-none" />
 
       <div className="absolute top-4 sm:top-6 right-4 sm:right-6 z-20">
         <LanguageSwitcher currentLocale={locale} ariaLabel={navigation.languageToggleAria} />
@@ -98,10 +100,10 @@ export default async function HomePage({ params }: PageProps) {
             {hero.cardTitle}
           </h2>
 
-          {/* iOS CTA - warm and inviting */}
+          {/* iOS CTA - warm sunset gradient */}
           <Link
             href={hero.iosCta.href}
-            className="flex items-center justify-center w-full h-12 sm:h-14 rounded-2xl bg-gradient-to-br from-white to-white/95 text-black font-semibold text-sm sm:text-base transition-all duration-300 hover:scale-[1.01] hover:shadow-lg hover:shadow-white/20 active:scale-[0.99] mb-4 sm:mb-5"
+            className="flex items-center justify-center w-full h-12 sm:h-14 rounded-2xl bg-gradient-to-br from-[#ffaa66] via-[#ff8844] to-[#ff7733] text-white font-semibold text-sm sm:text-base transition-all duration-300 hover:scale-[1.02] hover:shadow-xl hover:shadow-[#ff8844]/40 active:scale-[0.98] mb-4 sm:mb-5"
           >
             {hero.iosCta.label}
           </Link>

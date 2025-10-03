@@ -7,15 +7,14 @@
   --color-primary: var(--primary);
   --color-accent: var(--accent);
   --color-muted: var(--muted);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-bricolage);
 }
 
 :root {
   color-scheme: dark;
-  --background: #050506;
-  --background-accent: #050506;
-  --background-elevated: #0e0e11;
+  --background: transparent;
+  --background-accent: #1a0f0a;
+  --background-elevated: #2d1810;
   --surface: #101013;
   --surface-strong: #151519;
   --surface-muted: #0d0d0f;
@@ -52,7 +51,7 @@
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+  font-family: var(--font-bricolage), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   min-height: 100vh;
   margin: 0;
