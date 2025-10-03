@@ -89,9 +89,9 @@ export default function HomePage({ params }: PageProps) {
         />
       </div>
       <div className="absolute inset-0 -z-20">
-        <div className="absolute inset-0 bg-gradient-to-br from-[var(--surface-strong)] via-[var(--background)] to-[var(--background-accent)] transition-[background] duration-500" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_var(--primary-glow),_transparent_55%)] transition-opacity duration-500" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,_var(--accent-glow),_transparent_52%)] transition-opacity duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[var(--surface-strong)] via-[var(--background)] to-[var(--background-accent)] opacity-80 transition-[background] duration-500" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_var(--primary-glow),_transparent_55%)] opacity-60 transition-opacity duration-500" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,_var(--accent-glow),_transparent_52%)] opacity-50 transition-opacity duration-500" />
         <svg
           viewBox="0 0 1440 900"
           className="absolute inset-0 h-full w-full stroke-[color:var(--grid-stroke)] transition-colors duration-500"
