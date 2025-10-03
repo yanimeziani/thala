@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import thalaLogo from "@/public/logo.png";
 
 const avatars = [
   { id: "amira", label: "Amira from Tizi Ouzou", initials: "AM", position: "top-24 left-10" },
@@ -21,6 +22,33 @@ const highlights = [
   {
     title: "Marketplace",
     description: "Support Amazigh makers with verified artisan storefronts.",
+  },
+];
+
+const screenshots = [
+  {
+    id: "rituals",
+    title: "Ritual Reminders",
+    description: "Pin sunrise ceremonies and share them with your circle.",
+    image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: "circles",
+    title: "Community Circles",
+    description: "Listen to live storytelling rooms hosted across Tamazgha.",
+    image: "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: "marketplace",
+    title: "Marketplace",
+    description: "Support verified artisans with curated Amazigh goods.",
+    image: "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=600&q=80",
+  },
+  {
+    id: "archive",
+    title: "Living Archive",
+    description: "Save oral histories with translations for future generations.",
+    image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80",
   },
 ];
 
@@ -62,7 +90,7 @@ export default function Home() {
         <header className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Image
-              src="/logo.png"
+              src={thalaLogo}
               alt="Thala logo"
               width={40}
               height={40}
@@ -77,7 +105,7 @@ export default function Home() {
             href="#download"
             className="hidden rounded-full border border-soft bg-elevated px-6 py-2 text-sm font-semibold text-ink shadow-soft transition duration-300 hover:-translate-y-[1px] hover:shadow-card sm:inline-flex"
           >
-            Download App
+            Download on iOS
           </Link>
         </header>
 
@@ -108,21 +136,21 @@ export default function Home() {
                   <span className="block text-base text-white">App Store</span>
                 </span>
               </Link>
-              <Link
-                href="https://play.google.com"
-                className="inline-flex min-w-[210px] items-center justify-center gap-3 rounded-full border border-soft bg-elevated px-6 py-3 text-left text-sm font-semibold text-ink shadow-soft transition duration-300 hover:scale-[1.02] hover:shadow-card"
-              >
+              <div className="inline-flex min-w-[210px] items-center justify-center gap-3 rounded-full border border-soft bg-surface px-6 py-3 text-left text-sm font-semibold text-muted shadow-soft transition duration-300">
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-tint text-sm font-bold tracking-wide text-positive">
                   GP
                 </span>
                 <span>
-                  <span className="block text-[0.65rem] uppercase tracking-[0.28em] text-muted">
-                    Get it on
+                  <span className="block text-[0.65rem] uppercase tracking-[0.28em] text-muted-soft">
+                    Android version
                   </span>
-                  <span className="block text-base text-ink">Google Play</span>
+                  <span className="block text-base text-muted">Coming early 2026</span>
                 </span>
-              </Link>
+              </div>
             </div>
+            <p className="mt-2 text-xs text-muted-soft">
+              Thala is currently available on iOS. Android launch planned for early 2026.
+            </p>
             <div className="mt-6 flex flex-wrap justify-center gap-x-12 gap-y-3 text-sm text-muted lg:justify-start">
               <div className="flex items-center gap-2">
                 <span className="inline-flex h-2.5 w-2.5 rounded-full bg-[color:var(--accent-soft)]" />
@@ -203,6 +231,54 @@ export default function Home() {
               <p className="mt-3 text-sm leading-relaxed text-muted-soft">{item.description}</p>
             </div>
           ))}
+        </section>
+
+        <section className="relative z-10 mt-24">
+          <div className="flex flex-col items-center justify-between gap-6 text-center lg:flex-row lg:text-left">
+            <div className="max-w-xl">
+              <h2 className="text-2xl font-semibold text-ink sm:text-3xl">Peek inside Thala</h2>
+              <p className="mt-3 text-sm leading-relaxed text-muted">
+                Scroll through a few product moments—from ritual reminders to community circles and curated marketplaces.
+              </p>
+            </div>
+            <div className="text-xs font-semibold uppercase tracking-[0.35em] text-muted-soft">
+              Swipe horizontally
+            </div>
+          </div>
+          <div className="relative -mx-6 mt-10 sm:-mx-10">
+            <div className="pointer-events-none absolute inset-y-0 left-0 hidden w-12 bg-gradient-to-r from-[var(--background)] to-transparent sm:block" aria-hidden="true" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-12 bg-gradient-to-l from-[var(--background)] to-transparent sm:block" aria-hidden="true" />
+            <div className="scrollbar-none flex gap-6 overflow-x-auto px-6 pb-6 pt-1 sm:px-10 snap-x snap-mandatory">
+              {screenshots.map((item) => (
+                <article
+                  key={item.id}
+                  className="group relative flex w-[280px] shrink-0 snap-start flex-col overflow-hidden rounded-[28px] border border-strong bg-surface shadow-card transition-transform duration-300 hover:-translate-y-1 sm:w-[320px]"
+                >
+                  <div className="relative h-52 w-full overflow-hidden">
+                    <Image
+                      src={item.image}
+                      alt={item.title}
+                      fill
+                      sizes="(max-width: 768px) 280px, 320px"
+                      className="object-cover transition-transform duration-500 group-hover:scale-[1.05]"
+                    />
+                  </div>
+                  <div className="flex flex-1 flex-col justify-between gap-4 p-5 text-left">
+                    <div>
+                      <span className="text-xs font-semibold uppercase tracking-[0.32em] text-primary-soft">
+                        {item.id}
+                      </span>
+                      <h3 className="mt-3 text-lg font-semibold text-ink">{item.title}</h3>
+                      <p className="mt-2 text-sm leading-relaxed text-muted-soft">{item.description}</p>
+                    </div>
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.3em] text-muted-soft">
+                      Live preview
+                    </span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
         </section>
       </div>
 

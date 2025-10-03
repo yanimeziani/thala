@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -36,6 +37,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <Script
+          data-domain="thala.app"
+          src="http://thala-plausible-edba5a-89-116-170-202.traefik.me/js/script.outbound-links.js"
+          strategy="afterInteractive"
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

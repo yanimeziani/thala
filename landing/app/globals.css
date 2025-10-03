@@ -225,4 +225,12 @@ body {
   .stroke-grid {
     stroke: var(--grid-stroke);
   }
+
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
 }
