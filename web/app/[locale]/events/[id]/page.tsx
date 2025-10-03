@@ -10,7 +10,6 @@ export default function EventRedirect() {
   useEffect(() => {
     // Try to open the mobile app
     const appScheme = `app.thala://event/${eventId}`;
-    const universalLink = `https://thala.app/event/${eventId}`;
 
     // Detect if on mobile
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -55,10 +54,10 @@ export default function EventRedirect() {
             Open in Thala App
           </a>
           <p className="text-sm text-purple-300">
-            Don't have the app?{' '}
-            <a href="/" className="underline hover:text-white transition-colors">
+            Don&apos;t have the app?{' '}
+            <button onClick={() => window.location.href = '/'} className="underline hover:text-white transition-colors">
               Learn more
-            </a>
+            </button>
           </p>
         </div>
       </div>

@@ -49,10 +49,10 @@ export default function CommunityRedirect() {
             Open in Thala App
           </a>
           <p className="text-sm text-purple-300">
-            Don't have the app?{' '}
-            <a href="/" className="underline hover:text-white transition-colors">
+            Don&apos;t have the app?{' '}
+            <button onClick={() => window.location.href = '/'} className="underline hover:text-white transition-colors">
               Learn more
-            </a>
+            </button>
           </p>
         </div>
       </div>
