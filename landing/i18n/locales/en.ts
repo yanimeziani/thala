@@ -2,128 +2,41 @@ import type { Dictionary } from "@/i18n/types";
 
 export const enDictionary: Dictionary = {
   metadata: {
-    title: "Thala | Kabyle Heritage Companion",
+    title: "Thala App | Amazigh culture, on the go",
     description:
-      "Discover and celebrate Kabyle culture with Thala. Explore curated experiences, learn traditions, and stay connected with your heritage.",
+      "Thala is the mobile home for Amazigh rituals, stories, and circles — available now on iOS.",
     openGraph: {
-      title: "Thala | Kabyle Heritage Companion",
+      title: "Thala App | Amazigh culture, on the go",
       description:
-        "Discover Kabyle culture, personalized recommendations, and community stories in the Thala app.",
+        "Download Thala on iOS to keep Kabyle rituals, voices, and circles close wherever you are.",
     },
     twitter: {
-      title: "Thala | Kabyle Heritage Companion",
+      title: "Thala App | Amazigh culture, on the go",
       description:
-        "Discover Kabyle culture, personalized recommendations, and community stories in the Thala app.",
+        "Download Thala on iOS to keep Kabyle rituals, voices, and circles close wherever you are.",
     },
   },
   navigation: {
-    downloadCta: "Download on iOS",
     languageToggleAria: "Change language",
   },
   hero: {
-    badge: "Celebrate Amazigh Identity",
-    heading:
-      "Indulge in the world of living Amazigh culture and community stories.",
+    eyebrow: "Thala for iOS",
+    title: "Carry Kabyle culture with you, every day.",
     description:
-      "Thala is the social home for Amazigh creators, elders, and explorers. Discover daily rituals, co-create events, and form circles that bridge atlases, coasts, and diasporas.",
-    primaryCta: {
+      "Thala gives you rituals, language drops, and trusted circles built by Amazigh organizers across the world.",
+    iosCta: {
       href: "https://apps.apple.com",
-      preTitle: "Download on the",
-      title: "App Store",
-      initials: "AP",
+      label: "Download for iPhone",
     },
-    secondaryCta: {
-      preTitle: "Android version",
-      title: "Coming early 2026",
-      initials: "GP",
-    },
-    availabilityNote:
-      "Thala is currently available on iOS. Android launch planned for early 2026.",
-    bulletPoints: [
-      { text: "Weekly rituals & shareable archives", accent: "accent" },
-      { text: "Multilingual (Tamazight / French / English)", accent: "primary" },
-      { text: "Built by Amazigh organizers worldwide", accent: "positive" },
+    androidNote: "Android is in development — request early access from inside the app.",
+    highlights: [
+      "Five-minute rituals and reminders rooted in Kabyle traditions",
+      "Circles to share audio notes with family, friends, and elders",
+      "Lightweight design built for low bandwidth and travel",
     ],
+    footnote: "Thala is currently invite-only while we onboard the first communities.",
   },
-  phoneShowcase: {
-    headerTitle: "Today in Tamazgha",
-    badgeLabel: "Spotlight",
-    featuredTag: "Featured",
-    featuredTitle: "Tifawin Nights in Agadir",
-    featuredDescription:
-      "Join musicians and poets livestreaming ancestral chants under desert skies.",
-    cards: [
-      {
-        title: "Circle Rooms",
-        description: "Host bilingual dialogues on heritage, food, and identity.",
-        tone: "primary",
-      },
-      {
-        title: "Story Capsules",
-        description: "Save voice notes and archive them for your clan forever.",
-        tone: "accent",
-      },
-    ],
-    tipTitle: "Tip of the week",
-    tipDescription:
-      "Record elders speaking Tamazight phrases - AI assists with translations for the community.",
+  footer: {
+    note: "Thala — built with Amazigh communities worldwide.",
   },
-  highlights: [
-    {
-      title: "Explore Tribes",
-      description: "Discover communities across Tamazgha, from Rif to Aures.",
-    },
-    {
-      title: "Cultural Circles",
-      description: "Host live storytelling rooms and archive them for every tribe.",
-    },
-    {
-      title: "Marketplace",
-      description: "Support Amazigh makers with verified artisan storefronts.",
-    },
-  ],
-  gallery: {
-    heading: "Peek inside Thala",
-    description:
-      "Scroll through a few product moments—from ritual reminders to community circles and curated marketplaces.",
-    instruction: "Swipe horizontally",
-    slideMetaLabel: "Live preview",
-    slides: [
-      {
-        id: "rituals",
-        tag: "Rituals",
-        title: "Ritual Reminders",
-        description: "Pin sunrise ceremonies and share them with your circle.",
-        image: "/gallery/rituals.jpg",
-      },
-      {
-        id: "circles",
-        tag: "Circles",
-        title: "Community Circles",
-        description: "Listen to live storytelling rooms hosted across Tamazgha.",
-        image: "/gallery/circles.jpg",
-      },
-      {
-        id: "marketplace",
-        tag: "Marketplace",
-        title: "Marketplace",
-        description: "Support verified artisans with curated Amazigh goods.",
-        image: "/gallery/marketplace.jpg",
-      },
-      {
-        id: "archive",
-        tag: "Archive",
-        title: "Living Archive",
-        description: "Save oral histories with translations for future generations.",
-        image: "/gallery/archive.jpg",
-      },
-    ],
-  },
-  avatars: [
-    { id: "amira", label: "Amira from Tizi Ouzou" },
-    { id: "ikram", label: "Ikram in Paris" },
-    { id: "farid", label: "Farid curating stories" },
-    { id: "lila", label: "Lila sharing art" },
-    { id: "samir", label: "Samir leading circles" },
-  ],
 };

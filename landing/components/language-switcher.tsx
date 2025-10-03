@@ -28,7 +28,7 @@ export const LanguageSwitcher = ({ currentLocale, ariaLabel }: LanguageSwitcherP
   return (
     <nav
       aria-label={ariaLabel}
-      className="flex items-center gap-1 rounded-full border border-soft bg-surface-translucent p-1 text-xs font-semibold uppercase tracking-[0.3em] text-muted"
+      className="flex items-center gap-1 rounded-full border border-[color:var(--border-soft)] bg-[color:var(--background)] px-1 py-1 text-[0.65rem] font-medium uppercase tracking-[0.28em] text-[color:var(--muted)] shadow-sm"
     >
       {(locales as readonly Locale[]).map((locale) => {
         const isActive = locale === currentLocale;
@@ -39,8 +39,10 @@ export const LanguageSwitcher = ({ currentLocale, ariaLabel }: LanguageSwitcherP
             key={locale}
             href={href}
             aria-current={isActive ? "page" : undefined}
-            className={`rounded-full px-3 py-1 transition ${
-              isActive ? "bg-primary text-white shadow-primary-glow" : "hover:bg-surface"
+            className={`rounded-full px-3 py-1 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--foreground)] ${
+              isActive
+                ? "bg-[color:var(--foreground)] text-[color:var(--background)]"
+                : "hover:text-[color:var(--foreground)]"
             }`}
           >
             {languageNames[locale]}

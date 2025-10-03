@@ -1,27 +1,3 @@
-export type Highlight = {
-  title: string;
-  description: string;
-};
-
-export type GallerySlide = {
-  id: string;
-  tag: string;
-  title: string;
-  description: string;
-  image: string;
-};
-
-export type AvatarTranslation = {
-  id: string;
-  label: string;
-};
-
-export type FeatureCard = {
-  title: string;
-  description: string;
-  tone: "primary" | "accent";
-};
-
 export type Dictionary = {
   metadata: {
     title: string;
@@ -36,47 +12,21 @@ export type Dictionary = {
     };
   };
   navigation: {
-    downloadCta: string;
     languageToggleAria: string;
   };
   hero: {
-    badge: string;
-    heading: string;
+    eyebrow: string;
+    title: string;
     description: string;
-    primaryCta: {
+    iosCta: {
       href: string;
-      preTitle: string;
-      title: string;
-      initials: string;
+      label: string;
     };
-    secondaryCta: {
-      preTitle: string;
-      title: string;
-      initials: string;
-    };
-    availabilityNote: string;
-    bulletPoints: Array<{
-      text: string;
-      accent: "accent" | "primary" | "positive";
-    }>;
+    androidNote: string;
+    highlights: string[];
+    footnote: string;
   };
-  phoneShowcase: {
-    headerTitle: string;
-    badgeLabel: string;
-    featuredTag: string;
-    featuredTitle: string;
-    featuredDescription: string;
-    cards: FeatureCard[];
-    tipTitle: string;
-    tipDescription: string;
+  footer: {
+    note: string;
   };
-  highlights: Highlight[];
-  gallery: {
-    heading: string;
-    description: string;
-    instruction: string;
-    slideMetaLabel: string;
-    slides: GallerySlide[];
-  };
-  avatars: AvatarTranslation[];
 };

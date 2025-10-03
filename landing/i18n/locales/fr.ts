@@ -2,128 +2,41 @@ import type { Dictionary } from "@/i18n/types";
 
 export const frDictionary: Dictionary = {
   metadata: {
-    title: "Thala | Compagnon du patrimoine kabyle",
+    title: "Thala App | Culture amazighe, partout avec vous",
     description:
-      "Découvrez et célébrez la culture kabyle avec Thala. Explorez des expériences sélectionnées, apprenez les traditions et restez connecté à votre héritage.",
+      "Thala est le foyer mobile des rituels, histoires et cercles amazighs — disponible maintenant sur iOS.",
     openGraph: {
-      title: "Thala | Compagnon du patrimoine kabyle",
+      title: "Thala App | Culture amazighe, partout avec vous",
       description:
-        "Découvrez la culture kabyle, des recommandations personnalisées et des récits communautaires dans l'application Thala.",
+        "Téléchargez Thala sur iOS pour garder près de vous les rituels, voix et cercles kabyles.",
     },
     twitter: {
-      title: "Thala | Compagnon du patrimoine kabyle",
+      title: "Thala App | Culture amazighe, partout avec vous",
       description:
-        "Découvrez la culture kabyle, des recommandations personnalisées et des récits communautaires dans l'application Thala.",
+        "Téléchargez Thala sur iOS pour garder près de vous les rituels, voix et cercles kabyles.",
     },
   },
   navigation: {
-    downloadCta: "Télécharger sur iOS",
     languageToggleAria: "Changer de langue",
   },
   hero: {
-    badge: "Célébrez l'identité amazighe",
-    heading:
-      "Plongez dans l'univers de la culture amazighe vivante et de ses histoires communautaires.",
+    eyebrow: "Thala sur iOS",
+    title: "Emportez la culture kabyle avec vous, chaque jour.",
     description:
-      "Thala est le foyer social des créateurs, aînés et explorateurs amazighs. Découvrez les rituels quotidiens, co-créez des événements et formez des cercles qui relient atlas, littoraux et diasporas.",
-    primaryCta: {
+      "Thala rassemble rituels, capsules de langue et cercles fiables imaginés par des organisateurs amazighs partout dans le monde.",
+    iosCta: {
       href: "https://apps.apple.com",
-      preTitle: "Télécharger sur l'",
-      title: "App Store",
-      initials: "AP",
+      label: "Télécharger sur iPhone",
     },
-    secondaryCta: {
-      preTitle: "Version Android",
-      title: "Arrive début 2026",
-      initials: "GP",
-    },
-    availabilityNote:
-      "Thala est disponible sur iOS. Lancement Android prévu début 2026.",
-    bulletPoints: [
-      { text: "Rituels hebdomadaires et archives partageables", accent: "accent" },
-      { text: "Multilingue (tamazight / français / anglais)", accent: "primary" },
-      { text: "Créé par des organisateurs amazighs partout dans le monde", accent: "positive" },
+    androidNote: "La version Android arrive — demandez un accès anticipé dans l'application.",
+    highlights: [
+      "Rituels et rappels de cinq minutes ancrés dans les traditions kabyles",
+      "Cercles pour partager des notes audio avec famille, amis et aînés",
+      "Interface légère pensée pour les faibles débits et les voyages",
     ],
+    footnote: "Thala est actuellement accessible sur invitation pendant l'accueil des premières communautés.",
   },
-  phoneShowcase: {
-    headerTitle: "Aujourd'hui en Tamazgha",
-    badgeLabel: "À l'honneur",
-    featuredTag: "À la une",
-    featuredTitle: "Nuits Tifawin à Agadir",
-    featuredDescription:
-      "Rejoignez musiciens et poètes qui diffusent en direct des chants ancestraux sous le ciel du désert.",
-    cards: [
-      {
-        title: "Salons Cercle",
-        description: "Animez des dialogues bilingues sur le patrimoine, la cuisine et l'identité.",
-        tone: "primary",
-      },
-      {
-        title: "Capsules d'histoires",
-        description: "Enregistrez des notes vocales et archivez-les pour votre clan à jamais.",
-        tone: "accent",
-      },
-    ],
-    tipTitle: "Conseil de la semaine",
-    tipDescription:
-      "Enregistrez les aînés prononçant des expressions en tamazight - l'IA aide à les traduire pour la communauté.",
+  footer: {
+    note: "Thala — créé avec les communautés amazighes du monde entier.",
   },
-  highlights: [
-    {
-      title: "Explorez les tribus",
-      description: "Découvrez les communautés de tout le Tamazgha, du Rif aux Aurès.",
-    },
-    {
-      title: "Cercles culturels",
-      description: "Organisez des salons de narration en direct et archivez-les pour chaque tribu.",
-    },
-    {
-      title: "Marché",
-      description: "Soutenez les artisans amazighs avec des boutiques vérifiées.",
-    },
-  ],
-  gallery: {
-    heading: "Découvrez Thala de l'intérieur",
-    description:
-      "Parcourez quelques moments produit - des rappels de rituels aux cercles communautaires et marchés sélectionnés.",
-    instruction: "Balayez horizontalement",
-    slideMetaLabel: "Aperçu en direct",
-    slides: [
-      {
-        id: "rituals",
-        tag: "Rituels",
-        title: "Rappels de rituels",
-        description: "Épinglez les cérémonies à l'aube et partagez-les avec votre cercle.",
-        image: "/gallery/rituals.jpg",
-      },
-      {
-        id: "circles",
-        tag: "Cercles",
-        title: "Cercles communautaires",
-        description: "Écoutez des salons de narration en direct animés à travers le Tamazgha.",
-        image: "/gallery/circles.jpg",
-      },
-      {
-        id: "marketplace",
-        tag: "Marché",
-        title: "Marché",
-        description: "Soutenez des artisans vérifiés avec des créations amazighes sélectionnées.",
-        image: "/gallery/marketplace.jpg",
-      },
-      {
-        id: "archive",
-        tag: "Archive",
-        title: "Archive vivante",
-        description: "Sauvegardez des histoires orales avec des traductions pour les générations futures.",
-        image: "/gallery/archive.jpg",
-      },
-    ],
-  },
-  avatars: [
-    { id: "amira", label: "Amira de Tizi Ouzou" },
-    { id: "ikram", label: "Ikram à Paris" },
-    { id: "farid", label: "Farid qui soigne les récits" },
-    { id: "lila", label: "Lila partage son art" },
-    { id: "samir", label: "Samir qui anime les cercles" },
-  ],
 };
