@@ -35,4 +35,87 @@ export type Dictionary = {
     terms: string;
     privacy: string;
   };
+  terms: {
+    title: string;
+    description: string;
+    lastUpdated: string;
+    backToHome: string;
+    privacyLink: string;
+    section1: {
+      title: string;
+      p1: string;
+      p2: string;
+    };
+    section2: {
+      title: string;
+      p1: string;
+      p2: string;
+    };
+    section3: {
+      title: string;
+      p1: string;
+      list: string[];
+      p2: string;
+    };
+    section4: {
+      title: string;
+      p1: string;
+    };
+    section5: {
+      title: string;
+      p1: string;
+      p2: string;
+    };
+    section6: {
+      title: string;
+      p1: string;
+    };
+    contact: {
+      title: string;
+      p1: string;
+    };
+  };
+  privacy: {
+    title: string;
+    description: string;
+    lastUpdated: string;
+    backToHome: string;
+    termsLink: string;
+    section1: {
+      title: string;
+      p1: string;
+      p2: string;
+    };
+    section2: {
+      title: string;
+      p1: string;
+      list: string[];
+    };
+    section3: {
+      title: string;
+      p1: string;
+      list: string[];
+    };
+    section4: {
+      title: string;
+      p1: string;
+    };
+    section5: {
+      title: string;
+      p1: string;
+      p2: string;
+    };
+    section6: {
+      title: string;
+      p1: string;
+    };
+    section7: {
+      title: string;
+      p1: string;
+    };
+    contact: {
+      title: string;
+      p1: string;
+    };
+  };
 };
