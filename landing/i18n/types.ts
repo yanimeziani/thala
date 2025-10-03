@@ -18,15 +18,21 @@ export type Dictionary = {
     eyebrow: string;
     title: string;
     description: string;
+    cardTitle: string;
     iosCta: {
       href: string;
       label: string;
     };
+    androidWaitlistLabel: string;
+    androidEmailPlaceholder: string;
+    androidSubmitButton: string;
     androidNote: string;
     highlights: string[];
     footnote: string;
   };
   footer: {
     note: string;
+    terms: string;
+    privacy: string;
   };
 };

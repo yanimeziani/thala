@@ -57,51 +57,79 @@ export default async function HomePage({ params }: PageProps) {
   const { navigation, hero, footer } = dictionary;
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[color:var(--background)] text-[color:var(--foreground)] px-6">
-      <div className="absolute top-6 right-6">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6">
+      {/* Gradient background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0A1216] to-[#1A2329]" />
+
+      <div className="absolute top-6 right-6 z-20">
         <LanguageSwitcher currentLocale={locale} ariaLabel={navigation.languageToggleAria} />
       </div>
 
-      <main className="flex w-full max-w-lg flex-col items-center text-center">
-        <div className="mb-8">
-          <Image src={thalaLogo} alt="Thala" width={56} height={56} priority />
+      <main className="relative z-10 flex w-full max-w-md flex-col items-center text-center animate-in fade-in slide-in-from-bottom-8 duration-700">
+        {/* Logo */}
+        <div className="mb-6">
+          <Image src={thalaLogo} alt="Thala" width={120} height={120} priority className="opacity-90" />
         </div>
 
-        <span className="text-[0.65rem] font-medium uppercase tracking-[0.3em] text-[color:var(--muted-soft)]">
-          {hero.eyebrow}
-        </span>
-
-        <h1 className="mt-4 text-balance text-5xl font-bold leading-[1.1] tracking-tight sm:text-6xl">
-          {hero.title}
+        {/* Title */}
+        <h1 className="text-4xl font-bold text-white tracking-tight mb-3">
+          Thala
         </h1>
 
-        <p className="mt-6 max-w-md text-lg leading-relaxed text-[color:var(--muted)]">
+        {/* Subtitle */}
+        <p className="text-white/60 mb-12">
           {hero.description}
         </p>
 
-        <Link
-          href={hero.iosCta.href}
-          className="mt-10 inline-flex items-center justify-center rounded-full bg-[color:var(--foreground)] px-8 py-4 text-base font-semibold text-[color:var(--background)] transition-all hover:scale-105 hover:opacity-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--foreground)]"
-        >
-          {hero.iosCta.label}
-        </Link>
+        {/* Glass card */}
+        <div className="w-full bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 p-8 shadow-2xl">
+          <h2 className="text-xl font-semibold text-white mb-6">
+            {hero.cardTitle}
+          </h2>
 
-        <p className="mt-3 text-sm text-[color:var(--muted-soft)]">
-          {hero.androidNote}
-        </p>
+          {/* iOS CTA */}
+          <Link
+            href={hero.iosCta.href}
+            className="flex items-center justify-center w-full h-14 rounded-xl bg-white text-black font-semibold text-base transition-all hover:scale-[1.02] active:scale-[0.98] mb-4"
+          >
+            {hero.iosCta.label}
+          </Link>
 
-        <div className="mt-16 space-y-2 text-sm text-[color:var(--muted)]">
-          {hero.highlights.map((item) => (
-            <p key={item}>{item}</p>
-          ))}
+          {/* Android waitlist */}
+          <div className="pt-6 border-t border-white/10">
+            <p className="text-sm text-white/70 mb-3">
+              {hero.androidWaitlistLabel}
+            </p>
+            <form className="flex gap-2" onSubmit={(e) => e.preventDefault()}>
+              <input
+                type="email"
+                placeholder={hero.androidEmailPlaceholder}
+                className="flex-1 h-12 px-4 bg-white/5 border border-white/20 rounded-lg text-white placeholder:text-white/40 focus:outline-none focus:border-[#ff9569] transition-colors"
+                required
+              />
+              <button
+                type="submit"
+                className="px-6 h-12 rounded-lg bg-[#ff9569]/20 border border-[#ff9569]/40 text-[#ff9569] font-medium hover:bg-[#ff9569]/30 transition-colors"
+              >
+                {hero.androidSubmitButton}
+              </button>
+            </form>
+          </div>
         </div>
 
-        <p className="mt-12 text-xs text-[color:var(--muted-soft)]">
-          {hero.footnote}
-        </p>
-
-        <footer className="mt-16 text-[0.65rem] uppercase tracking-[0.3em] text-[color:var(--muted-soft)]">
-          {footer.note}
+        <footer className="mt-12 flex flex-col items-center gap-4">
+          <div className="flex gap-4 text-xs text-white/40">
+            <Link href={`/${locale}/terms`} className="hover:text-[#ff9569] transition-colors">
+              {footer.terms}
+            </Link>
+            <span>•</span>
+            <Link href={`/${locale}/privacy`} className="hover:text-[#ff9569] transition-colors">
+              {footer.privacy}
+            </Link>
+          </div>
+          <div className="text-[0.65rem] uppercase tracking-[0.3em] text-white/40">
+            {footer.note}
+          </div>
         </footer>
       </main>
     </div>
