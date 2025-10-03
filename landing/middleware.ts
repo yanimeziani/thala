@@ -13,8 +13,6 @@ export function middleware(request: NextRequest) {
 
   if (
     pathname.startsWith("/api") ||
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/static") ||
     PUBLIC_FILE.test(pathname)
   ) {
     return NextResponse.next();
@@ -34,5 +32,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/(?!.*(?:_next|\.[^/]+$)).*"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|favicon.png|favicon.svg|robots.txt|sitemap.xml).*)"],
 };
