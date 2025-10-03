@@ -80,7 +80,7 @@ export default async function HomePage({ params }: PageProps) {
             width={100}
             height={100}
             priority
-            className="opacity-95 drop-shadow-2xl w-[80px] h-[80px] sm:w-[100px] sm:h-[100px]"
+            className="opacity-95 drop-shadow-2xl w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] mix-blend-screen"
           />
         </div>
 
