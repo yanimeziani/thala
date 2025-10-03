@@ -16,9 +16,9 @@ const AVATAR_LAYOUT = [
 ] as const;
 
 type PageProps = {
-  params: {
+  params: Promise<{
     locale: string;
-  };
+  }>;
 };
 
 const normalizeLocale = (raw?: string): Locale => {
@@ -31,8 +31,9 @@ export const generateStaticParams = () => {
   return (locales as readonly string[]).map((locale) => ({ locale }));
 };
 
-export const generateMetadata = ({ params }: PageProps): Metadata => {
-  const locale = normalizeLocale(params.locale);
+export const generateMetadata = async ({ params }: PageProps): Promise<Metadata> => {
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dictionary = getDictionary(locale);
 
   const languageAlternates = Object.fromEntries(
@@ -57,8 +58,9 @@ export const generateMetadata = ({ params }: PageProps): Metadata => {
   };
 };
 
-export default function HomePage({ params }: PageProps) {
-  const locale = normalizeLocale(params.locale);
+export default async function HomePage({ params }: PageProps) {
+  const { locale: rawLocale } = await params;
+  const locale = normalizeLocale(rawLocale);
   const dictionary = getDictionary(locale);
   const { navigation, hero, phoneShowcase, highlights, gallery } = dictionary;
 

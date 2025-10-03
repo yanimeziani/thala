@@ -1,0 +1,23 @@
+0 verbose cli /opt/homebrew/Cellar/node/24.7.0/bin/node /opt/homebrew/lib/node_modules/npm/bin/npm-cli.js
+1 info using npm@11.5.1
+2 info using node@v24.7.0
+3 silly config load:file:/opt/homebrew/lib/node_modules/npm/npmrc
+4 silly config load:file:/Volumes/Seagate/MEZIANI.ORG/Labs/Thela/landing/.npmrc
+5 silly config load:file:/Users/yanimeziani/.npmrc
+6 silly config load:file:/opt/homebrew/etc/npmrc
+7 verbose title npm exec playwright@1.48.2 install-deps
+8 verbose argv "exec" "--yes" "--" "playwright@1.48.2" "install-deps"
+9 verbose logfile logs-max:10 dir:/Volumes/Seagate/MEZIANI.ORG/Labs/Thela/landing/.npm-cache/_logs/2025-10-03T19_12_34_768Z-
+10 verbose logfile /Volumes/Seagate/MEZIANI.ORG/Labs/Thela/landing/.npm-cache/_logs/2025-10-03T19_12_34_768Z-debug-0.log
+11 silly logfile done cleaning log files
+12 silly packumentCache heap:4496293888 maxSize:1124073472 maxEntrySize:562036736
+13 verbose shrinkwrap failed to load node_modules/.package-lock.json out of date, updated: node_modules
+14 http fetch GET 200 https://registry.npmjs.org/playwright 178ms (cache revalidated)
+15 silly packumentCache heap:4496293888 maxSize:1124073472 maxEntrySize:562036736
+16 silly packumentCache heap:4496293888 maxSize:1124073472 maxEntrySize:562036736
+17 verbose cwd /Volumes/Seagate/MEZIANI.ORG/Labs/Thela/landing
+18 verbose os Darwin 25.0.0
+19 verbose node v24.7.0
+20 verbose npm  v11.5.1
+21 verbose exit 0
+22 info ok
