@@ -94,32 +94,28 @@ export const frDictionary: Dictionary = {
         tag: "Rituels",
         title: "Rappels de rituels",
         description: "Épinglez les cérémonies à l'aube et partagez-les avec votre cercle.",
-        image:
-          "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80",
+        image: "/gallery/rituals.jpg",
       },
       {
         id: "circles",
         tag: "Cercles",
         title: "Cercles communautaires",
         description: "Écoutez des salons de narration en direct animés à travers le Tamazgha.",
-        image:
-          "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=600&q=80",
+        image: "/gallery/circles.jpg",
       },
       {
         id: "marketplace",
         tag: "Marché",
         title: "Marché",
         description: "Soutenez des artisans vérifiés avec des créations amazighes sélectionnées.",
-        image:
-          "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=600&q=80",
+        image: "/gallery/marketplace.jpg",
       },
       {
         id: "archive",
         tag: "Archive",
         title: "Archive vivante",
         description: "Sauvegardez des histoires orales avec des traductions pour les générations futures.",
-        image:
-          "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80",
+        image: "/gallery/archive.jpg",
       },
     ],
   },

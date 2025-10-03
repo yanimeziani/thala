@@ -94,32 +94,28 @@ export const enDictionary: Dictionary = {
         tag: "Rituals",
         title: "Ritual Reminders",
         description: "Pin sunrise ceremonies and share them with your circle.",
-        image:
-          "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=600&q=80",
+        image: "/gallery/rituals.jpg",
       },
       {
         id: "circles",
         tag: "Circles",
         title: "Community Circles",
         description: "Listen to live storytelling rooms hosted across Tamazgha.",
-        image:
-          "https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?auto=format&fit=crop&w=600&q=80",
+        image: "/gallery/circles.jpg",
       },
       {
         id: "marketplace",
         tag: "Marketplace",
         title: "Marketplace",
         description: "Support verified artisans with curated Amazigh goods.",
-        image:
-          "https://images.unsplash.com/photo-1506784983877-45594efa4cbe?auto=format&fit=crop&w=600&q=80",
+        image: "/gallery/marketplace.jpg",
       },
       {
         id: "archive",
         tag: "Archive",
         title: "Living Archive",
         description: "Save oral histories with translations for future generations.",
-        image:
-          "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=600&q=80",
+        image: "/gallery/archive.jpg",
       },
     ],
   },
