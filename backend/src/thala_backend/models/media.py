@@ -3,9 +3,10 @@ from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import ARRAY, CHECK, ForeignKey, Integer, Numeric, String, Text
+from sqlalchemy import ARRAY, ForeignKey, Integer, Numeric, String, Text
 from sqlalchemy.dialects.postgresql import JSONB, UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.schema import CheckConstraint
 
 from ..db.base import Base
 
@@ -104,4 +105,4 @@ class CreatorFollower(Base):
     user_id: Mapped[UUID] = mapped_column(PGUUID(as_uuid=True), primary_key=True)
     followed_at: Mapped[datetime] = mapped_column(default=utcnow)
 
-    __table_args__ = (CHECK("creator_handle <> ''"),)
+    __table_args__ = (CheckConstraint("creator_handle <> ''"),)
