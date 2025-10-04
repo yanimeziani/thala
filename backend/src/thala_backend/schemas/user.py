@@ -113,3 +113,7 @@ class UserProfile(BaseModel):
             }
         }
     )
+
+
+# Alias for backward compatibility
+UserPublic = UserProfile
