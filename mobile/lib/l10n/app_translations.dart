@@ -236,16 +236,24 @@ class AppTranslations {
 
   static String fromLocale(Locale locale, AppText key) {
     final languageCode = locale.languageCode.toLowerCase();
-    final language = languageCode == 'fr' ? 'fr' :
-                     languageCode == 'ar' ? 'ar' : 'en';
-    final options = _values[key];
-    if (options == null) {
-      return '';
+    final keyStr = key.toString().split('.').last;
+
+    // Select translation map based on language
+    Map<String, String> translations;
+    if (languageCode == 'fr') {
+      translations = translationsFr;
+    } else if (languageCode == 'ar') {
+      translations = translationsAr;
+    } else {
+      translations = translationsEn;
     }
-    return options[language] ?? options['en'] ?? '';
+
+    // Return translation with fallback to English
+    return translations[keyStr] ?? translationsEn[keyStr] ?? '';
   }
 
-  static const Map<AppText, Map<String, String>> _values = {
+  // Old format kept for reference (will be removed)
+  static const Map<AppText, Map<String, String>> _valuesOld = {
     AppText.appName: {'en': 'Thala', 'fr': 'Thala', 'ar': 'ثالا'},
     AppText.tagline: {
       'en': 'Stories of Amazigh culture in motion',
