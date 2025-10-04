@@ -204,6 +204,22 @@ enum AppText {
   communityHostEmail,
   communityHostMessage,
   communityHostInvalidEmail,
+  feedbackTitle,
+  feedbackBugReport,
+  feedbackFeatureRequest,
+  feedbackGeneralFeedback,
+  feedbackTitleHint,
+  feedbackDescriptionHint,
+  feedbackEmailHint,
+  feedbackNameHint,
+  feedbackSubmit,
+  feedbackSuccess,
+  feedbackError,
+  feedbackTypeLabel,
+  feedbackTitleLabel,
+  feedbackDescriptionLabel,
+  feedbackContactLabel,
+  feedbackOptionalContact,
 }
 
 /// Lightweight translation helper backed by in-memory maps.
@@ -1025,6 +1041,86 @@ class AppTranslations {
       'en': 'Enter a valid email',
       'fr': 'Saisis un email valide',
       'ar': 'أدخل بريداً إلكترونياً صالحاً',
+    },
+    AppText.feedbackTitle: {
+      'en': 'Send Feedback',
+      'fr': 'Envoyer un retour',
+      'ar': 'إرسال ملاحظات',
+    },
+    AppText.feedbackBugReport: {
+      'en': 'Report a Bug',
+      'fr': 'Signaler un bug',
+      'ar': 'الإبلاغ عن خطأ',
+    },
+    AppText.feedbackFeatureRequest: {
+      'en': 'Request a Feature',
+      'fr': 'Demander une fonctionnalité',
+      'ar': 'طلب ميزة',
+    },
+    AppText.feedbackGeneralFeedback: {
+      'en': 'General Feedback',
+      'fr': 'Retour général',
+      'ar': 'ملاحظات عامة',
+    },
+    AppText.feedbackTitleHint: {
+      'en': 'Brief summary of your feedback',
+      'fr': 'Résumé bref de votre retour',
+      'ar': 'ملخص موجز لملاحظاتك',
+    },
+    AppText.feedbackDescriptionHint: {
+      'en': 'Describe your feedback in detail',
+      'fr': 'Décrivez votre retour en détail',
+      'ar': 'صف ملاحظاتك بالتفصيل',
+    },
+    AppText.feedbackEmailHint: {
+      'en': 'Your email (optional)',
+      'fr': 'Votre email (optionnel)',
+      'ar': 'بريدك الإلكتروني (اختياري)',
+    },
+    AppText.feedbackNameHint: {
+      'en': 'Your name (optional)',
+      'fr': 'Votre nom (optionnel)',
+      'ar': 'اسمك (اختياري)',
+    },
+    AppText.feedbackSubmit: {
+      'en': 'Submit Feedback',
+      'fr': 'Envoyer le retour',
+      'ar': 'إرسال الملاحظات',
+    },
+    AppText.feedbackSuccess: {
+      'en': 'Thank you! Your feedback has been submitted.',
+      'fr': 'Merci ! Votre retour a été envoyé.',
+      'ar': 'شكراً! تم إرسال ملاحظاتك.',
+    },
+    AppText.feedbackError: {
+      'en': 'Could not submit feedback. Please try again.',
+      'fr': 'Impossible d\'envoyer le retour. Veuillez réessayer.',
+      'ar': 'تعذر إرسال الملاحظات. يرجى المحاولة مرة أخرى.',
+    },
+    AppText.feedbackTypeLabel: {
+      'en': 'Feedback Type',
+      'fr': 'Type de retour',
+      'ar': 'نوع الملاحظات',
+    },
+    AppText.feedbackTitleLabel: {
+      'en': 'Title',
+      'fr': 'Titre',
+      'ar': 'العنوان',
+    },
+    AppText.feedbackDescriptionLabel: {
+      'en': 'Description',
+      'fr': 'Description',
+      'ar': 'الوصف',
+    },
+    AppText.feedbackContactLabel: {
+      'en': 'Contact Information',
+      'fr': 'Informations de contact',
+      'ar': 'معلومات الاتصال',
+    },
+    AppText.feedbackOptionalContact: {
+      'en': 'Optional - We may contact you for follow-up',
+      'fr': 'Optionnel - Nous pouvons vous contacter pour un suivi',
+      'ar': 'اختياري - قد نتواصل معك للمتابعة',
     },
   };
 }

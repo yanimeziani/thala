@@ -1,78 +1,54 @@
 import { NextResponse } from "next/server"
-import { withAuth } from "@/lib/auth-utils"
-import { AdminPermission, hasPermission } from "@/lib/admin-config"
-import { logAuditAction, AuditAction } from "@/lib/audit-log"
+import { auth } from "@/auth"
 
-interface VideoStats {
-  likes?: number
-  comments?: number
-  shares?: number
-}
-
-/**
- * GET /api/admin/stats
- * Get dashboard statistics
- * Protected route - requires authentication
- */
 export async function GET() {
-  return withAuth(async (session) => {
-    // Check permission
-    if (!hasPermission(session.user.email, AdminPermission.VIEW_SETTINGS)) {
+  try {
+    // Check authentication
+    const session = await auth()
+    if (!session?.user) {
       return NextResponse.json(
-        { error: "Insufficient permissions" },
-        { status: 403 }
+        { error: "Unauthorized" },
+        { status: 401 }
       )
     }
 
-    // Log the action
-    logAuditAction({
-      action: AuditAction.USER_VIEW,
-      adminEmail: session.user.email,
-      adminName: session.user.name || undefined,
-      resourceType: "dashboard_stats",
-      details: { timestamp: new Date().toISOString() },
+    // Fetch stats from backend
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:8000"
+    const response = await fetch(`${backendUrl}/api/v1/admin/stats`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      cache: 'no-store'
     })
 
-    // Fetch real stats from backend API
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://backend.thala.app/api/v1"
-
-    try {
-      const [users, events, videos, archive, communities] = await Promise.all([
-        fetch(`${API_BASE_URL}/users`).then(r => r.ok ? r.json() : []),
-        fetch(`${API_BASE_URL}/events`).then(r => r.ok ? r.json() : []),
-        fetch(`${API_BASE_URL}/videos`).then(r => r.ok ? r.json() : []),
-        fetch(`${API_BASE_URL}/archive`).then(r => r.ok ? r.json() : []),
-        fetch(`${API_BASE_URL}/community`).then(r => r.ok ? r.json() : []),
-      ])
-
-      const stats = {
-        totalUsers: Array.isArray(users) ? users.length : 0,
-        totalEvents: Array.isArray(events) ? events.length : 0,
-        totalVideos: Array.isArray(videos) ? videos.length : 0,
-        totalArchiveEntries: Array.isArray(archive) ? archive.length : 0,
-        totalMessages: 0, // TODO: Add messages endpoint
-        totalCommunities: Array.isArray(communities) ? communities.length : 0,
-        // Additional stats
-        totalLikes: Array.isArray(videos) ? videos.reduce((sum: number, v: VideoStats) => sum + (v.likes || 0), 0) : 0,
-        totalComments: Array.isArray(videos) ? videos.reduce((sum: number, v: VideoStats) => sum + (v.comments || 0), 0) : 0,
-        totalShares: Array.isArray(videos) ? videos.reduce((sum: number, v: VideoStats) => sum + (v.shares || 0), 0) : 0,
-      }
-
-      return NextResponse.json(stats)
-    } catch (error) {
-      console.error('Error fetching stats:', error)
-      // Return empty stats on error
-      return NextResponse.json({
-        totalUsers: 0,
-        totalEvents: 0,
-        totalVideos: 0,
-        totalArchiveEntries: 0,
-        totalMessages: 0,
-        totalCommunities: 0,
-        totalLikes: 0,
-        totalComments: 0,
-        totalShares: 0,
-      })
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: "Failed to fetch stats" }))
+      return NextResponse.json(
+        { error: errorData.error || "Failed to fetch stats" },
+        { status: response.status }
+      )
     }
-  })
+
+    const data = await response.json()
+
+    return NextResponse.json({
+      totalUsers: data.total_users || 0,
+      totalEvents: data.total_events || 0,
+      totalVideos: data.total_videos || 0,
+      totalArchiveEntries: data.total_archive_entries || 0,
+      totalMessages: data.total_messages || 0,
+      totalCommunities: data.total_communities || 0,
+      totalLikes: data.total_likes || 0,
+      totalComments: data.total_comments || 0,
+      totalShares: data.total_shares || 0,
+    })
+
+  } catch (error) {
+    console.error("Stats fetch error:", error)
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Internal server error" },
+      { status: 500 }
+    )
+  }
 }

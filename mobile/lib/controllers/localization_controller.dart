@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum AppLanguage { english, french }
+enum AppLanguage { english, french, arabic }
 
 /// Handles the active locale and notifies listeners when the user toggles language.
 class LocalizationController extends ChangeNotifier {
@@ -12,15 +12,18 @@ class LocalizationController extends ChangeNotifier {
 
   static const _preferenceKey = 'thala.preferredLanguage';
 
-  static const supportedLocales = <Locale>[Locale('en'), Locale('fr')];
+  static const supportedLocales = <Locale>[Locale('en'), Locale('fr'), Locale('ar')];
 
   Locale _locale;
 
   Locale get locale => _locale;
 
-  AppLanguage get language => _locale.languageCode.toLowerCase() == 'fr'
-      ? AppLanguage.french
-      : AppLanguage.english;
+  AppLanguage get language {
+    final code = _locale.languageCode.toLowerCase();
+    if (code == 'fr') return AppLanguage.french;
+    if (code == 'ar') return AppLanguage.arabic;
+    return AppLanguage.english;
+  }
 
   Future<void> loadPreferredLocale() async {
     try {
@@ -41,9 +44,19 @@ class LocalizationController extends ChangeNotifier {
   }
 
   void setLanguage(AppLanguage language) {
-    final target = language == AppLanguage.french
-        ? const Locale('fr')
-        : const Locale('en');
+    final Locale target;
+    switch (language) {
+      case AppLanguage.french:
+        target = const Locale('fr');
+        break;
+      case AppLanguage.arabic:
+        target = const Locale('ar');
+        break;
+      case AppLanguage.english:
+      default:
+        target = const Locale('en');
+        break;
+    }
     if (_locale == target) return;
     _locale = target;
     notifyListeners();
@@ -54,7 +67,9 @@ class LocalizationController extends ChangeNotifier {
     setLanguage(
       language == AppLanguage.english
           ? AppLanguage.french
-          : AppLanguage.english,
+          : language == AppLanguage.french
+              ? AppLanguage.arabic
+              : AppLanguage.english,
     );
   }
 
@@ -68,8 +83,12 @@ class LocalizationController extends ChangeNotifier {
   }
 
   static Locale _sanitize(Locale locale) {
-    if (locale.languageCode.toLowerCase() == 'fr') {
+    final code = locale.languageCode.toLowerCase();
+    if (code == 'fr') {
       return const Locale('fr');
+    }
+    if (code == 'ar') {
+      return const Locale('ar');
     }
     return const Locale('en');
   }

@@ -14,6 +14,8 @@ import {
   Settings,
   LayoutDashboard,
   FileText,
+  Database,
+  Bug,
 } from "lucide-react"
 
 const navItems = [
@@ -26,6 +28,8 @@ const navItems = [
   { href: "/community", label: "Community", icon: Community },
   { href: "/content-profiles", label: "Content Profiles", icon: FileText },
   { href: "/messages", label: "Messages", icon: MessageSquare },
+  { href: "/feedback", label: "Feedback", icon: Bug },
+  { href: "/sql-editor", label: "SQL Editor", icon: Database },
   { href: "/settings", label: "Settings", icon: Settings },
 ]
 

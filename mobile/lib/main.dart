@@ -144,8 +144,13 @@ class ThalaApp extends StatelessWidget {
       onGenerateTitle: (context) =>
           AppTranslations.of(context, AppText.appName),
       builder: (context, child) {
+        final localization = context.watch<LocalizationController>();
+        final textDirection = localization.locale.languageCode == 'ar'
+            ? TextDirection.rtl
+            : TextDirection.ltr;
+
         final content = Directionality(
-          textDirection: TextDirection.ltr,
+          textDirection: textDirection,
           child: child ?? const SizedBox.shrink(),
         );
 

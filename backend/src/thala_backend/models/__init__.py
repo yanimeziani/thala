@@ -8,6 +8,7 @@ from thala_backend.models.community import (
 )
 from thala_backend.models.content import ContentProfile
 from thala_backend.models.event import CulturalEvent
+from thala_backend.models.feedback import Feedback
 from thala_backend.models.media import (
     CreatorFollower,
     MusicTrack,
@@ -27,6 +28,7 @@ __all__ = [
     "ContentProfile",
     "CreatorFollower",
     "CulturalEvent",
+    "Feedback",
     "Message",
     "MessageThread",
     "MusicTrack",
