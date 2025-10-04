@@ -166,15 +166,33 @@ async def send_message(
         thread_id=thread_id,
         author_handle=message_data.author_handle,
         author_display_name=message_data.author_display_name,
+        message_type=message_data.message_type,
         body=message_data.body,
+        media_url=message_data.media_url,
+        thumbnail_url=message_data.thumbnail_url,
+        media_width=message_data.media_width,
+        media_height=message_data.media_height,
+        media_duration=message_data.media_duration,
+        media_size=message_data.media_size,
         delivery_status=message_data.delivery_status,
     )
 
     session.add(message)
 
-    # Update thread's last message preview (simplified - just use body for both languages)
-    thread.last_message_en = message_data.body[:100]
-    thread.last_message_fr = message_data.body[:100]
+    # Update thread's last message preview
+    if message_data.message_type == "text":
+        preview = message_data.body[:100]
+    elif message_data.message_type == "image":
+        preview = "📷 Image"
+    elif message_data.message_type == "video":
+        preview = "🎥 Video"
+    elif message_data.message_type == "audio":
+        preview = "🎵 Audio message"
+    else:
+        preview = "Message"
+
+    thread.last_message_en = preview
+    thread.last_message_fr = preview
 
     await session.commit()
     await session.refresh(message)

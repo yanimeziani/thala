@@ -122,14 +122,14 @@ SnackBar buildThalaSnackBar(
   return SnackBar(
     duration: duration,
     action: action,
-    behavior: SnackBarBehavior.floating,
+    behavior: SnackBarBehavior.fixed,
     elevation: 0,
     backgroundColor: Colors.transparent,
     padding: EdgeInsets.zero,
     margin: EdgeInsets.only(
       left: isCupertino ? 120 : 32,
       right: isCupertino ? 120 : 32,
-      bottom: isCupertino ? 72 : 24,
+      bottom: isCupertino ? 16 : 16,
     ),
     content: Align(alignment: Alignment.center, child: body),
   );

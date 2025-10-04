@@ -200,6 +200,8 @@ class _VideoFeedPageState extends State<VideoFeedPage> {
                 showWelcome: showWelcome && _activeIndex == 0,
                 activePost: _resolveActivePost(showWelcome, posts),
                 locale: locale,
+                isMuted: _isMuted,
+                onToggleMute: _toggleMute,
               ),
             ),
             if (feed.error != null)
@@ -240,12 +242,16 @@ class _FeedHeader extends StatelessWidget {
     required this.showWelcome,
     required this.activePost,
     required this.locale,
+    required this.isMuted,
+    required this.onToggleMute,
   });
 
   final VoidCallback onRefresh;
   final bool showWelcome;
   final VideoPost? activePost;
   final Locale locale;
+  final bool isMuted;
+  final VoidCallback onToggleMute;
 
   @override
   Widget build(BuildContext context) {
@@ -304,6 +310,12 @@ class _FeedHeader extends StatelessWidget {
         final Widget actions = Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            _FeedActionIcon(
+              icon: isMuted ? Icons.volume_off : Icons.volume_up,
+              tooltip: isMuted ? 'Unmute' : 'Mute',
+              onPressed: onToggleMute,
+            ),
+            const SizedBox(width: 8),
             _FeedActionIcon(
               icon: Icons.person_outline,
               tooltip: AppTranslations.of(context, AppText.viewProfile),
@@ -500,6 +512,8 @@ class _FeedWelcomePageState extends State<_FeedWelcomePage>
   late final AnimationController _backgroundController;
   late final AnimationController _pulseController;
   late final AnimationController _typographyController;
+  late final AnimationController _particleController;
+  late final AnimationController _shimmerController;
   late final Animation<double> _typographyAnimation;
 
   @override
@@ -507,17 +521,25 @@ class _FeedWelcomePageState extends State<_FeedWelcomePage>
     super.initState();
     _backgroundController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 12),
+      duration: const Duration(seconds: 15),
     )..repeat();
     _pulseController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2000),
+      duration: const Duration(milliseconds: 1800),
       lowerBound: 0.0,
       upperBound: 1.0,
     )..repeat(reverse: true);
+    _particleController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 20),
+    )..repeat();
+    _shimmerController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..repeat();
     _typographyController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1800),
+      duration: const Duration(milliseconds: 2200),
     );
     _typographyAnimation = CurvedAnimation(
       parent: _typographyController,
@@ -528,6 +550,8 @@ class _FeedWelcomePageState extends State<_FeedWelcomePage>
 
   @override
   void dispose() {
+    _shimmerController.dispose();
+    _particleController.dispose();
     _typographyController.dispose();
     _pulseController.dispose();
     _backgroundController.dispose();
@@ -543,6 +567,7 @@ class _FeedWelcomePageState extends State<_FeedWelcomePage>
       fit: StackFit.expand,
       children: [
         _MeshGradientBackground(animation: _backgroundController),
+        _ParticleField(animation: _particleController),
         _AnimatedGlowLayer(animation: _backgroundController),
         Positioned.fill(
           child: DecoratedBox(
@@ -551,8 +576,8 @@ class _FeedWelcomePageState extends State<_FeedWelcomePage>
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.black.withOpacity(0.1),
-                  Colors.black.withOpacity(0.4),
+                  Colors.black.withOpacity(0.15),
+                  Colors.black.withOpacity(0.5),
                 ],
               ),
             ),
@@ -566,42 +591,82 @@ class _FeedWelcomePageState extends State<_FeedWelcomePage>
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                _PulsingLogo(animation: _pulseController),
-                const SizedBox(height: 48),
+                _EnhancedPulsingLogo(animation: _pulseController),
+                const SizedBox(height: 64),
                 AnimatedBuilder(
-                  animation: _typographyAnimation,
+                  animation: Listenable.merge([_typographyAnimation, _shimmerController]),
                   builder: (context, child) {
+                    final fadeT = _typographyAnimation.value;
+                    final shimmerT = _shimmerController.value;
+
                     return Opacity(
-                      opacity: _typographyAnimation.value,
+                      opacity: fadeT,
                       child: Transform.translate(
-                        offset: Offset(0, (1 - _typographyAnimation.value) * 16),
-                        child: Column(
-                          children: [
-                            Text(
+                        offset: Offset(0, (1 - fadeT) * 30),
+                        child: Transform.scale(
+                          scale: 0.8 + (fadeT * 0.2),
+                          child: ShaderMask(
+                            shaderCallback: (Rect bounds) {
+                              final sweepPos = (shimmerT * 1.5) % 1.0;
+                              return LinearGradient(
+                                begin: Alignment(-1 + (sweepPos * 2.0), -0.5),
+                                end: Alignment(1 + (sweepPos * 2.0), 0.5),
+                                colors: const [
+                                  Color(0xFFFFFFFF),
+                                  Color(0xFF00D9A8),
+                                  Color(0xFF6366F1),
+                                  Color(0xFFFFFFFF),
+                                ],
+                                stops: const [0.0, 0.3, 0.7, 1.0],
+                              ).createShader(bounds);
+                            },
+                            blendMode: BlendMode.srcIn,
+                            child: Text(
                               tagline,
                               textAlign: TextAlign.center,
                               style: theme.textTheme.headlineLarge?.copyWith(
-                                fontWeight: FontWeight.w300,
+                                fontWeight: FontWeight.w600,
                                 letterSpacing: -0.5,
-                                color: Colors.white,
+                                fontSize: 42,
                                 height: 1.15,
-                                fontSize: 36,
+                                shadows: [
+                                  Shadow(
+                                    color: const Color(0xFF00D9A8).withOpacity(0.5),
+                                    blurRadius: 20,
+                                  ),
+                                  Shadow(
+                                    color: Colors.white.withOpacity(0.3),
+                                    blurRadius: 10,
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(height: 56),
-                            Icon(
-                              Icons.keyboard_arrow_up_rounded,
-                              color: Colors.white.withOpacity(0.7),
-                              size: 48,
-                            ),
-                            const SizedBox(height: 8),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 72),
+                AnimatedBuilder(
+                  animation: _typographyAnimation,
+                  builder: (context, child) {
+                    final delayedProgress = (_typographyAnimation.value - 0.6).clamp(0.0, 1.0) / 0.4;
+                    return Opacity(
+                      opacity: delayedProgress,
+                      child: Transform.translate(
+                        offset: Offset(0, (1 - delayedProgress) * 20),
+                        child: Column(
+                          children: [
+                            _FloatingArrow(animation: _pulseController),
+                            const SizedBox(height: 12),
                             Text(
-                              'Swipe',
+                              'Swipe Up',
                               textAlign: TextAlign.center,
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                color: Colors.white.withOpacity(0.85),
-                                fontWeight: FontWeight.w400,
-                                letterSpacing: 2,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: Colors.white.withOpacity(0.9),
+                                fontWeight: FontWeight.w500,
+                                letterSpacing: 3,
                               ),
                             ),
                           ],
@@ -651,42 +716,49 @@ class _MeshGradientPainter extends CustomPainter {
 
   final double value;
 
-  static const _baseColor = Color(0xFF071D1D);
+  static const _baseColor = Color(0xFF0A1A1F);
   static const List<_MeshNode> _nodes = [
     _MeshNode(
-      color: Color(0xFF0F5B4F),
-      origin: Offset(0.18, 0.24),
-      offset: Offset(0.08, 0.05),
-      radiusFactor: 0.95,
+      color: Color(0xFF00D9A8),
+      origin: Offset(0.15, 0.20),
+      offset: Offset(0.10, 0.08),
+      radiusFactor: 1.1,
       phase: 0.0,
     ),
     _MeshNode(
-      color: Color(0xFF2A7F55),
-      origin: Offset(0.75, 0.22),
-      offset: Offset(0.06, 0.04),
+      color: Color(0xFF6366F1),
+      origin: Offset(0.80, 0.18),
+      offset: Offset(0.08, 0.06),
+      radiusFactor: 1.0,
+      phase: 1.3,
+    ),
+    _MeshNode(
+      color: Color(0xFFA855F7),
+      origin: Offset(0.70, 0.80),
+      offset: Offset(0.06, 0.09),
+      radiusFactor: 1.05,
+      phase: 2.6,
+    ),
+    _MeshNode(
+      color: Color(0xFFFFB84D),
+      origin: Offset(0.25, 0.82),
+      offset: Offset(0.09, 0.07),
+      radiusFactor: 0.95,
+      phase: 3.5,
+    ),
+    _MeshNode(
+      color: Color(0xFFFF6B9D),
+      origin: Offset(0.50, 0.45),
+      offset: Offset(0.05, 0.10),
       radiusFactor: 0.85,
-      phase: 1.1,
+      phase: 4.8,
     ),
     _MeshNode(
-      color: Color(0xFF73C27A),
-      origin: Offset(0.65, 0.75),
-      offset: Offset(0.05, 0.06),
-      radiusFactor: 0.9,
-      phase: 2.4,
-    ),
-    _MeshNode(
-      color: Color(0xFFF4C772),
-      origin: Offset(0.28, 0.78),
+      color: Color(0xFF22D3EE),
+      origin: Offset(0.35, 0.55),
       offset: Offset(0.07, 0.05),
-      radiusFactor: 0.8,
-      phase: 3.2,
-    ),
-    _MeshNode(
-      color: Color(0xFFF28A6C),
-      origin: Offset(0.48, 0.48),
-      offset: Offset(0.04, 0.07),
       radiusFactor: 0.75,
-      phase: 4.4,
+      phase: 5.2,
     ),
   ];
 
@@ -822,6 +894,222 @@ class _PulsingLogo extends StatelessWidget {
       },
     );
   }
+}
+
+class _EnhancedPulsingLogo extends StatelessWidget {
+  const _EnhancedPulsingLogo({required this.animation});
+
+  final Animation<double> animation;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        final scale = 0.94 + (animation.value * 0.06);
+        final glow = 0.3 + animation.value * 0.25;
+        return Container(
+          width: 160,
+          height: 160,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: RadialGradient(
+              colors: [
+                const Color(0xFF00D9A8).withOpacity(glow * 0.6),
+                const Color(0xFF6366F1).withOpacity(glow * 0.3),
+                Colors.transparent,
+              ],
+              stops: const [0.0, 0.4, 1.0],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF00D9A8).withOpacity(glow * 0.7),
+                blurRadius: 40 + (animation.value * 30),
+                spreadRadius: 2 + (animation.value * 4),
+              ),
+              BoxShadow(
+                color: const Color(0xFF6366F1).withOpacity(glow * 0.5),
+                blurRadius: 60 + (animation.value * 40),
+                spreadRadius: -5,
+              ),
+              BoxShadow(
+                color: Colors.white.withOpacity(glow),
+                blurRadius: 25 + (animation.value * 20),
+                spreadRadius: 0,
+              ),
+            ],
+          ),
+          child: Transform.scale(
+            scale: scale,
+            child: const Center(
+              child: ThalaLogo(size: 92, fit: BoxFit.contain),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _FloatingArrow extends StatelessWidget {
+  const _FloatingArrow({required this.animation});
+
+  final Animation<double> animation;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, child) {
+        final offset = math.sin(animation.value * math.pi * 2) * 8;
+        final glow = 0.5 + animation.value * 0.3;
+        return Transform.translate(
+          offset: Offset(0, offset),
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.white.withOpacity(glow * 0.4),
+                  blurRadius: 20 + (animation.value * 10),
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            child: Icon(
+              Icons.keyboard_arrow_up_rounded,
+              color: Colors.white.withOpacity(0.95),
+              size: 56,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ParticleField extends StatelessWidget {
+  const _ParticleField({required this.animation});
+
+  final Animation<double> animation;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, _) {
+        return CustomPaint(
+          painter: _ParticlePainter(animation.value),
+        );
+      },
+    );
+  }
+}
+
+class _ParticlePainter extends CustomPainter {
+  const _ParticlePainter(this.value);
+
+  final double value;
+
+  static const int _particleCount = 35;
+  static const List<_Particle> _particles = [
+    _Particle(startX: 0.15, startY: 0.25, speedY: 0.08, speedX: 0.02, size: 3.5, opacity: 0.6, phase: 0.0),
+    _Particle(startX: 0.82, startY: 0.15, speedY: 0.12, speedX: -0.015, size: 2.8, opacity: 0.5, phase: 0.3),
+    _Particle(startX: 0.45, startY: 0.75, speedY: 0.10, speedX: 0.025, size: 4.0, opacity: 0.7, phase: 0.6),
+    _Particle(startX: 0.68, startY: 0.35, speedY: 0.09, speedX: -0.02, size: 3.2, opacity: 0.55, phase: 0.9),
+    _Particle(startX: 0.28, startY: 0.55, speedY: 0.11, speedX: 0.018, size: 3.0, opacity: 0.65, phase: 1.2),
+    _Particle(startX: 0.90, startY: 0.68, speedY: 0.07, speedX: -0.022, size: 3.8, opacity: 0.6, phase: 1.5),
+    _Particle(startX: 0.12, startY: 0.88, speedY: 0.13, speedX: 0.015, size: 2.5, opacity: 0.5, phase: 1.8),
+    _Particle(startX: 0.55, startY: 0.12, speedY: 0.08, speedX: 0.028, size: 3.6, opacity: 0.68, phase: 2.1),
+    _Particle(startX: 0.38, startY: 0.42, speedY: 0.10, speedX: -0.018, size: 2.9, opacity: 0.58, phase: 2.4),
+    _Particle(startX: 0.75, startY: 0.58, speedY: 0.09, speedX: 0.020, size: 3.3, opacity: 0.62, phase: 2.7),
+    _Particle(startX: 0.20, startY: 0.72, speedY: 0.11, speedX: -0.025, size: 4.2, opacity: 0.72, phase: 3.0),
+    _Particle(startX: 0.62, startY: 0.22, speedY: 0.12, speedX: 0.016, size: 2.7, opacity: 0.52, phase: 3.3),
+    _Particle(startX: 0.48, startY: 0.85, speedY: 0.08, speedX: -0.019, size: 3.4, opacity: 0.64, phase: 3.6),
+    _Particle(startX: 0.85, startY: 0.48, speedY: 0.10, speedX: 0.024, size: 3.1, opacity: 0.60, phase: 3.9),
+    _Particle(startX: 0.32, startY: 0.18, speedY: 0.09, speedX: -0.017, size: 3.7, opacity: 0.66, phase: 4.2),
+    _Particle(startX: 0.08, startY: 0.62, speedY: 0.13, speedX: 0.021, size: 2.6, opacity: 0.54, phase: 4.5),
+    _Particle(startX: 0.72, startY: 0.92, speedY: 0.07, speedX: -0.023, size: 3.9, opacity: 0.70, phase: 4.8),
+    _Particle(startX: 0.52, startY: 0.32, speedY: 0.11, speedX: 0.019, size: 3.0, opacity: 0.59, phase: 5.1),
+    _Particle(startX: 0.95, startY: 0.28, speedY: 0.08, speedX: -0.026, size: 3.5, opacity: 0.63, phase: 5.4),
+    _Particle(startX: 0.18, startY: 0.48, speedY: 0.12, speedX: 0.022, size: 2.8, opacity: 0.56, phase: 5.7),
+    _Particle(startX: 0.65, startY: 0.08, speedY: 0.10, speedX: -0.020, size: 3.3, opacity: 0.61, phase: 6.0),
+    _Particle(startX: 0.42, startY: 0.68, speedY: 0.09, speedX: 0.027, size: 4.1, opacity: 0.69, phase: 0.2),
+    _Particle(startX: 0.88, startY: 0.82, speedY: 0.11, speedX: -0.016, size: 2.9, opacity: 0.57, phase: 0.5),
+    _Particle(startX: 0.25, startY: 0.38, speedY: 0.08, speedX: 0.018, size: 3.6, opacity: 0.67, phase: 0.8),
+    _Particle(startX: 0.58, startY: 0.52, speedY: 0.13, speedX: -0.024, size: 2.7, opacity: 0.53, phase: 1.1),
+    _Particle(startX: 0.35, startY: 0.78, speedY: 0.09, speedX: 0.021, size: 3.4, opacity: 0.65, phase: 1.4),
+    _Particle(startX: 0.78, startY: 0.42, speedY: 0.10, speedX: -0.019, size: 3.1, opacity: 0.59, phase: 1.7),
+    _Particle(startX: 0.05, startY: 0.95, speedY: 0.12, speedX: 0.025, size: 3.8, opacity: 0.68, phase: 2.0),
+    _Particle(startX: 0.92, startY: 0.55, speedY: 0.08, speedX: -0.022, size: 3.2, opacity: 0.62, phase: 2.3),
+    _Particle(startX: 0.50, startY: 0.05, speedY: 0.11, speedX: 0.017, size: 2.9, opacity: 0.58, phase: 2.6),
+    _Particle(startX: 0.68, startY: 0.72, speedY: 0.09, speedX: -0.020, size: 3.5, opacity: 0.64, phase: 2.9),
+    _Particle(startX: 0.22, startY: 0.62, speedY: 0.10, speedX: 0.023, size: 4.0, opacity: 0.70, phase: 3.2),
+    _Particle(startX: 0.85, startY: 0.18, speedY: 0.12, speedX: -0.018, size: 2.8, opacity: 0.55, phase: 3.5),
+    _Particle(startX: 0.40, startY: 0.92, speedY: 0.08, speedX: 0.026, size: 3.3, opacity: 0.63, phase: 3.8),
+    _Particle(startX: 0.60, startY: 0.28, speedY: 0.09, speedX: -0.021, size: 3.7, opacity: 0.66, phase: 4.1),
+  ];
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (size.width <= 0 || size.height <= 0) {
+      return;
+    }
+
+    for (final particle in _particles) {
+      final progress = (value + particle.phase) % 1.0;
+      final x = size.width * (particle.startX + particle.speedX * progress);
+      final y = size.height * ((particle.startY - particle.speedY * progress) % 1.0);
+
+      final fadeIn = progress < 0.1 ? progress / 0.1 : 1.0;
+      final fadeOut = progress > 0.9 ? (1.0 - progress) / 0.1 : 1.0;
+      final opacity = particle.opacity * fadeIn * fadeOut;
+
+      final gradient = RadialGradient(
+        colors: [
+          Colors.white.withOpacity(opacity),
+          Colors.white.withOpacity(opacity * 0.3),
+          Colors.transparent,
+        ],
+        stops: const [0.0, 0.5, 1.0],
+      );
+
+      final paint = Paint()
+        ..shader = gradient.createShader(
+          Rect.fromCircle(
+            center: Offset(x, y),
+            radius: particle.size,
+          ),
+        );
+
+      canvas.drawCircle(Offset(x, y), particle.size, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _ParticlePainter oldDelegate) {
+    return oldDelegate.value != value;
+  }
+}
+
+class _Particle {
+  const _Particle({
+    required this.startX,
+    required this.startY,
+    required this.speedY,
+    required this.speedX,
+    required this.size,
+    required this.opacity,
+    required this.phase,
+  });
+
+  final double startX;
+  final double startY;
+  final double speedY;
+  final double speedX;
+  final double size;
+  final double opacity;
+  final double phase;
 }
 
 class _AnimatedGradientHeadline extends StatelessWidget {

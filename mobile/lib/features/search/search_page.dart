@@ -75,12 +75,8 @@ class SearchPageState extends State<SearchPage> {
       unawaited(_searchController.submitQuery(value));
       return;
     }
-    final results = _filteredOptions;
-    if (results.isEmpty) {
-      HapticFeedback.selectionClick();
-      return;
-    }
-    _openOption(results.first);
+    // Just submit the search, don't navigate away
+    HapticFeedback.selectionClick();
   }
 
   List<_ResolvedSearchOption> get _filteredOptions {
@@ -94,13 +90,6 @@ class SearchPageState extends State<SearchPage> {
           .toLowerCase();
       return haystack.contains(query);
     }).toList();
-  }
-
-  void _openOption(_ResolvedSearchOption option) {
-    HapticFeedback.lightImpact();
-    Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(builder: option.builder),
-    );
   }
 
   @override
@@ -152,10 +141,7 @@ class SearchPageState extends State<SearchPage> {
                             focusedBorder: InputBorder.none,
                             errorBorder: InputBorder.none,
                             disabledBorder: InputBorder.none,
-                            hintText: AppTranslations.of(
-                              context,
-                              AppText.archiveSearchPlaceholder,
-                            ),
+                            hintText: 'Search everything...',
                           ),
                         ),
                       ),
@@ -181,22 +167,20 @@ class SearchPageState extends State<SearchPage> {
                   duration: const Duration(milliseconds: 280),
                   switchInCurve: Curves.easeOutCubic,
                   switchOutCurve: Curves.easeInCubic,
-                  child: showRemote
-                      ? _RemoteSearchResults(
-                          key: ValueKey(
-                            'remote-${searchState.results.length}-${searchState.isLoading}-${searchState.errorMessage}-$query',
-                          ),
-                          controller: searchState,
-                          query: query,
-                          suggestions: _resolvedOptions,
-                          onSuggestionTap: _openOption,
-                        )
-                      : _StaticSearchOptions(
-                          key: ValueKey('static-${filteredOptions.length}-$query'),
-                          options: filteredOptions,
-                          query: query,
-                          onTap: _openOption,
-                        ),
+                  child: query.isEmpty
+                      ? _SearchPlaceholder(key: const ValueKey('placeholder'))
+                      : showRemote
+                          ? _RemoteSearchResults(
+                              key: ValueKey(
+                                'remote-${searchState.results.length}-${searchState.isLoading}-${searchState.errorMessage}-$query',
+                              ),
+                              controller: searchState,
+                              query: query,
+                            )
+                          : Center(
+                              key: ValueKey('empty-$query'),
+                              child: _SearchEmptyState(query: query),
+                            ),
                 ),
               ),
             ],
@@ -207,35 +191,44 @@ class SearchPageState extends State<SearchPage> {
   }
 }
 
-class _StaticSearchOptions extends StatelessWidget {
-  const _StaticSearchOptions({
-    super.key,
-    required this.options,
-    required this.query,
-    required this.onTap,
-  });
-
-  final List<_ResolvedSearchOption> options;
-  final String query;
-  final void Function(_ResolvedSearchOption) onTap;
+class _SearchPlaceholder extends StatelessWidget {
+  const _SearchPlaceholder({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (options.isEmpty) {
-      return _SearchEmptyState(query: query);
-    }
+    final theme = Theme.of(context);
+    final palette = context.thalaPalette;
 
-    return ListView.separated(
-      padding: const EdgeInsets.only(bottom: 120),
-      itemCount: options.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 14),
-      itemBuilder: (context, index) {
-        final option = options[index];
-        return _SearchOptionCard(
-          option: option,
-          onTap: () => onTap(option),
-        );
-      },
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.search,
+            size: 72,
+            color: palette.iconMuted.withValues(alpha: 0.3),
+          ),
+          const SizedBox(height: 24),
+          Text(
+            'Search all of Thala',
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: palette.textSecondary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 48),
+            child: Text(
+              'Videos, Events, Music, Archive & Communities',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: palette.textMuted,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -245,14 +238,10 @@ class _RemoteSearchResults extends StatelessWidget {
     super.key,
     required this.controller,
     required this.query,
-    required this.suggestions,
-    required this.onSuggestionTap,
   });
 
   final SearchExperienceController controller;
   final String query;
-  final List<_ResolvedSearchOption> suggestions;
-  final void Function(_ResolvedSearchOption) onSuggestionTap;
 
   @override
   Widget build(BuildContext context) {
@@ -270,24 +259,8 @@ class _RemoteSearchResults extends StatelessWidget {
 
     final results = controller.results;
     if (results.isEmpty) {
-      return ListView(
-        padding: const EdgeInsets.only(bottom: 120),
-        children: [
-          const SizedBox(height: 48),
-          _SearchEmptyState(query: query),
-          const SizedBox(height: 24),
-          ...suggestions
-              .map(
-                (option) => Padding(
-                  padding: const EdgeInsets.only(bottom: 14),
-                  child: _SearchOptionCard(
-                    option: option,
-                    onTap: () => onSuggestionTap(option),
-                  ),
-                ),
-              )
-              .take(5),
-        ],
+      return Center(
+        child: _SearchEmptyState(query: query),
       );
     }
 

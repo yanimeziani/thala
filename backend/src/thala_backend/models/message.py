@@ -23,6 +23,14 @@ class DeliveryStatus(str, Enum):
     FAILED = "failed"
 
 
+class MessageType(str, Enum):
+    """Message type enum."""
+    TEXT = "text"
+    IMAGE = "image"
+    VIDEO = "video"
+    AUDIO = "audio"
+
+
 class MessageThread(Base):
     """Message thread model for conversations."""
     __tablename__ = "message_threads"
@@ -53,9 +61,21 @@ class Message(Base):
     )
     author_handle: Mapped[str] = mapped_column(String, nullable=False)
     author_display_name: Mapped[str] = mapped_column(String, nullable=False)
-    body: Mapped[str] = mapped_column(Text, nullable=False)
+
+    # Message content
+    message_type: Mapped[str] = mapped_column(String, nullable=False, default=MessageType.TEXT.value)
+    body: Mapped[str] = mapped_column(Text, nullable=False, default="")
+
+    # Multimedia fields
+    media_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    thumbnail_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    media_width: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    media_height: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    media_duration: Mapped[int | None] = mapped_column(Integer, nullable=True)  # Duration in seconds for audio/video
+    media_size: Mapped[int | None] = mapped_column(Integer, nullable=True)  # File size in bytes
+
     delivery_status: Mapped[str] = mapped_column(String, nullable=False, default=DeliveryStatus.SENT.value)
     created_at: Mapped[datetime] = mapped_column(default=utcnow)
 
     def __repr__(self) -> str:
-        return f"<Message(id={self.id!r}, author_handle={self.author_handle!r}, thread_id={self.thread_id!r})>"
+        return f"<Message(id={self.id!r}, type={self.message_type!r}, author_handle={self.author_handle!r}, thread_id={self.thread_id!r})>"

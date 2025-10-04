@@ -6,6 +6,14 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field
 
 
+class MessageTypeEnum(str):
+    """Message type enum for Pydantic."""
+    TEXT = "text"
+    IMAGE = "image"
+    VIDEO = "video"
+    AUDIO = "audio"
+
+
 class MessageThreadResponse(BaseModel):
     """Schema for message thread response."""
 
@@ -48,7 +56,22 @@ class MessageCreate(BaseModel):
     thread_id: str = Field(..., description="ID of the thread this message belongs to")
     author_handle: str = Field(..., description="Handle of the message author")
     author_display_name: str = Field(..., description="Display name of the message author")
-    body: str = Field(..., min_length=1, description="Message content")
+
+    # Message content
+    message_type: Literal["text", "image", "video", "audio"] = Field(
+        "text",
+        description="Type of message"
+    )
+    body: str = Field("", description="Text message content or caption")
+
+    # Multimedia fields
+    media_url: str | None = Field(None, description="URL to the media file")
+    thumbnail_url: str | None = Field(None, description="URL to the media thumbnail (for video/image)")
+    media_width: int | None = Field(None, description="Media width in pixels")
+    media_height: int | None = Field(None, description="Media height in pixels")
+    media_duration: int | None = Field(None, description="Media duration in seconds (for audio/video)")
+    media_size: int | None = Field(None, description="Media file size in bytes")
+
     delivery_status: Literal["pending", "sent", "delivered", "read", "failed"] = Field(
         "sent",
         description="Message delivery status"
@@ -60,6 +83,7 @@ class MessageCreate(BaseModel):
                 "thread_id": "thread-001",
                 "author_handle": "@amina",
                 "author_display_name": "Amina Taleb",
+                "message_type": "text",
                 "body": "Grateful. The elders will appreciate hearing the songs.",
                 "delivery_status": "sent"
             }
@@ -74,7 +98,19 @@ class MessageResponse(BaseModel):
     thread_id: str = Field(..., description="ID of the thread this message belongs to")
     author_handle: str = Field(..., description="Handle of the message author")
     author_display_name: str = Field(..., description="Display name of the message author")
-    body: str = Field(..., description="Message content")
+
+    # Message content
+    message_type: str = Field(..., description="Type of message")
+    body: str = Field("", description="Message content or caption")
+
+    # Multimedia fields
+    media_url: str | None = Field(None, description="URL to the media file")
+    thumbnail_url: str | None = Field(None, description="URL to the media thumbnail")
+    media_width: int | None = Field(None, description="Media width in pixels")
+    media_height: int | None = Field(None, description="Media height in pixels")
+    media_duration: int | None = Field(None, description="Media duration in seconds")
+    media_size: int | None = Field(None, description="Media file size in bytes")
+
     delivery_status: str = Field(..., description="Message delivery status")
     created_at: datetime = Field(..., description="Timestamp when message was created")
 
@@ -86,6 +122,7 @@ class MessageResponse(BaseModel):
                 "thread_id": "thread-001",
                 "author_handle": "@amina",
                 "author_display_name": "Amina Taleb",
+                "message_type": "text",
                 "body": "Grateful. The elders will appreciate hearing the songs.",
                 "delivery_status": "read",
                 "created_at": "2024-04-16T18:12:00Z"

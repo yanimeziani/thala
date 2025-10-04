@@ -1,21 +1,31 @@
 import 'dart:developer' as developer;
+import '../services/api_client.dart';
 
 /// Repository for community-related operations
-/// Currently uses local/sample data since backend integration is not yet implemented
 class CommunityRepository {
-  CommunityRepository();
+  CommunityRepository({this.accessToken});
 
-  bool get isRemoteEnabled => false;
+  final String? accessToken;
+
+  bool get isRemoteEnabled => accessToken != null && accessToken!.isNotEmpty;
 
   Future<void> recordCommunityView({
     required String communityId,
     required String? userId,
   }) async {
-    // Backend integration pending - no-op for now
-    developer.log(
-      'Community view recorded locally (backend integration pending)',
-      name: 'CommunityRepository',
-    );
+    if (!isRemoteEnabled) {
+      developer.log('Community: No auth token, skipping view record', name: 'CommunityRepository');
+      return;
+    }
+
+    try {
+      await ApiClient.post(
+        '/communities/$communityId/view',
+        headers: ApiClient.authHeaders(accessToken!),
+      );
+    } catch (e) {
+      developer.log('Failed to record community view: $e', name: 'CommunityRepository', level: 1000);
+    }
   }
 
   Future<void> submitHostRequest({
@@ -24,10 +34,23 @@ class CommunityRepository {
     required String message,
     String? userId,
   }) async {
-    // Backend integration pending - no-op for now
-    developer.log(
-      'Host request submitted locally (backend integration pending)',
-      name: 'CommunityRepository',
-    );
+    if (!isRemoteEnabled) {
+      throw Exception('Must be authenticated to submit host request');
+    }
+
+    try {
+      await ApiClient.post(
+        '/communities/host-request',
+        headers: ApiClient.authHeaders(accessToken!),
+        body: {
+          'name': name,
+          'email': email,
+          'message': message,
+        },
+      );
+    } catch (e) {
+      developer.log('Failed to submit host request: $e', name: 'CommunityRepository', level: 1000);
+      rethrow;
+    }
   }
 }

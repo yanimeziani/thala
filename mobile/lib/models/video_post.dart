@@ -69,6 +69,51 @@ class VideoPost {
     return videoUrl;
   }
 
+  factory VideoPost.fromJson(Map<String, dynamic> json) {
+    return VideoPost(
+      id: json['id'] as String,
+      videoUrl: json['video_url'] as String? ?? '',
+      videoSource: VideoSource.network,
+      mediaKind: _parseMediaKind(json['media_kind'] as String?),
+      imageUrl: json['image_url'] as String?,
+      aspectRatio: (json['aspect_ratio'] as num?)?.toDouble(),
+      thumbnailUrl: json['thumbnail_url'] as String?,
+      textSlides: (json['text_slides'] as List<dynamic>?)
+              ?.map((e) => LocalizedText.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      galleryUrls: (json['gallery_urls'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toList() ??
+          const [],
+      title: LocalizedText.fromJson(json['title'] as Map<String, dynamic>? ?? {}),
+      description: LocalizedText.fromJson(json['description'] as Map<String, dynamic>? ?? {}),
+      location: LocalizedText.fromJson(json['location'] as Map<String, dynamic>? ?? {}),
+      creatorName: LocalizedText.fromJson(json['creator_name'] as Map<String, dynamic>? ?? {}),
+      creatorHandle: json['creator_handle'] as String? ?? '',
+      likes: json['likes'] as int? ?? 0,
+      comments: json['comments'] as int? ?? 0,
+      shares: json['shares'] as int? ?? 0,
+      musicTrackId: json['music_track_id'] as String?,
+      effectId: json['effect_id'] as String?,
+      tags: (json['tags'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? const [],
+      isLocalDraft: false,
+    );
+  }
+
+  static StoryMediaKind _parseMediaKind(String? kind) {
+    switch (kind?.toLowerCase()) {
+      case 'video':
+        return StoryMediaKind.video;
+      case 'image':
+        return StoryMediaKind.image;
+      case 'post':
+        return StoryMediaKind.post;
+      default:
+        return StoryMediaKind.video;
+    }
+  }
+
   VideoPost copyWith({
     String? id,
     String? videoUrl,

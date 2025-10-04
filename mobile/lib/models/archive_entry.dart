@@ -40,4 +40,32 @@ class ArchiveEntry {
   bool get meetsCommunityThreshold {
     return communityApprovalPercent >= requiredApprovalPercent;
   }
+
+  factory ArchiveEntry.fromJson(Map<String, dynamic> json) {
+    return ArchiveEntry(
+      id: json['id'] as String,
+      title: LocalizedText.fromJson(json['title'] as Map<String, dynamic>? ?? {}),
+      summary: LocalizedText.fromJson(json['summary'] as Map<String, dynamic>? ?? {}),
+      era: LocalizedText.fromJson(json['era'] as Map<String, dynamic>? ?? {}),
+      thumbnailUrl: json['thumbnail_url'] as String? ?? '',
+      communityUpvotes: json['community_upvotes'] as int? ?? 0,
+      registeredUsers: json['registered_users'] as int? ?? 0,
+      requiredApprovalPercent: (json['required_approval_percent'] as num?)?.toDouble() ?? 75.0,
+      category: json['category'] as String?,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title.toJson(),
+      'summary': summary.toJson(),
+      'era': era.toJson(),
+      'thumbnail_url': thumbnailUrl,
+      'community_upvotes': communityUpvotes,
+      'registered_users': registeredUsers,
+      'required_approval_percent': requiredApprovalPercent,
+      'category': category,
+    };
+  }
 }

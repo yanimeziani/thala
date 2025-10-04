@@ -1968,7 +1968,11 @@ class _StoryMediaFrame {
       height = safeAspect >= 1 ? 1.0 : (1.0 / safeAspect);
     }
 
-    return _StoryMediaFrame(width: width, height: height, borderRadius: 0);
+    return _StoryMediaFrame(
+      width: width,
+      height: height,
+      borderRadius: _kStoryMediaBorderRadius,
+    );
   }
 }
 

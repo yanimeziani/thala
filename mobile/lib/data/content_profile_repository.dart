@@ -1,14 +1,38 @@
+import 'dart:developer' as developer;
 import '../models/content_profile.dart';
-import 'sample_content_profiles.dart';
+import '../services/api_client.dart';
 
 class ContentProfileRepository {
-  ContentProfileRepository();
+  ContentProfileRepository({this.accessToken});
 
-  bool get isRemoteEnabled => false;
+  final String? accessToken;
+
+  bool get isRemoteEnabled => accessToken != null && accessToken!.isNotEmpty;
 
   Future<Map<String, ContentProfile>> fetchProfiles() async {
-    // Backend integration pending - return sample data
-    return sampleContentProfiles;
+    if (!isRemoteEnabled) {
+      developer.log('Content profiles: No auth token, returning empty map', name: 'ContentProfileRepository');
+      return {};
+    }
+
+    try {
+      final response = await ApiClient.get(
+        '/content/profiles',
+        headers: ApiClient.authHeaders(accessToken!),
+      );
+
+      final profiles = <String, ContentProfile>{};
+      if (response['profiles'] is Map) {
+        (response['profiles'] as Map).forEach((key, value) {
+          profiles[key.toString()] = _mapProfile(value as Map<String, dynamic>);
+        });
+      }
+
+      return profiles;
+    } catch (e) {
+      developer.log('Failed to fetch content profiles: $e', name: 'ContentProfileRepository', level: 1000);
+      return {};
+    }
   }
 
   ContentProfile _mapProfile(Map<String, dynamic> row) {

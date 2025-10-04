@@ -145,66 +145,120 @@ class _UserProfilePageState extends State<UserProfilePage> {
           bottom: true,
           child: Hero(
             tag: 'profile-${widget.post.creatorHandle}',
-            child: NestedScrollView(
-              headerSliverBuilder: (context, innerBoxIsScrolled) => [
-                SliverAppBar(
-                  backgroundColor: theme.colorScheme.surface,
-                  surfaceTintColor: Colors.transparent,
-                  elevation: 0,
-                  iconTheme: IconThemeData(color: palette.iconPrimary),
-                  pinned: true,
-                  expandedHeight: 220,
-                  flexibleSpace: FlexibleSpaceBar(
-                    collapseMode: CollapseMode.pin,
-                    titlePadding: EdgeInsets.zero,
-                    title: null,
-                    background: _ProfileHero(
-                      featuredPost: featuredPost,
-                      displayName: heroTitle,
-                      handle: handleLabel,
-                      location: location,
-                      bio: bio,
-                      tags: tags,
-                      stats: stats,
-                      actionRow: actions,
-                    ),
-                  ),
-                  bottom: _ProfileTabs(
-                    storiesLabel: storiesTabLabel,
-                    likedLabel: likedTabLabel,
-                    mediaLabel: mediaTabLabel,
+            child: Stack(
+              children: [
+                // Fixed profile header
+                SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: MediaQuery.of(context).padding.top,
+                      ),
+                      _ProfileHero(
+                        featuredPost: featuredPost,
+                        displayName: heroTitle,
+                        handle: handleLabel,
+                        location: location,
+                        bio: bio,
+                        tags: tags,
+                        stats: stats,
+                        actionRow: actions,
+                      ),
+                      SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+                    ],
                   ),
                 ),
+                // Back button
+                Positioned(
+                  top: MediaQuery.of(context).padding.top + 8,
+                  left: 8,
+                  child: IconButton(
+                    icon: Icon(Icons.arrow_back, color: palette.iconPrimary),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ),
+                // Sliding bottom sheet with tabs
+                DraggableScrollableSheet(
+                  initialChildSize: 0.35,
+                  minChildSize: 0.15,
+                  maxChildSize: 0.9,
+                  snap: true,
+                  snapSizes: const [0.15, 0.35, 0.9],
+                  builder: (context, scrollController) {
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surface,
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(20),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, -2),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          // Drag handle
+                          Center(
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(vertical: 12),
+                              width: 40,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                color: palette.textMuted.withValues(alpha: 0.3),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                          ),
+                          // Tabs
+                          _ProfileTabs(
+                            storiesLabel: storiesTabLabel,
+                            likedLabel: likedTabLabel,
+                            mediaLabel: mediaTabLabel,
+                          ),
+                          // Tab content
+                          Expanded(
+                            child: TabBarView(
+                              children: [
+                                _ProfileStoriesList(
+                                  posts: creatorPosts,
+                                  locale: locale,
+                                  emptyTitle: storiesEmptyTitle,
+                                  emptyMessage: storiesEmptyMessage,
+                                  emptyIcon: Icons.local_movies_outlined,
+                                  scrollController: scrollController,
+                                ),
+                                _ProfileStoriesList(
+                                  posts: likedPosts,
+                                  locale: locale,
+                                  emptyTitle: likedEmptyTitle,
+                                  emptyMessage: likedEmptyMessage,
+                                  emptyIcon: Icons.favorite_border,
+                                  scrollController: scrollController,
+                                ),
+                                _ProfileMediaGrid(
+                                  posts: mediaPosts,
+                                  locale: locale,
+                                  emptyTitle: mediaEmptyTitle,
+                                  emptyMessage: mediaEmptyMessage,
+                                  scrollController: scrollController,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ],
-              body: TabBarView(
-                physics: const BouncingScrollPhysics(),
-                children: [
-                  _ProfileStoriesList(
-                    posts: creatorPosts,
-                    locale: locale,
-                    emptyTitle: storiesEmptyTitle,
-                    emptyMessage: storiesEmptyMessage,
-                    emptyIcon: Icons.local_movies_outlined,
-                  ),
-                  _ProfileStoriesList(
-                    posts: likedPosts,
-                    locale: locale,
-                    emptyTitle: likedEmptyTitle,
-                    emptyMessage: likedEmptyMessage,
-                    emptyIcon: Icons.favorite_border,
-                  ),
-                  _ProfileMediaGrid(
-                    posts: mediaPosts,
-                    locale: locale,
-                    emptyTitle: mediaEmptyTitle,
-                    emptyMessage: mediaEmptyMessage,
-                  ),
-                ],
-              ),
             ),
           ),
-          ),
         ),
+      ),
     );
   }
 
@@ -277,8 +331,8 @@ class _ProfileTabs extends StatelessWidget implements PreferredSizeWidget {
     final palette = context.thalaPalette;
 
     return Container(
-      color: theme.colorScheme.surface,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      color: Colors.transparent,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
       child: TabBar(
         labelColor: palette.textPrimary,
         unselectedLabelColor: palette.textMuted,
@@ -593,6 +647,7 @@ class _ProfileStoriesList extends StatelessWidget {
     this.emptyTitle = 'No stories yet',
     this.emptyMessage = 'This creator has not shared any stories yet.',
     this.emptyIcon = Icons.local_movies_outlined,
+    required this.scrollController,
   });
 
   final List<VideoPost> posts;
@@ -600,6 +655,7 @@ class _ProfileStoriesList extends StatelessWidget {
   final String emptyTitle;
   final String emptyMessage;
   final IconData emptyIcon;
+  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
@@ -609,6 +665,7 @@ class _ProfileStoriesList extends StatelessWidget {
       return Container(
         color: theme.colorScheme.surface,
         child: ListView(
+          controller: scrollController,
           padding: const EdgeInsets.fromLTRB(20, 32, 20, 40),
           physics: const BouncingScrollPhysics(),
           children: [
@@ -625,9 +682,9 @@ class _ProfileStoriesList extends StatelessWidget {
     return Container(
       color: theme.colorScheme.surface,
       child: ListView.separated(
+        controller: scrollController,
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
         physics: const BouncingScrollPhysics(),
-        primary: false,
         itemCount: posts.length,
         itemBuilder: (context, index) {
           final post = posts[index];
@@ -646,6 +703,7 @@ class _ProfileMediaGrid extends StatelessWidget {
     required this.emptyTitle,
     required this.emptyMessage,
     this.emptyIcon = Icons.collections_outlined,
+    required this.scrollController,
   });
 
   final List<VideoPost> posts;
@@ -653,6 +711,7 @@ class _ProfileMediaGrid extends StatelessWidget {
   final String emptyTitle;
   final String emptyMessage;
   final IconData emptyIcon;
+  final ScrollController scrollController;
 
   @override
   Widget build(BuildContext context) {
@@ -662,6 +721,7 @@ class _ProfileMediaGrid extends StatelessWidget {
       return Container(
         color: theme.colorScheme.surface,
         child: ListView(
+          controller: scrollController,
           padding: const EdgeInsets.fromLTRB(20, 32, 20, 40),
           physics: const BouncingScrollPhysics(),
           children: [
@@ -678,6 +738,7 @@ class _ProfileMediaGrid extends StatelessWidget {
     return Container(
       color: theme.colorScheme.surface,
       child: GridView.builder(
+        controller: scrollController,
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
         physics: const BouncingScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(

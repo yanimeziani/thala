@@ -11,4 +11,18 @@ class LocalizedText {
   String resolve(Locale locale) {
     return locale.languageCode.toLowerCase() == 'fr' ? fr : en;
   }
+
+  factory LocalizedText.fromJson(Map<String, dynamic> json) {
+    return LocalizedText(
+      en: json['en'] as String? ?? '',
+      fr: json['fr'] as String? ?? json['en'] as String? ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'en': en,
+      'fr': fr,
+    };
+  }
 }

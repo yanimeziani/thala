@@ -1,5 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, Calendar, Video, Archive, MessageSquare, Users as Community } from "lucide-react"
+import { Users, Calendar, Video, Archive, MessageSquare, Users as Community, Shield } from "lucide-react"
+import { auth } from "@/auth"
+import { getAdminUser } from "@/lib/admin-config"
 
 async function getDashboardStats() {
   // TODO: Fetch real stats from backend API
@@ -14,6 +16,8 @@ async function getDashboardStats() {
 }
 
 export default async function DashboardPage() {
+  const session = await auth()
+  const adminUser = session?.user?.email ? getAdminUser(session.user.email) : null
   const stats = await getDashboardStats()
 
   const statCards = [
@@ -57,11 +61,21 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        <p className="text-muted-foreground">
-          Welcome to the Thala admin dashboard
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+          <p className="text-muted-foreground">
+            Welcome back, {adminUser?.name || session?.user?.name || "Admin"}
+          </p>
+        </div>
+        {adminUser && (
+          <div className="flex items-center gap-2 rounded-lg border px-4 py-2">
+            <Shield className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm font-medium capitalize">
+              {adminUser.role.replace("_", " ")}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

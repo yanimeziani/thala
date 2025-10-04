@@ -1,16 +1,35 @@
+import 'dart:developer' as developer;
 import '../models/community_profile.dart';
 import '../models/community_space.dart';
 import '../models/localized_text.dart';
-import 'sample_community_profiles.dart';
+import '../services/api_client.dart';
 
 class CommunityProfilesRepository {
-  CommunityProfilesRepository();
+  CommunityProfilesRepository({this.accessToken});
 
-  bool get isRemoteEnabled => false;
+  final String? accessToken;
+
+  bool get isRemoteEnabled => accessToken != null && accessToken!.isNotEmpty;
 
   Future<List<CommunityProfile>> fetchProfiles() async {
-    // Backend integration pending - return sample data
-    return sampleCommunityProfiles;
+    if (!isRemoteEnabled) {
+      developer.log('Community profiles: No auth token, returning empty list', name: 'CommunityProfilesRepository');
+      return [];
+    }
+
+    try {
+      final response = await ApiClient.getList(
+        '/communities/profiles',
+        headers: ApiClient.authHeaders(accessToken!),
+      );
+
+      return response
+          .map((json) => _mapProfile(json as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      developer.log('Failed to fetch community profiles: $e', name: 'CommunityProfilesRepository', level: 1000);
+      return [];
+    }
   }
 
   CommunityProfile _mapProfile(Map<String, dynamic> row) {

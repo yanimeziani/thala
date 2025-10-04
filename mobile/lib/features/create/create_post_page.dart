@@ -52,15 +52,14 @@ class _CreatePostView extends StatefulWidget {
 class _CreatePostViewState extends State<_CreatePostView>
     with WidgetsBindingObserver {
   final _formKey = GlobalKey<FormState>();
-  final _titleEnController = TextEditingController();
-  final _titleFrController = TextEditingController();
-  final _descriptionEnController = TextEditingController();
-  final _descriptionFrController = TextEditingController();
-  final _locationEnController = TextEditingController();
-  final _locationFrController = TextEditingController();
-  final _creatorNameEnController = TextEditingController(text: 'You');
-  final _creatorNameFrController = TextEditingController(text: 'Vous');
+  final _titleController = TextEditingController();
+  final _descriptionController = TextEditingController();
+  final _locationController = TextEditingController();
+  final _creatorNameController = TextEditingController(text: 'You');
   final _creatorHandleController = TextEditingController(text: '@you');
+
+  // Language toggle: 'en' or 'fr'
+  String _selectedLanguage = 'en';
 
   VideoPlayerController? _videoController;
   Future<void>? _videoInitialization;
@@ -125,14 +124,10 @@ class _CreatePostViewState extends State<_CreatePostView>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _titleEnController.dispose();
-    _titleFrController.dispose();
-    _descriptionEnController.dispose();
-    _descriptionFrController.dispose();
-    _locationEnController.dispose();
-    _locationFrController.dispose();
-    _creatorNameEnController.dispose();
-    _creatorNameFrController.dispose();
+    _titleController.dispose();
+    _descriptionController.dispose();
+    _locationController.dispose();
+    _creatorNameController.dispose();
     _creatorHandleController.dispose();
     _videoController?.dispose();
     _recordingTicker?.cancel();
@@ -417,15 +412,13 @@ class _CreatePostViewState extends State<_CreatePostView>
         ),
         _DetailSheet(
           formKey: _formKey,
-          titleEnController: _titleEnController,
-          titleFrController: _titleFrController,
-          descriptionEnController: _descriptionEnController,
-          descriptionFrController: _descriptionFrController,
-          locationEnController: _locationEnController,
-          locationFrController: _locationFrController,
-          creatorNameEnController: _creatorNameEnController,
-          creatorNameFrController: _creatorNameFrController,
+          titleController: _titleController,
+          descriptionController: _descriptionController,
+          locationController: _locationController,
+          creatorNameController: _creatorNameController,
           creatorHandleController: _creatorHandleController,
+          selectedLanguage: _selectedLanguage,
+          onLanguageChanged: (lang) => setState(() => _selectedLanguage = lang),
           isPublishing: controller.isProcessing,
           onPublish: () => _handlePublish(controller),
           onShowEffects: () =>
@@ -966,33 +959,39 @@ class _CreatePostViewState extends State<_CreatePostView>
       final now = DateTime.now();
       final defaultTitle = 'Story ${now.month}/${now.day}';
       final defaultCreator = 'Creator';
+      final defaultLocation = _selectedLanguage == 'fr'
+          ? AppTranslations.of(context, AppText.createStoryDefaultLocationFr)
+          : AppTranslations.of(context, AppText.createStoryDefaultLocationEn);
 
-      final titleEn = _titleEnController.text.trim().isEmpty
+      final title = _titleController.text.trim().isEmpty
           ? defaultTitle
-          : _titleEnController.text.trim();
+          : _titleController.text.trim();
 
-      final descEn = _descriptionEnController.text.trim().isEmpty
-          ? ''
-          : _descriptionEnController.text.trim();
+      final description = _descriptionController.text.trim();
 
-      final creatorEn = _creatorNameEnController.text.trim().isEmpty
+      final location = _locationController.text.trim().isEmpty
+          ? defaultLocation
+          : _locationController.text.trim();
+
+      final creatorName = _creatorNameController.text.trim().isEmpty
           ? defaultCreator
-          : _creatorNameEnController.text.trim();
+          : _creatorNameController.text.trim();
 
+      final creatorHandle = _creatorHandleController.text.trim().isEmpty
+          ? '@creator'
+          : _creatorHandleController.text.trim();
+
+      // Use the same text for both languages (users can add translations later via backend)
       final post = await controller.buildPost(
-        titleEn: titleEn,
-        titleFr: _titleFrController.text.trim().isEmpty ? titleEn : _titleFrController.text.trim(),
-        descriptionEn: descEn,
-        descriptionFr: _descriptionFrController.text.trim().isEmpty ? descEn : _descriptionFrController.text.trim(),
-        locationEn: _locationEnController.text.trim().isEmpty
-            ? AppTranslations.of(context, AppText.createStoryDefaultLocationEn)
-            : _locationEnController.text.trim(),
-        locationFr: _locationFrController.text.trim().isEmpty
-            ? AppTranslations.of(context, AppText.createStoryDefaultLocationFr)
-            : _locationFrController.text.trim(),
-        creatorNameEn: creatorEn,
-        creatorNameFr: _creatorNameFrController.text.trim().isEmpty ? creatorEn : _creatorNameFrController.text.trim(),
-        creatorHandle: _creatorHandleController.text.trim().isEmpty ? '@creator' : _creatorHandleController.text.trim(),
+        titleEn: _selectedLanguage == 'en' ? title : '',
+        titleFr: _selectedLanguage == 'fr' ? title : '',
+        descriptionEn: _selectedLanguage == 'en' ? description : '',
+        descriptionFr: _selectedLanguage == 'fr' ? description : '',
+        locationEn: _selectedLanguage == 'en' ? location : defaultLocation,
+        locationFr: _selectedLanguage == 'fr' ? location : defaultLocation,
+        creatorNameEn: _selectedLanguage == 'en' ? creatorName : '',
+        creatorNameFr: _selectedLanguage == 'fr' ? creatorName : '',
+        creatorHandle: creatorHandle,
       );
 
       if (!mounted) {
@@ -2183,30 +2182,26 @@ class _EffectChip extends StatelessWidget {
 class _DetailSheet extends StatelessWidget {
   const _DetailSheet({
     required this.formKey,
-    required this.titleEnController,
-    required this.titleFrController,
-    required this.descriptionEnController,
-    required this.descriptionFrController,
-    required this.locationEnController,
-    required this.locationFrController,
-    required this.creatorNameEnController,
-    required this.creatorNameFrController,
+    required this.titleController,
+    required this.descriptionController,
+    required this.locationController,
+    required this.creatorNameController,
     required this.creatorHandleController,
+    required this.selectedLanguage,
+    required this.onLanguageChanged,
     required this.isPublishing,
     required this.onPublish,
     required this.onShowEffects,
   });
 
   final GlobalKey<FormState> formKey;
-  final TextEditingController titleEnController;
-  final TextEditingController titleFrController;
-  final TextEditingController descriptionEnController;
-  final TextEditingController descriptionFrController;
-  final TextEditingController locationEnController;
-  final TextEditingController locationFrController;
-  final TextEditingController creatorNameEnController;
-  final TextEditingController creatorNameFrController;
+  final TextEditingController titleController;
+  final TextEditingController descriptionController;
+  final TextEditingController locationController;
+  final TextEditingController creatorNameController;
   final TextEditingController creatorHandleController;
+  final String selectedLanguage;
+  final ValueChanged<String> onLanguageChanged;
   final bool isPublishing;
   final VoidCallback onPublish;
   final VoidCallback onShowEffects;
@@ -2267,73 +2262,54 @@ class _DetailSheet extends StatelessWidget {
                   children: [
                     Text(tr(AppText.createStoryDetails), style: titleStyle),
                     const Spacer(),
-                    TextButton.icon(
-                      onPressed: onShowEffects,
-                      icon: Icon(
-                        Icons.auto_awesome,
-                        color: theme.colorScheme.secondary,
-                      ),
-                      label: Text(
-                        tr(AppText.createStoryEffects),
-                        style: actionStyle,
+                    // Language toggle
+                    SegmentedButton<String>(
+                      segments: const [
+                        ButtonSegment(value: 'en', label: Text('EN')),
+                        ButtonSegment(value: 'fr', label: Text('FR')),
+                      ],
+                      selected: {selectedLanguage},
+                      onSelectionChanged: (Set<String> selection) {
+                        onLanguageChanged(selection.first);
+                      },
+                      style: ButtonStyle(
+                        textStyle: WidgetStateProperty.all(
+                          theme.textTheme.labelSmall,
+                        ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 _DetailTextField(
-                  controller: titleEnController,
-                  label: tr(AppText.createStoryTitleEn),
+                  controller: titleController,
+                  label: 'Title',
                 ),
                 const SizedBox(height: 12),
                 _DetailTextField(
-                  controller: titleFrController,
-                  label: tr(AppText.createStoryTitleFrOptional),
-                  required: false,
-                ),
-                const SizedBox(height: 12),
-                _DetailTextField(
-                  controller: descriptionEnController,
-                  label: tr(AppText.createStoryDescriptionEn),
-                  maxLines: 3,
-                ),
-                const SizedBox(height: 12),
-                _DetailTextField(
-                  controller: descriptionFrController,
-                  label: tr(AppText.createStoryDescriptionFrOptional),
+                  controller: descriptionController,
+                  label: 'Description (optional)',
                   maxLines: 3,
                   required: false,
                 ),
                 const SizedBox(height: 12),
                 _DetailTextField(
-                  controller: locationEnController,
-                  label: tr(AppText.createStoryLocationEnOptional),
+                  controller: locationController,
+                  label: 'Location (optional)',
                   required: false,
                 ),
                 const SizedBox(height: 12),
                 _DetailTextField(
-                  controller: locationFrController,
-                  label: tr(AppText.createStoryLocationFrOptional),
-                  required: false,
-                ),
-                const SizedBox(height: 12),
-                _DetailTextField(
-                  controller: creatorNameEnController,
-                  label: tr(AppText.createStoryCreatorNameEn),
-                ),
-                const SizedBox(height: 12),
-                _DetailTextField(
-                  controller: creatorNameFrController,
-                  label: tr(AppText.createStoryCreatorNameFrOptional),
-                  required: false,
+                  controller: creatorNameController,
+                  label: 'Creator Name',
                 ),
                 const SizedBox(height: 12),
                 _DetailTextField(
                   controller: creatorHandleController,
-                  label: tr(AppText.createStoryCreatorHandle),
+                  label: 'Handle (e.g., @username)',
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
-                      return tr(AppText.createStoryHandleError);
+                      return 'Handle is required';
                     }
                     return null;
                   },
