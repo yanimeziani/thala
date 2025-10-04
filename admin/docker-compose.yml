@@ -9,9 +9,12 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      - GOOGLE_OAUTH_CLIENT_ID=${GOOGLE_OAUTH_CLIENT_ID:-${GOOGLE_CLIENT_ID}}
+      - GOOGLE_OAUTH_CLIENT_SECRET=${GOOGLE_OAUTH_CLIENT_SECRET:-${GOOGLE_CLIENT_SECRET}}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - AUTH_SECRET=${AUTH_SECRET}
       - AUTH_URL=${AUTH_URL:-http://localhost:3000}
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-https://backend.thala.app/api/v1}
+      - NEXT_PUBLIC_ADMIN_URL=${NEXT_PUBLIC_ADMIN_URL:-http://localhost:3001}
     restart: unless-stopped

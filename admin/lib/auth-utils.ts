@@ -1,6 +1,7 @@
 import { auth } from "@/auth"
 import { NextResponse } from "next/server"
 import { hasPermission, type AdminPermission } from "./admin-config"
+import type { Session } from "next-auth"
 
 /**
  * Require authentication for server actions or API routes
@@ -28,14 +29,15 @@ export async function requirePermission(permission: AdminPermission) {
  * Middleware helper to protect API routes
  */
 export async function withAuth<T>(
-  handler: (session: NonNullable<Awaited<ReturnType<typeof auth>>>) => Promise<T>
+  handler: (session: Session & { user: { email: string } }) => Promise<T>
 ): Promise<T | NextResponse> {
   try {
     const session = await auth()
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
-    return await handler(session)
+    // TypeScript now knows session.user.email is defined
+    return await handler(session as Session & { user: { email: string } })
   } catch (error) {
     console.error("Auth error:", error)
     return NextResponse.json(
@@ -50,7 +52,7 @@ export async function withAuth<T>(
  */
 export async function withPermission<T>(
   permission: AdminPermission,
-  handler: (session: NonNullable<Awaited<ReturnType<typeof auth>>>) => Promise<T>
+  handler: (session: Session & { user: { email: string } }) => Promise<T>
 ): Promise<T | NextResponse> {
   try {
     const session = await auth()
@@ -65,7 +67,8 @@ export async function withPermission<T>(
       )
     }
 
-    return await handler(session)
+    // TypeScript now knows session.user.email is defined
+    return await handler(session as Session & { user: { email: string } })
   } catch (error) {
     console.error("Permission check error:", error)
     return NextResponse.json(

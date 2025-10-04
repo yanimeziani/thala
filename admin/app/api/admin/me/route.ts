@@ -9,7 +9,7 @@ import { getAdminUser } from "@/lib/admin-config"
  */
 export async function GET() {
   return withAuth(async (session) => {
-    const adminUser = getAdminUser(session.user.email!)
+    const adminUser = getAdminUser(session.user.email)
 
     if (!adminUser) {
       return NextResponse.json(

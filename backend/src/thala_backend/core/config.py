@@ -57,6 +57,14 @@ class Settings(BaseSettings):
     rate_limit_requests_per_minute: int = Field(default=60, alias="RATE_LIMIT_REQUESTS_PER_MINUTE")
     rate_limit_burst: int = Field(default=10, alias="RATE_LIMIT_BURST")
 
+    # SMTP Email settings
+    smtp_host: Optional[str] = Field(default=None, alias="SMTP_HOST")
+    smtp_port: int = Field(default=465, alias="SMTP_PORT")
+    smtp_user: Optional[str] = Field(default=None, alias="SMTP_USER")
+    smtp_password: Optional[str] = Field(default=None, alias="SMTP_PASSWORD")
+    smtp_from_email: str = Field(default="noreply@thala.app", alias="SMTP_FROM_EMAIL")
+    smtp_from_name: str = Field(default="Thala", alias="SMTP_FROM_NAME")
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
