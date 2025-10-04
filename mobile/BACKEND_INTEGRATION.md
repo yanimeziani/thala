@@ -9,17 +9,21 @@ This Flutter app is now fully integrated with the FastAPI backend located in `ba
 The app connects to the production backend at `https://backend.thala.app` by default.
 
 ```bash
-cd app
+cd mobile
 flutter run -d macos
 ```
 
 ### Local Development
 
-#### 1. Start the Backend Locally
+#### 1. Start the Backend Stack
 
 ```bash
+# From project root
+docker-compose up -d
+
+# Or run backend directly
 cd backend
-uvicorn thela_backend.main:app --reload
+uvicorn thala_backend.main:app --reload
 ```
 
 The backend will start on `http://localhost:8000`
@@ -27,9 +31,12 @@ The backend will start on `http://localhost:8000`
 #### 2. Run the Flutter App with Local Backend
 
 ```bash
-cd app
+cd mobile
 
-# Connect to local backend
+# Using the helper script (recommended)
+./run_local.sh -- -d macos
+
+# Or manually connect to local backend
 flutter run -d macos --dart-define THELA_API_URL=http://localhost:8000
 
 # Or for custom backend URL
@@ -107,7 +114,7 @@ The app communicates with these backend endpoints:
 ## Architecture
 
 ```
-app/
+mobile/
 ├── lib/
 │   ├── features/
 │   │   ├── splash/         # Warm splash screen
@@ -118,6 +125,8 @@ app/
 │   │   ├── backend_auth_service.dart  # Auth API calls
 │   │   └── api_client.dart            # Generic HTTP client
 │   └── main.dart
+├── run_local.sh            # Helper script for local development
+└── BACKEND_INTEGRATION.md  # This file
 ```
 
 ## Testing
@@ -126,7 +135,7 @@ app/
 
 1. **Run App** (connects to backend.thala.app):
    ```bash
-   cd app && flutter run -d macos
+   cd mobile && flutter run -d macos
    ```
 
 2. **Test Registration**:
@@ -145,12 +154,15 @@ app/
 
 1. **Start Local Backend**:
    ```bash
-   cd backend && uvicorn thela_backend.main:app --reload
+   # From project root
+   docker-compose up -d
+   # Or: cd backend && uvicorn thala_backend.main:app --reload
    ```
 
 2. **Run App with Local Backend**:
    ```bash
-   cd app && flutter run -d macos --dart-define THELA_API_URL=http://localhost:8000
+   cd mobile && ./run_local.sh -- -d macos
+   # Or: flutter run -d macos --dart-define THELA_API_URL=http://localhost:8000
    ```
 
 3. **Test as above**

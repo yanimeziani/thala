@@ -1,8 +1,8 @@
-# Thala
+# Thala Mobile App
 
-Thala is a TikTok-inspired home for Amazigh stories, culture, and music. The experience now includes:
+Thala is a TikTok-inspired home for Amazigh stories, culture, and music. The mobile app includes:
 
-- A vertical video feed with bilingual overlays and Supabase-backed content (falls back to curated samples).
+- A vertical video feed with bilingual overlays and backend-synced content (falls back to curated samples).
 - A shader-driven onboarding splash that greets new users and gathers Amazigh identity or ally context.
 - Dedicated community and archive spaces to surface gatherings, projects, and cultural artefacts.
 - A music lounge with a live shader visualiser that pulses with curated Amazigh tracks.
@@ -16,30 +16,24 @@ Thala is a TikTok-inspired home for Amazigh stories, culture, and music. The exp
    flutter pub get
    ```
 
-2. (Optional) Wire up Supabase so the feed can stream real data. Keep the credentials out of git by creating `.env.local` (ignored) with your values:
-
-   ```dotenv
-   SUPABASE_URL=https://your-project.supabase.co
-   SUPABASE_ANON_KEY=your-publishable-key
-   ```
-
-   Then start the app through the helper script so the values are passed as `--dart-define`s:
+2. (Optional) Connect to a backend. The app works offline with sample data, but to sync real content:
 
    ```bash
-   ./tools/run_with_supabase.sh -- -d macos
+   # Start the backend (in a separate terminal)
+   cd ../backend
+   docker-compose up -d  # Or run backend directly
+
+   # Run the mobile app with local backend
+   ./run_local.sh -- -d macos
    ```
 
-   Provide any normal `flutter run` flags after `--`. If you prefer to run Flutter directly, continue passing the defines yourself:
+   Or manually specify the backend URL:
 
    ```bash
-   flutter run \
-     --dart-define SUPABASE_URL=https://your-project.supabase.co \
-     --dart-define SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+   flutter run -d macos --dart-define THELA_API_URL=http://localhost:8000
    ```
 
-   The service role key and database passwords should stay server-side; only the publishable/anon key is injected into the client build.
-
-   Expected table: `videos` with columns `id`, `video_url`, `thumbnail_url`, `title_en`, `title_fr`, `description_en`, `description_fr`, `location_en`, `location_fr`, `creator_name_en`, `creator_name_fr`, `creator_handle`, `likes`, `comments`, `shares`, and `tags` (array of text). Missing credentials just keeps the curated sample feed.
+   Without a backend connection, the app gracefully falls back to curated sample content.
 
 3. Launch the app. Onboarding appears once per runtime and then drops you into the home shell with tabs for Feed, Community, Archive, Music, and Rights.
 
@@ -52,6 +46,8 @@ Thala is a TikTok-inspired home for Amazigh stories, culture, and music. The exp
 
 ## Development tips
 
-- The app accesses Supabase only after `SupabaseManager.ensureInitialized` detects `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` (or the legacy `SUPABASE_ANON_KEY`).
+- The app connects to the backend via `ApiClient` when `THELA_API_URL` is provided, otherwise uses sample data.
+- Authentication is handled by `BackendAuthService` with automatic token refresh.
 - To refresh the video feed manually, tap the refresh icon in the header.
 - All assets and shaders are registered in `pubspec.yaml`.
+- See `BACKEND_INTEGRATION.md` for full backend integration details.

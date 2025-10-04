@@ -10,9 +10,9 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 
 # Import the base and all models to ensure they're registered
-from thela_backend.db.base import Base
-from thela_backend.models import *  # noqa: F401, F403
-from thela_backend.core.config import settings
+from thala_backend.db.base import Base
+from thala_backend.models import *  # noqa: F401, F403
+from thala_backend.core.config import settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

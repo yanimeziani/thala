@@ -94,7 +94,7 @@ services:
       RATE_LIMIT_BURST: ${RATE_LIMIT_BURST:-10}
 
       # App Settings
-      APP_NAME: ${APP_NAME:-Thela Backend}
+      APP_NAME: ${APP_NAME:-Thala Backend}
       API_V1_PREFIX: ${API_V1_PREFIX:-/api/v1}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
     ports:

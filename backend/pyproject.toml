@@ -1,9 +1,9 @@
 [project]
 name = "thela-backend"
 version = "0.1.0"
-description = "Thela FastAPI backend replacing Supabase with Google OAuth and S3 support"
+description = "Thala FastAPI backend replacing Supabase with Google OAuth and S3 support"
 requires-python = ">=3.11"
-authors = [{name = "Thela", email = "dev@thela.app"}]
+authors = [{name = "Thala", email = "dev@thela.app"}]
 readme = "README.md"
 license = {text = "MIT"}
 dependencies = [

@@ -3,7 +3,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
-/// Generic API client for Thela backend communication
+/// Generic API client for Thala backend communication
 class ApiClient {
   ApiClient._();
 

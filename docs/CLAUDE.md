@@ -4,53 +4,54 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Thela** (also spelled "Thala") is a TikTok-inspired cultural platform for Amazigh stories, music, and community. The project consists of three main components:
+**Thala** is a TikTok-inspired cultural platform for Amazigh stories, music, and community. The project consists of four main components:
 
-- **app/** - Flutter mobile application (iOS/Android)
+- **mobile/** - Flutter mobile application (iOS/Android/Web/Desktop)
 - **backend/** - FastAPI backend with PostgreSQL and S3 integration
-- **landing/** - Next.js landing page
+- **web/** - Next.js landing page
+- **admin/** - Admin dashboard (Next.js)
 
 ## Development Commands
 
-### Flutter App (app/)
+### Flutter App (mobile/)
 
 **Setup:**
 ```bash
-cd app
+cd mobile
 flutter pub get
 ```
 
-**Run with Supabase credentials:**
+**Run with backend:**
 ```bash
 # Using the helper script (reads from .env.local)
-./tools/run_with_supabase.sh -- -d macos
+./run_local.sh -- -d macos
 
 # Or manually with dart-define flags
 flutter run \
-  --dart-define SUPABASE_URL=https://your-project.supabase.co \
-  --dart-define SUPABASE_PUBLISHABLE_KEY=your-key \
+  --dart-define BACKEND_URL=http://localhost:8000 \
   -d macos
 ```
 
-**Run without Supabase (uses sample data):**
+**Run without backend (uses sample data):**
 ```bash
-cd app
+cd mobile
 flutter run -d macos
 ```
 
 **Testing:**
 ```bash
-cd app
+cd mobile
 flutter test                    # Run all tests
 flutter test test/specific_test.dart  # Run specific test
 ```
 
 **Build:**
 ```bash
-cd app
+cd mobile
 flutter build ios              # iOS build
 flutter build apk              # Android APK
 flutter build macos            # macOS build
+flutter build web              # Web build
 ```
 
 **Shader compilation notes:**
@@ -71,11 +72,11 @@ pip install -e .
 **Run development server:**
 ```bash
 cd backend
-uvicorn thela_backend.main:app --reload
+uvicorn thala_backend.main:app --reload
 ```
 
 **Configuration:**
-- All settings are loaded from environment variables (see `thela_backend/core/config.py`)
+- All settings are loaded from environment variables (see `thala_backend/core/config.py`)
 - Required: `DATABASE_URL`, `GOOGLE_OAUTH_CLIENT_ID`, `JWT_SECRET`
 - Optional: AWS S3 credentials, CORS origins
 
@@ -85,31 +86,52 @@ cd backend
 pytest                         # No tests currently configured
 ```
 
-### Landing Page (landing/)
+### Landing Page (web/)
 
 **Setup:**
 ```bash
-cd landing
+cd web
 npm install
 ```
 
 **Development:**
 ```bash
-cd landing
+cd web
 npm run dev                    # Start dev server (uses Turbopack)
 ```
 
 **Build:**
 ```bash
-cd landing
+cd web
 npm run build                  # Production build (uses Turbopack)
 npm start                      # Start production server
 ```
 
 **Linting:**
 ```bash
-cd landing
+cd web
 npm run lint
+```
+
+### Admin Dashboard (admin/)
+
+**Setup:**
+```bash
+cd admin
+npm install
+```
+
+**Development:**
+```bash
+cd admin
+npm run dev                    # Start dev server
+```
+
+**Build:**
+```bash
+cd admin
+npm run build                  # Production build
+npm start                      # Start production server
 ```
 
 ## Architecture
@@ -143,25 +165,25 @@ The app follows a **feature-based structure** with clear separation of concerns:
 **Data layer strategy:**
 - Repositories provide a unified interface to both sample and remote data
 - Sample data files in `lib/data/sample_*.dart` provide fallback content
-- Supabase integration is optional; app gracefully degrades to samples when unavailable
-- MeiliSearch integration for search (optional, similar fallback pattern)
+- Backend integration is optional; app gracefully degrades to samples when unavailable
+- Search functionality integrated via backend API
 
 **Service initialization:**
-- `SupabaseManager.ensureInitialized()` - Checks for dart-define credentials
-- `MeiliSearchManager.ensureInitialized()` - Initializes search client
-- Both called in `main.dart` before app starts
+- `ApiClient` - Manages backend communication with automatic retry
+- `BackendAuthService` - Handles Google OAuth and JWT tokens
+- Services initialized in `main.dart` with fallback to sample data
 
 ### Backend Architecture
 
 FastAPI-based backend replacing Supabase functionality:
 
 **Directory structure:**
-- `src/thela_backend/api/` - API routes and dependencies
-- `src/thela_backend/core/` - Core configuration and settings
-- `src/thela_backend/db/` - Database models and session management
-- `src/thela_backend/models/` - SQLAlchemy models
-- `src/thela_backend/schemas/` - Pydantic schemas for validation
-- `src/thela_backend/services/` - Business logic services
+- `src/thala_backend/api/` - API routes and dependencies
+- `src/thala_backend/core/` - Core configuration and settings
+- `src/thala_backend/db/` - Database models and session management
+- `src/thala_backend/models/` - SQLAlchemy models
+- `src/thala_backend/schemas/` - Pydantic schemas for validation
+- `src/thala_backend/services/` - Business logic services
 
 **Key components:**
 - Google OAuth authentication with JWT tokens
@@ -170,7 +192,7 @@ FastAPI-based backend replacing Supabase functionality:
 - CORS configuration for cross-origin requests
 
 **Main entry point:**
-- `src/thela_backend/main.py` - Creates FastAPI app and includes routers
+- `src/thala_backend/main.py` - Creates FastAPI app and includes routers
 - API routes mounted at `/api/v1` (configurable via `API_V1_PREFIX`)
 
 ### Database Schema
@@ -181,27 +203,25 @@ The app expects specific Supabase/PostgreSQL tables:
 - `videos` - Video posts with bilingual metadata (title, description, location in EN/FR)
 - `music_tracks` - Music catalog with artwork and preview URLs
 - `video_effects` - Visual effects with JSON config
-- Additional tables defined in `app/schema.sql`
+- Additional tables defined in backend migrations
 
 **Important columns:**
 - Videos: `creator_handle`, `creator_name_en/fr`, `tags` (text array), engagement counts
-- All tables have RLS policies for read access
-- See `app/schema.sql` for complete schema
+- All tables have proper indexes and constraints
+- See `backend/alembic/` for database migrations
 
 ## Environment Configuration
 
 ### Flutter App
 
-**Required for Supabase:**
-- Create `app/.env.local` (gitignored):
+**Backend connection:**
+- Create `mobile/.env.local` (gitignored):
   ```
-  SUPABASE_URL=https://your-project.supabase.co
-  SUPABASE_ANON_KEY=your-publishable-key
+  BACKEND_URL=http://localhost:8000
+  GOOGLE_OAUTH_CLIENT_ID=your-client-id
   ```
 - Or pass via `--dart-define` flags when running
-
-**MeiliSearch (optional):**
-- Configured via dart-define or hardcoded in `meili_search_manager.dart`
+- App falls back to sample data when backend is unavailable
 
 ### Backend
 
@@ -219,7 +239,8 @@ The app expects specific Supabase/PostgreSQL tables:
 
 - **Never commit credentials**: Use `.env.local` (gitignored) for secrets
 - **Shader compatibility**: Requires Flutter 3.10+ with Impeller for shaders
-- **Graceful degradation**: App works with sample data when Supabase/MeiliSearch unavailable
+- **Graceful degradation**: App works with sample data when backend unavailable
 - **Bilingual support**: Content has EN/FR variants throughout (models use `LocalizedText`)
 - **Asset management**: Videos and images registered in `pubspec.yaml` under `assets:`
-- **Custom shaders**: Located in `shaders/` directory, compiled at build time
+- **Custom shaders**: Located in `mobile/shaders/` directory, compiled at build time
+- **Monorepo structure**: Use `docker-compose.yml` for local development stack

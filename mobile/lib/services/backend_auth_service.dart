@@ -3,7 +3,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
-/// Service for authenticating with the Thela FastAPI backend
+/// Service for authenticating with the Thala FastAPI backend
 class BackendAuthService {
   BackendAuthService._();
 
