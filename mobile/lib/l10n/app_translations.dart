@@ -1,4 +1,7 @@
 import 'package:flutter/widgets.dart';
+import 'translations_en.dart';
+import 'translations_fr.dart';
+import 'translations_ar.dart';
 
 enum AppText {
   appName,
