@@ -5,6 +5,9 @@ import { getAdminUser } from "@/lib/admin-config"
 import { videosApi, eventsApi } from "@/lib/api"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { UserGrowthChart } from "@/components/charts/user-growth-chart"
+import { EngagementChart } from "@/components/charts/engagement-chart"
+import { ActivityChart } from "@/components/charts/activity-chart"
 
 async function getDashboardStats() {
   try {
@@ -173,6 +176,47 @@ export default async function DashboardPage() {
             </Card>
           )
         })}
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5" />
+              User Growth
+            </CardTitle>
+            <CardDescription>Monthly user registration trends</CardDescription>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            <UserGrowthChart />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Heart className="h-5 w-5" />
+              Engagement Metrics
+            </CardTitle>
+            <CardDescription>Likes, comments, and shares over time</CardDescription>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            <EngagementChart />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-5 w-5" />
+              Platform Activity
+            </CardTitle>
+            <CardDescription>Content creation across categories</CardDescription>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            <ActivityChart />
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

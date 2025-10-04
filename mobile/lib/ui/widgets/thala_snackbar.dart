@@ -122,7 +122,7 @@ SnackBar buildThalaSnackBar(
   return SnackBar(
     duration: duration,
     action: action,
-    behavior: SnackBarBehavior.fixed,
+    behavior: SnackBarBehavior.floating,
     elevation: 0,
     backgroundColor: Colors.transparent,
     padding: EdgeInsets.zero,

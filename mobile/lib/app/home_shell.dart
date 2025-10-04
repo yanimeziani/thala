@@ -381,7 +381,7 @@ class _BottomNavItemButton extends StatelessWidget {
     final iconBaseColor = palette.textPrimary;
     final inactiveOpacity = 0.48;
     const iconSize = 28.0;
-    const actionSizeBoost = 1.14; // create button stands out with premium presence
+    const actionSizeBoost = 1.35; // create button stands out with premium presence
     final actionIconSize = iconSize * actionSizeBoost;
     final actionButtonSize = 56.0 * actionSizeBoost;
     final splashColor = palette.overlay.withValues(alpha: isAction ? 0.18 : 0.12);
@@ -409,18 +409,30 @@ class _BottomNavItemButton extends StatelessWidget {
           height: actionButtonSize,
           width: actionButtonSize,
           decoration: BoxDecoration(
-            color: colorScheme.primary,
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                colorScheme.primary.withValues(alpha: 1.0),
+                colorScheme.primaryContainer,
+              ],
+            ),
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: colorScheme.primary.withValues(alpha: 0.36),
-                blurRadius: 20,
-                offset: const Offset(0, 6),
-                spreadRadius: -2,
+                color: colorScheme.primary.withValues(alpha: 0.5),
+                blurRadius: 28,
+                offset: const Offset(0, 8),
+                spreadRadius: 0,
               ),
               BoxShadow(
-                color: colorScheme.primary.withValues(alpha: 0.16),
-                blurRadius: 12,
+                color: colorScheme.primary.withValues(alpha: 0.3),
+                blurRadius: 16,
+                offset: const Offset(0, 4),
+              ),
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.12),
+                blurRadius: 6,
                 offset: const Offset(0, 2),
               ),
             ],

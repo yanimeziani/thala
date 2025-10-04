@@ -3,6 +3,12 @@ import { withAuth } from "@/lib/auth-utils"
 import { AdminPermission, hasPermission } from "@/lib/admin-config"
 import { logAuditAction, AuditAction } from "@/lib/audit-log"
 
+interface VideoStats {
+  likes?: number
+  comments?: number
+  shares?: number
+}
+
 /**
  * GET /api/admin/stats
  * Get dashboard statistics
@@ -47,9 +53,9 @@ export async function GET() {
         totalMessages: 0, // TODO: Add messages endpoint
         totalCommunities: Array.isArray(communities) ? communities.length : 0,
         // Additional stats
-        totalLikes: Array.isArray(videos) ? videos.reduce((sum: number, v: any) => sum + (v.likes || 0), 0) : 0,
-        totalComments: Array.isArray(videos) ? videos.reduce((sum: number, v: any) => sum + (v.comments || 0), 0) : 0,
-        totalShares: Array.isArray(videos) ? videos.reduce((sum: number, v: any) => sum + (v.shares || 0), 0) : 0,
+        totalLikes: Array.isArray(videos) ? videos.reduce((sum: number, v: VideoStats) => sum + (v.likes || 0), 0) : 0,
+        totalComments: Array.isArray(videos) ? videos.reduce((sum: number, v: VideoStats) => sum + (v.comments || 0), 0) : 0,
+        totalShares: Array.isArray(videos) ? videos.reduce((sum: number, v: VideoStats) => sum + (v.shares || 0), 0) : 0,
       }
 
       return NextResponse.json(stats)
