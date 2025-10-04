@@ -274,7 +274,7 @@ export default async function DashboardPage() {
                   <div key={event.id} className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">
-                        {event.title?.en || 'Untitled Event'}
+                        {typeof event.title === 'string' ? event.title : event.title?.en || 'Untitled Event'}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {new Date(event.start_at).toLocaleDateString()} • {event.mode}
