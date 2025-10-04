@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:math' as math;
@@ -27,6 +28,10 @@ class _GoogleLoginPageState extends State<GoogleLoginPage>
   @override
   void initState() {
     super.initState();
+
+    // Initialize Google Sign-In early
+    _initializeGoogleSignIn();
+
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1200),
@@ -77,14 +82,27 @@ class _GoogleLoginPageState extends State<GoogleLoginPage>
     super.dispose();
   }
 
+  Future<void> _initializeGoogleSignIn() async {
+    try {
+      // Initialize Google Sign-In with web client ID for backend
+      await GoogleSignIn.instance.initialize(
+        serverClientId: '622637204479-fji413j8q5eu3glpvmqr3rao78ggo9l3.apps.googleusercontent.com',
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        debugPrint('Google Sign-In initialization error: $e');
+      }
+    }
+  }
+
   Future<void> _handleGoogleSignIn() async {
     try {
-      final GoogleSignIn googleSignIn = GoogleSignIn(
-        clientId: '622637204479-afmv3jontq583poaqefe1r0vlinjembo.apps.googleusercontent.com',
-        scopes: ['email', 'profile'],
-      );
+      final googleSignIn = GoogleSignIn.instance;
 
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+      print('Starting Google Sign-In...');
+      // Use authenticate() in v7+ (replaces signIn())
+      final GoogleSignInAccount? googleUser = await googleSignIn.authenticate();
+      print('Google Sign-In result: ${googleUser?.email}');
 
       if (googleUser == null) {
         // User cancelled the sign-in
@@ -240,67 +258,73 @@ class _GoogleLoginPageState extends State<GoogleLoginPage>
                         ),
                         const SizedBox(height: 32),
 
-                        // Title
+                        // Title - More premium, generous spacing
                         Text(
                           'Thala',
-                          style: theme.textTheme.displayMedium?.copyWith(
+                          style: theme.textTheme.displayLarge?.copyWith(
                             color: palette.textPrimary,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: -1.5,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -2.0,
+                            fontSize: 56,
+                            height: 1.1,
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
 
-                        // Subtitle matching splash screen
+                        // Subtitle - Cleaner, more refined
                         Text(
                           'Connect • Share • Celebrate',
-                          style: theme.textTheme.titleMedium?.copyWith(
+                          style: theme.textTheme.titleLarge?.copyWith(
                             color: palette.textSecondary,
-                            letterSpacing: 0.5,
+                            letterSpacing: 0.8,
                             fontWeight: FontWeight.w500,
+                            fontSize: 18,
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 10),
                         Text(
                           'Amazigh culture, together',
                           style: theme.textTheme.bodyLarge?.copyWith(
                             color: palette.textMuted,
                             fontStyle: FontStyle.italic,
+                            fontSize: 15,
                           ),
                           textAlign: TextAlign.center,
                         ),
-                        const SizedBox(height: 48),
+                        const SizedBox(height: 64),
 
-                        // Login card
+                        // Login card - More premium with softer edges
                         ThalaGlassSurface(
-                          cornerRadius: 28,
-                          padding: const EdgeInsets.all(32),
-                          backgroundOpacity: isDark ? 0.3 : 0.75,
+                          cornerRadius: 24,
+                          padding: const EdgeInsets.all(36),
+                          backgroundOpacity: isDark ? 0.35 : 0.80,
                           child: Column(
                             children: [
                               Text(
                                 'Sign in to continue',
-                                style: theme.textTheme.titleLarge?.copyWith(
+                                style: theme.textTheme.headlineSmall?.copyWith(
                                   color: palette.textPrimary,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 20,
                                 ),
                               ),
-                              const SizedBox(height: 24),
+                              const SizedBox(height: 28),
 
-                              // Google Sign-In Button
+                              // Google Sign-In Button - More premium design
                               SizedBox(
                                 width: double.infinity,
                                 child: FilledButton.icon(
                                   onPressed: isAuthenticating ? null : _handleGoogleSignIn,
                                   style: FilledButton.styleFrom(
                                     backgroundColor: Colors.white,
-                                    foregroundColor: Colors.black87,
-                                    padding: const EdgeInsets.symmetric(vertical: 18),
+                                    foregroundColor: const Color(0xFF1F1F1F),
+                                    padding: const EdgeInsets.symmetric(vertical: 20),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(16),
                                     ),
                                     elevation: 0,
+                                    shadowColor: Colors.black.withOpacity(0.08),
                                   ),
                                   icon: Image.asset(
                                     'assets/images/google_logo.png',
@@ -313,9 +337,10 @@ class _GoogleLoginPageState extends State<GoogleLoginPage>
                                   label: Text(
                                     'Continue with Google',
                                     style: theme.textTheme.titleMedium?.copyWith(
-                                      color: Colors.black87,
-                                      fontWeight: FontWeight.bold,
-                                      letterSpacing: 0.5,
+                                      color: const Color(0xFF1F1F1F),
+                                      fontWeight: FontWeight.w600,
+                                      letterSpacing: 0.3,
+                                      fontSize: 16,
                                     ),
                                   ),
                                 ),

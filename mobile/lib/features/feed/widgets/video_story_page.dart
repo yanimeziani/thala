@@ -572,19 +572,23 @@ class _VideoStoryPageState extends State<VideoStoryPage>
       }
 
       if (shareOrigin != null) {
-        result ??= await Share.shareWithResult(
-          shareText,
-          subject: subject,
-          sharePositionOrigin: shareOrigin,
+        result ??= await SharePlus.instance.share(
+          ShareParams(
+            text: shareText,
+            subject: subject,
+            sharePositionOrigin: shareOrigin,
+          ),
         );
       } else {
-        result ??= await Share.shareWithResult(shareText, subject: subject);
+        result ??= await SharePlus.instance.share(
+          ShareParams(text: shareText, subject: subject),
+        );
       }
     } on UnimplementedError {
-      await Share.share(shareText, subject: subject);
+      await SharePlus.instance.share(ShareParams(text: shareText, subject: subject));
       result = null;
     } on MissingPluginException {
-      await Share.share(shareText, subject: subject);
+      await SharePlus.instance.share(ShareParams(text: shareText, subject: subject));
       result = null;
     } on PlatformException catch (error) {
       if (error.code == 'unavailable' ||
@@ -952,7 +956,7 @@ class _VideoStoryPageState extends State<VideoStoryPage>
                           ),
                         );
                       },
-                      child: _LikeHeart(
+                      child: _LikeLogo(
                         size: useCompactLayout ? 96 : 128,
                         accentColor: theme.colorScheme.secondary,
                       ),
@@ -2015,17 +2019,17 @@ class _BottomBlend extends StatelessWidget {
   }
 }
 
-class _LikeHeart extends StatefulWidget {
-  const _LikeHeart({required this.size, required this.accentColor});
+class _LikeLogo extends StatefulWidget {
+  const _LikeLogo({required this.size, required this.accentColor});
 
   final double size;
   final Color accentColor;
 
   @override
-  State<_LikeHeart> createState() => _LikeHeartState();
+  State<_LikeLogo> createState() => _LikeLogoState();
 }
 
-class _LikeHeartState extends State<_LikeHeart>
+class _LikeLogoState extends State<_LikeLogo>
     with SingleTickerProviderStateMixin {
   late AnimationController _rippleController;
   late Animation<double> _rippleScale;
@@ -2055,8 +2059,6 @@ class _LikeHeartState extends State<_LikeHeart>
 
   @override
   Widget build(BuildContext context) {
-    final Color strokeColor = Colors.white.withOpacity(0.55);
-
     return SizedBox(
       width: widget.size * 2,
       height: widget.size * 2,
@@ -2113,22 +2115,16 @@ class _LikeHeartState extends State<_LikeHeart>
               },
             );
           }),
-          // Main heart
+          // Main logo
           SizedBox(
             width: widget.size,
             height: widget.size,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                CustomPaint(
-                    painter: _HeartFillPainter(fillColor: widget.accentColor)),
-                CustomPaint(
-                  painter: _HeartStrokePainter(
-                    color: strokeColor,
-                    strokeWidth: widget.size * 0.045,
-                  ),
-                ),
-              ],
+            child: Image.asset(
+              'assets/images/logo_transparent.png',
+              width: widget.size,
+              height: widget.size,
+              color: widget.accentColor,
+              colorBlendMode: BlendMode.srcIn,
             ),
           ),
         ],
@@ -2229,6 +2225,30 @@ class _HeartStrokePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _HeartStrokePainter oldDelegate) {
     return oldDelegate.color != color || oldDelegate.strokeWidth != strokeWidth;
+  }
+}
+
+class _HeartOutlinePainter extends CustomPainter {
+  const _HeartOutlinePainter({required this.strokeColor});
+
+  final Color strokeColor;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Path heart = _buildHeartPath(size);
+    final Paint strokePaint = Paint()
+      ..color = strokeColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = size.width * 0.06
+      ..strokeJoin = StrokeJoin.round
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawPath(heart, strokePaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _HeartOutlinePainter oldDelegate) {
+    return oldDelegate.strokeColor != strokeColor;
   }
 }
 
@@ -2740,6 +2760,10 @@ class _VideoStoryRailButton extends StatelessWidget {
     );
 
     final Listenable? animationListenable = scaleAnimation ?? glowAnimation;
+
+    // Use Thala logo for like button
+    final bool isHeartIcon = icon == Icons.favorite || icon == Icons.favorite_border;
+
     Widget iconWidget = SizedBox(
       width: 36,
       height: 36,
@@ -2756,12 +2780,25 @@ class _VideoStoryRailButton extends StatelessWidget {
                     color: iconColor,
                   ),
                 )
-              : Icon(
-                  icon,
-                  key: ValueKey<int>(icon.codePoint),
-                  color: iconColor,
-                  size: 28,
-                ),
+              : isHeartIcon
+                  ? SizedBox(
+                      key: ValueKey<int>(icon.codePoint),
+                      width: 28,
+                      height: 28,
+                      child: Image.asset(
+                        'assets/images/logo_transparent.png',
+                        width: 28,
+                        height: 28,
+                        color: iconColor,
+                        colorBlendMode: BlendMode.srcIn,
+                      ),
+                    )
+                  : Icon(
+                      icon,
+                      key: ValueKey<int>(icon.codePoint),
+                      color: iconColor,
+                      size: 28,
+                    ),
         ),
       ),
     );

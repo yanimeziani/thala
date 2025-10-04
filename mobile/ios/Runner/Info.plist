@@ -43,6 +43,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>FlutterDeepLinkingEnabled</key>
 	<true/>
+	<key>GIDClientID</key>
+	<string>622637204479-afmv3jontq583poaqefe1r0vlinjembo.apps.googleusercontent.com</string>
+	<key>GIDServerClientID</key>
+	<string>622637204479-fji413j8q5eu3glpvmqr3rao78ggo9l3.apps.googleusercontent.com</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>

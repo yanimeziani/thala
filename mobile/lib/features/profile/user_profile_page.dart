@@ -139,34 +139,25 @@ class _UserProfilePageState extends State<UserProfilePage> {
       length: 3,
       child: Scaffold(
         extendBodyBehindAppBar: true,
-        backgroundColor: Colors.transparent,
-        body: ThalaPageBackground(
-          child: SafeArea(
-            top: false,
-            bottom: false,
+        backgroundColor: theme.colorScheme.surface,
+        body: SafeArea(
+          top: false,
+          bottom: true,
+          child: Hero(
+            tag: 'profile-${widget.post.creatorHandle}',
             child: NestedScrollView(
               headerSliverBuilder: (context, innerBoxIsScrolled) => [
                 SliverAppBar(
-                  backgroundColor: Colors.transparent,
+                  backgroundColor: theme.colorScheme.surface,
+                  surfaceTintColor: Colors.transparent,
                   elevation: 0,
                   iconTheme: IconThemeData(color: palette.iconPrimary),
                   pinned: true,
-                  expandedHeight: 360,
+                  expandedHeight: 220,
                   flexibleSpace: FlexibleSpaceBar(
-                    collapseMode: CollapseMode.parallax,
-                    titlePadding: const EdgeInsetsDirectional.only(
-                      start: 72,
-                      bottom: 16,
-                    ),
-                    title: innerBoxIsScrolled
-                        ? Text(
-                            heroTitle,
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              color: palette.textPrimary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          )
-                        : null,
+                    collapseMode: CollapseMode.pin,
+                    titlePadding: EdgeInsets.zero,
+                    title: null,
                     background: _ProfileHero(
                       featuredPost: featuredPost,
                       displayName: heroTitle,
@@ -212,8 +203,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
               ),
             ),
           ),
+          ),
         ),
-      ),
     );
   }
 
@@ -284,47 +275,36 @@ class _ProfileTabs extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final palette = context.thalaPalette;
-    final bool isDark = theme.brightness == Brightness.dark;
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-      child: ThalaGlassSurface(
-        cornerRadius: 28,
-        enableLiquid: false,
-        shadows: [
-          BoxShadow(
-            color: palette.surfaceDim.withValues(alpha: 0.28),
-            blurRadius: 18,
-            offset: const Offset(0, 10),
+    return Container(
+      color: theme.colorScheme.surface,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      child: TabBar(
+        labelColor: palette.textPrimary,
+        unselectedLabelColor: palette.textMuted,
+        dividerColor: palette.border.withValues(alpha: 0.1),
+        indicator: UnderlineTabIndicator(
+          borderSide: BorderSide(
+            color: palette.textPrimary,
+            width: 2,
           ),
-        ],
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: TabBar(
-          labelColor: palette.textPrimary,
-          unselectedLabelColor: palette.textSecondary,
-          indicator: BoxDecoration(
-            color: theme.colorScheme.secondary.withValues(
-              alpha: isDark ? 0.32 : 0.22,
-            ),
-            borderRadius: BorderRadius.circular(20),
-          ),
-          indicatorPadding: const EdgeInsets.all(2),
-          indicatorSize: TabBarIndicatorSize.tab,
-          labelStyle: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-          tabs: [
-            Tab(text: storiesLabel),
-            Tab(text: likedLabel),
-            Tab(text: mediaLabel),
-          ],
+          insets: const EdgeInsets.symmetric(horizontal: 16),
         ),
+        indicatorSize: TabBarIndicatorSize.tab,
+        labelStyle: theme.textTheme.bodyMedium?.copyWith(
+          fontWeight: FontWeight.w600,
+        ),
+        tabs: [
+          Tab(text: storiesLabel),
+          Tab(text: likedLabel),
+          Tab(text: mediaLabel),
+        ],
       ),
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(72);
+  Size get preferredSize => const Size.fromHeight(48);
 }
 
 class _ProfileHero extends StatelessWidget {
@@ -356,150 +336,36 @@ class _ProfileHero extends StatelessWidget {
         ? displayName.characters.first.toUpperCase()
         : '?';
 
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        _ProfileBackdrop(post: featuredPost),
-        Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xAA050506), Color(0xE6000000)],
+    final bool isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      color: theme.colorScheme.surface,
+      padding: const EdgeInsets.fromLTRB(20, 80, 20, 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            displayName,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: palette.textPrimary,
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.5,
             ),
           ),
-        ),
-        Align(
-          alignment: Alignment.bottomCenter,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-            child: ThalaGlassSurface(
-              cornerRadius: 32,
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        height: 72,
-                        width: 72,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: palette.surfaceDim.withValues(alpha: 0.65),
-                          border: Border.all(color: palette.border),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          initial,
-                          style: theme.textTheme.headlineSmall?.copyWith(
-                            color: palette.textPrimary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 18),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              displayName,
-                              style: theme.textTheme.headlineSmall?.copyWith(
-                                color: palette.textPrimary,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -0.4,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              handle,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: palette.textSecondary,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.location_on_outlined,
-                                  size: 18,
-                                  color: theme.colorScheme.secondary,
-                                ),
-                                const SizedBox(width: 6),
-                                Expanded(
-                                  child: Text(
-                                    location,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: theme.textTheme.bodyMedium?.copyWith(
-                                      color: palette.textSecondary,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (bio != null) ...[
-                    const SizedBox(height: 16),
-                    Text(
-                      bio!,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: palette.textSecondary,
-                        height: 1.4,
-                      ),
-                    ),
-                  ],
-                  if (tags.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: tags.take(6).map((tag) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: palette.surfaceStrong.withValues(
-                              alpha: 0.28,
-                            ),
-                            borderRadius: BorderRadius.circular(999),
-                            border: Border.all(
-                              color: palette.border.withValues(alpha: 0.48),
-                            ),
-                          ),
-                          child: Text(
-                            tag,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: palette.textPrimary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                  const SizedBox(height: 20),
-                  _ProfileStatsRow(stats: stats),
-                  const SizedBox(height: 20),
-                  actionRow,
-                ],
-              ),
+          const SizedBox(height: 4),
+          Text(
+            handle,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: palette.textMuted,
             ),
           ),
-        ),
-      ],
+          const SizedBox(height: 16),
+          _ProfileStatsRow(stats: stats),
+          const SizedBox(height: 16),
+          actionRow,
+        ],
+      ),
     );
   }
 }
@@ -559,39 +425,35 @@ class _ProfileStatsRow extends StatelessWidget {
     final palette = context.thalaPalette;
 
     return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         for (int index = 0; index < stats.length; index++) ...[
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  stats[index].value,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: palette.textPrimary,
-                    fontWeight: FontWeight.w700,
-                  ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                stats[index].value,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: palette.textPrimary,
+                  fontWeight: FontWeight.w600,
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  stats[index].label,
-                  maxLines: 2,
-                  textAlign: TextAlign.center,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: palette.textSecondary,
-                  ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                stats[index].label,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: palette.textMuted,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
           if (index < stats.length - 1)
-            Container(
-              width: 1,
-              height: 44,
-              margin: const EdgeInsets.symmetric(horizontal: 10),
-              color: palette.border.withValues(alpha: 0.35),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Text(
+                '·',
+                style: TextStyle(color: palette.textMuted),
+              ),
             ),
         ],
       ],
@@ -621,35 +483,21 @@ class _ProfileActionsRow extends StatelessWidget {
     return Row(
       children: [
         Expanded(child: followButton),
-        const SizedBox(width: 12),
+        const SizedBox(width: 8),
         Expanded(
-          child: FilledButton.icon(
+          child: OutlinedButton(
             onPressed: (messagingEnabled && !isMessaging) ? onMessage : null,
-            style: FilledButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              backgroundColor: theme.colorScheme.primary,
-              foregroundColor: theme.colorScheme.onPrimary,
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              side: BorderSide(color: theme.colorScheme.outline),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(8),
               ),
             ),
-            icon: isMessaging
-                ? SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        theme.colorScheme.onPrimary,
-                      ),
-                    ),
-                  )
-                : const Icon(Icons.forum_outlined),
-            label: Text(
+            child: Text(
               messageLabel,
-              style: theme.textTheme.titleSmall?.copyWith(
-                color: theme.colorScheme.onPrimary,
-                fontWeight: FontWeight.w600,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
               ),
             ),
           ),
@@ -689,39 +537,40 @@ class _FollowButton extends StatelessWidget {
       await feed.toggleFollow(post: post, userId: user.id);
     }
 
-    return FilledButton.icon(
-      onPressed: isProcessing ? null : handleFollow,
-      style: FilledButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        backgroundColor: theme.colorScheme.secondary.withValues(
-          alpha: isFollowing ? 0.36 : 0.22,
-        ),
-        foregroundColor: theme.colorScheme.onSecondary,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-      ),
-      icon: isProcessing
-          ? SizedBox(
-              height: 18,
-              width: 18,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  theme.colorScheme.onSecondary,
-                ),
+    return isFollowing
+        ? OutlinedButton(
+            onPressed: isProcessing ? null : handleFollow,
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              side: BorderSide(color: theme.colorScheme.outline),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
               ),
-            )
-          : Icon(
-              isFollowing ? Icons.check_circle : Icons.person_add_alt_1,
-              color: theme.colorScheme.onSecondary,
             ),
-      label: Text(
-        isFollowing ? followingLabel : followLabel,
-        style: theme.textTheme.titleSmall?.copyWith(
-          color: theme.colorScheme.onSecondary,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
+            child: Text(
+              followingLabel,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          )
+        : FilledButton(
+            onPressed: isProcessing ? null : handleFollow,
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              backgroundColor: theme.colorScheme.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              followLabel,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w500,
+                color: theme.colorScheme.onPrimary,
+              ),
+            ),
+          );
   }
 
   void _showSnack(BuildContext context, String message) {
@@ -754,30 +603,38 @@ class _ProfileStoriesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     if (posts.isEmpty) {
-      return ListView(
-        padding: const EdgeInsets.fromLTRB(20, 32, 20, 120),
-        physics: const BouncingScrollPhysics(),
-        children: [
-          _ProfileEmptyState(
-            icon: emptyIcon,
-            title: emptyTitle,
-            message: emptyMessage,
-          ),
-        ],
+      return Container(
+        color: theme.colorScheme.surface,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 32, 20, 40),
+          physics: const BouncingScrollPhysics(),
+          children: [
+            _ProfileEmptyState(
+              icon: emptyIcon,
+              title: emptyTitle,
+              message: emptyMessage,
+            ),
+          ],
+        ),
       );
     }
 
-    return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
-      physics: const BouncingScrollPhysics(),
-      primary: false,
-      itemCount: posts.length,
-      itemBuilder: (context, index) {
-        final post = posts[index];
-        return _ProfilePostCard(post: post, locale: locale);
-      },
-      separatorBuilder: (context, index) => const SizedBox(height: 18),
+    return Container(
+      color: theme.colorScheme.surface,
+      child: ListView.separated(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+        physics: const BouncingScrollPhysics(),
+        primary: false,
+        itemCount: posts.length,
+        itemBuilder: (context, index) {
+          final post = posts[index];
+          return _ProfilePostCard(post: post, locale: locale);
+        },
+        separatorBuilder: (context, index) => const SizedBox(height: 18),
+      ),
     );
   }
 }
@@ -799,34 +656,42 @@ class _ProfileMediaGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     if (posts.isEmpty) {
-      return ListView(
-        padding: const EdgeInsets.fromLTRB(20, 32, 20, 120),
-        physics: const BouncingScrollPhysics(),
-        children: [
-          _ProfileEmptyState(
-            icon: emptyIcon,
-            title: emptyTitle,
-            message: emptyMessage,
-          ),
-        ],
+      return Container(
+        color: theme.colorScheme.surface,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 32, 20, 40),
+          physics: const BouncingScrollPhysics(),
+          children: [
+            _ProfileEmptyState(
+              icon: emptyIcon,
+              title: emptyTitle,
+              message: emptyMessage,
+            ),
+          ],
+        ),
       );
     }
 
-    return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 120),
-      physics: const BouncingScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 0.82,
+    return Container(
+      color: theme.colorScheme.surface,
+      child: GridView.builder(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+        physics: const BouncingScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 0.82,
+        ),
+        itemCount: posts.length,
+        itemBuilder: (context, index) {
+          final post = posts[index];
+          return _ProfileMediaCard(post: post, locale: locale);
+        },
       ),
-      itemCount: posts.length,
-      itemBuilder: (context, index) {
-        final post = posts[index];
-        return _ProfileMediaCard(post: post, locale: locale);
-      },
     );
   }
 }

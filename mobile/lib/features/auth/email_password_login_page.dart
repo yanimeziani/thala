@@ -538,7 +538,8 @@ class _EmailPasswordLoginPageState extends State<EmailPasswordLoginPage>
   Future<void> _signInWithGoogle(BuildContext context) async {
     try {
       final GoogleSignIn googleSignIn = GoogleSignIn(
-        clientId: '622637204479-afmv3jontq583poaqefe1r0vlinjembo.apps.googleusercontent.com',
+        // Web client ID for backend token verification
+        serverClientId: '622637204479-fji413j8q5eu3glpvmqr3rao78ggo9l3.apps.googleusercontent.com',
         scopes: ['email', 'profile'],
       );
 

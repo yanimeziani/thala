@@ -8,8 +8,14 @@ import '../models/message.dart';
 import '../models/message_thread.dart';
 
 class MessagesController extends ChangeNotifier {
-  MessagesController({MessagesRepository? repository})
-    : _repository = repository ?? MessagesRepository() {
+  MessagesController({
+    MessagesRepository? repository,
+    String? authToken,
+  }) : _repository = repository ?? MessagesRepository(
+          authToken: authToken,
+          useBackend: authToken != null && authToken.isNotEmpty,
+        ),
+        _authToken = authToken {
     _threadsSubscription = _repository.watchThreads().listen(
       _handleThreadsUpdate,
       onError: (Object error, StackTrace stackTrace) {
@@ -20,6 +26,7 @@ class MessagesController extends ChangeNotifier {
   }
 
   final MessagesRepository _repository;
+  final String? _authToken;
   final Map<String, _ThreadSession> _sessions = <String, _ThreadSession>{};
 
   StreamSubscription<List<MessageThread>>? _threadsSubscription;
@@ -36,7 +43,7 @@ class MessagesController extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get hasData => _threads.isNotEmpty;
-  bool get isRemoteEnabled => false; // Backend integration pending
+  bool get isRemoteEnabled => _authToken != null && _authToken.isNotEmpty;
 
   int get unreadCount => _threads.fold<int>(0, (int acc, MessageThread thread) {
     final int count = thread.unreadCount;

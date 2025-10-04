@@ -572,97 +572,146 @@ class _MessageThreadTile extends StatelessWidget {
     final preview = thread.lastMessage.resolve(locale).trim();
     final timeLabel = _formatTimestamp(context, thread.updatedAt);
     final hasUnread = thread.unreadCount > 0;
+    final bool isDark = theme.brightness == Brightness.dark;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(24),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _ThreadAvatar(title: title),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        color: palette.textPrimary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      preview.isNotEmpty
-                          ? preview
-                          : AppTranslations.of(context, AppText.messagesEmpty),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: palette.textSecondary,
-                        height: 1.3,
-                      ),
-                    ),
-                    if (thread.participants.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        thread.participants.join(' · '),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: palette.textMuted,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: ThalaGlassSurface(
+        cornerRadius: 24,
+        padding: EdgeInsets.zero,
+        backgroundOpacity: isDark ? 0.35 : 0.75,
+        shadows: [
+          BoxShadow(
+            color: palette.surfaceDim.withValues(alpha: 0.12),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(24),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (timeLabel.isNotEmpty)
-                    Text(
-                      timeLabel,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: palette.textSecondary,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  if (hasUnread) ...[
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.secondary,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Text(
-                        thread.unreadCount > 99
-                            ? '99+'
-                            : '${thread.unreadCount}',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.onSecondary,
-                          fontWeight: FontWeight.bold,
+                  _ThreadAvatar(title: title, hasUnread: hasUnread),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  color: palette.textPrimary,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.2,
+                                ),
+                              ),
+                            ),
+                            if (timeLabel.isNotEmpty) ...[
+                              const SizedBox(width: 12),
+                              Text(
+                                timeLabel,
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: palette.textSecondary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
-                      ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                preview.isNotEmpty
+                                    ? preview
+                                    : AppTranslations.of(context, AppText.messagesEmpty),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: palette.textSecondary,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                            if (hasUnread) ...[
+                              const SizedBox(width: 12),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      theme.colorScheme.secondary,
+                                      theme.colorScheme.secondary.withValues(alpha: 0.8),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: theme.colorScheme.secondary.withValues(alpha: 0.3),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Text(
+                                  thread.unreadCount > 99
+                                      ? '99+'
+                                      : '${thread.unreadCount}',
+                                  style: theme.textTheme.labelSmall?.copyWith(
+                                    color: theme.colorScheme.onSecondary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        if (thread.participants.isNotEmpty) ...[
+                          const SizedBox(height: 6),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.people_outline,
+                                size: 14,
+                                color: palette.textMuted,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  thread.participants.join(' · '),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: palette.textMuted,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
                     ),
-                  ],
+                  ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -671,23 +720,57 @@ class _MessageThreadTile extends StatelessWidget {
 }
 
 class _ThreadAvatar extends StatelessWidget {
-  const _ThreadAvatar({required this.title});
+  const _ThreadAvatar({required this.title, this.hasUnread = false});
 
   final String title;
+  final bool hasUnread;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.thalaPalette;
     final theme = Theme.of(context);
     final initials = _initialsFor(title);
-    return CircleAvatar(
-      radius: 26,
-      backgroundColor: palette.surfaceSubtle,
-      child: Text(
-        initials,
-        style: theme.textTheme.titleMedium?.copyWith(
-          color: palette.textPrimary,
-          fontWeight: FontWeight.w700,
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: hasUnread
+              ? [
+                  theme.colorScheme.secondary.withValues(alpha: 0.3),
+                  theme.colorScheme.secondary.withValues(alpha: 0.2),
+                ]
+              : [
+                  palette.surfaceSubtle,
+                  palette.surfaceDim.withValues(alpha: 0.5),
+                ],
+        ),
+        border: Border.all(
+          color: hasUnread
+              ? theme.colorScheme.secondary.withValues(alpha: 0.5)
+              : palette.border.withValues(alpha: 0.3),
+          width: 2,
+        ),
+        boxShadow: hasUnread
+            ? [
+                BoxShadow(
+                  color: theme.colorScheme.secondary.withValues(alpha: 0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ]
+            : null,
+      ),
+      child: CircleAvatar(
+        radius: 26,
+        backgroundColor: Colors.transparent,
+        child: Text(
+          initials,
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: hasUnread ? theme.colorScheme.secondary : palette.textPrimary,
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );

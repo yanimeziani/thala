@@ -105,6 +105,36 @@ class DeepLinkService {
           );
         }
         break;
+
+      case 'share':
+        // Handle shared content: /share?url=...&text=...
+        final url = uri.queryParameters['url'];
+        final text = uri.queryParameters['text'];
+        final title = uri.queryParameters['title'];
+
+        return DeepLinkRoute(
+          type: DeepLinkType.share,
+          id: url ?? '',
+          metadata: {
+            if (text != null) 'text': text,
+            if (title != null) 'title': title,
+          },
+        );
+
+      case 'messages':
+      case 'm':
+        // Handle direct messaging: /messages/{handle}
+        if (pathSegments.length >= 2) {
+          return DeepLinkRoute(
+            type: DeepLinkType.message,
+            id: pathSegments[1],
+          );
+        }
+        // Open messages list
+        return DeepLinkRoute(
+          type: DeepLinkType.messages,
+          id: '',
+        );
     }
 
     return null;
@@ -117,18 +147,23 @@ enum DeepLinkType {
   profile,
   video,
   community,
+  share,
+  message,
+  messages,
 }
 
 /// Parsed deep link route information
 class DeepLinkRoute {
   final DeepLinkType type;
   final String id;
+  final Map<String, String> metadata;
 
   DeepLinkRoute({
     required this.type,
     required this.id,
+    this.metadata = const {},
   });
 
   @override
-  String toString() => 'DeepLinkRoute(type: $type, id: $id)';
+  String toString() => 'DeepLinkRoute(type: $type, id: $id, metadata: $metadata)';
 }

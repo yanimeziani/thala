@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 
 import 'app_theme.dart';
 
+import '../controllers/auth_controller.dart';
 import '../controllers/feed_controller.dart';
 import '../controllers/messages_controller.dart';
 import '../l10n/app_translations.dart';
@@ -39,10 +40,13 @@ class _HomeShellState extends State<HomeShell> {
   void initState() {
     super.initState();
     final recommendationService = context.read<RecommendationService>();
+    final authController = context.read<AuthController>();
     _feedController = FeedController(
       recommendationService: recommendationService,
     );
-    _messagesController = MessagesController();
+    _messagesController = MessagesController(
+      authToken: authController.accessToken,
+    );
     unawaited(_messagesController.ensureLoaded());
     _pages = [
       MultiProvider(
@@ -194,11 +198,11 @@ class _NavBarContents extends StatelessWidget {
     final size = mediaQuery.size;
     final shortestSide = size.shortestSide;
     final isWideLayout = shortestSide >= 600;
-    final navHeight = isWideLayout ? 72.0 : 68.0;
-    final navBorderRadius = BorderRadius.circular(isWideLayout ? 28.0 : 24.0);
+    final navHeight = isWideLayout ? 76.0 : 72.0;
+    final navBorderRadius = BorderRadius.circular(isWideLayout ? 32.0 : 28.0);
     final navMaxWidth = isWideLayout ? 640.0 : double.infinity;
-    final safeHorizontal = isWideLayout ? 24.0 : 16.0;
-    final safeBottom = mediaQuery.padding.bottom > 0 ? 12.0 : 16.0;
+    final safeHorizontal = isWideLayout ? 24.0 : 18.0;
+    final safeBottom = mediaQuery.padding.bottom > 0 ? 14.0 : 18.0;
 
     final unreadMessages = messagesController.unreadCount;
 
@@ -375,12 +379,12 @@ class _BottomNavItemButton extends StatelessWidget {
     final palette = context.thalaPalette;
     final isAction = data.isAction;
     final iconBaseColor = palette.textPrimary;
-    final inactiveOpacity = 0.52;
-    const iconSize = 26.0;
-    const actionSizeBoost = 1.10; // create button stands out slightly more than the rest
+    final inactiveOpacity = 0.48;
+    const iconSize = 28.0;
+    const actionSizeBoost = 1.14; // create button stands out with premium presence
     final actionIconSize = iconSize * actionSizeBoost;
-    final actionButtonSize = 52.0 * actionSizeBoost;
-    final splashColor = palette.overlay.withValues(alpha: isAction ? 0.16 : 0.10);
+    final actionButtonSize = 56.0 * actionSizeBoost;
+    final splashColor = palette.overlay.withValues(alpha: isAction ? 0.18 : 0.12);
 
     Widget icon = Icon(
       isSelected ? data.activeIcon : data.icon,
@@ -391,15 +395,15 @@ class _BottomNavItemButton extends StatelessWidget {
     if (!isAction) {
       icon = AnimatedOpacity(
         opacity: isSelected ? 1 : inactiveOpacity,
-        duration: const Duration(milliseconds: 160),
-        curve: Curves.easeOut,
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeInOut,
         child: icon,
       );
     } else {
       icon = AnimatedSwitcher(
-        duration: const Duration(milliseconds: 200),
-        switchInCurve: Curves.easeOut,
-        switchOutCurve: Curves.easeIn,
+        duration: const Duration(milliseconds: 240),
+        switchInCurve: Curves.easeOutCubic,
+        switchOutCurve: Curves.easeInCubic,
         child: Container(
           key: ValueKey<bool>(isSelected),
           height: actionButtonSize,
@@ -409,10 +413,15 @@ class _BottomNavItemButton extends StatelessWidget {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: colorScheme.primary.withValues(alpha: 0.32),
-                blurRadius: 16,
-                offset: const Offset(0, 8),
-                spreadRadius: -4,
+                color: colorScheme.primary.withValues(alpha: 0.36),
+                blurRadius: 20,
+                offset: const Offset(0, 6),
+                spreadRadius: -2,
+              ),
+              BoxShadow(
+                color: colorScheme.primary.withValues(alpha: 0.16),
+                blurRadius: 12,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
@@ -448,7 +457,7 @@ class _BottomNavItemButton extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10.0),
+      padding: const EdgeInsets.only(bottom: 8.0),
       child: Semantics(
         label: data.label,
         selected: isSelected,
@@ -461,14 +470,14 @@ class _BottomNavItemButton extends StatelessWidget {
               onTap();
             },
             borderRadius: BorderRadius.circular(
-              isAction ? actionButtonSize / 2 : 18.0,
+              isAction ? actionButtonSize / 2 : 20.0,
             ),
             splashColor: splashColor,
             highlightColor: Colors.transparent,
             child: Padding(
               padding: EdgeInsets.symmetric(
-                horizontal: isAction ? 12.0 : 0.0,
-                vertical: isAction ? 6.0 : 12.0,
+                horizontal: isAction ? 14.0 : 0.0,
+                vertical: isAction ? 8.0 : 14.0,
               ),
               child: Center(child: icon),
             ),

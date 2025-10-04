@@ -169,16 +169,18 @@ ThemeData buildThalaLightTheme() => _buildThalaTheme(Brightness.light);
 ThemeData buildThalaDarkTheme() => _buildThalaTheme(Brightness.dark);
 
 ThemeData _buildThalaTheme(Brightness brightness) {
-  const primary = Color(0xFF1A4AA8);
-  const accent = Color(0xFFEB6A3B);
-  const success = Color(0xFF2AC38D);
-  const warning = Color(0xFFF4B740);
-  const danger = Color(0xFFEA3A3D);
+  // Premium minimalist color palette
+  const primary = Color(0xFF2952A3); // Refined blue
+  const accent = Color(0xFFE66439); // Warm terracotta
+  const success = Color(0xFF25B88A); // Soft emerald
+  const warning = Color(0xFFF5B840); // Warm amber
+  const danger = Color(0xFFE63946); // Vibrant red
 
   final bool isDark = brightness == Brightness.dark;
 
-  final background = isDark ? const Color(0xFF050607) : const Color(0xFFF5F6FA);
-  final surface = isDark ? const Color(0xFF101217) : Colors.white;
+  // Premium backgrounds with more depth
+  final background = isDark ? const Color(0xFF0A0B0D) : const Color(0xFFFAFAFB);
+  final surface = isDark ? const Color(0xFF12131A) : const Color(0xFFFFFFFF);
   final surfaceBright = isDark
       ? const Color(0xFF161920)
       : const Color(0xFFF0F2F9);
@@ -272,8 +274,11 @@ ThemeData _buildThalaTheme(Brightness brightness) {
     cardTheme: CardThemeData(
       color: surface,
       elevation: 0,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)), // Softer corners
       margin: EdgeInsets.zero,
+      shadowColor: isDark
+          ? Colors.black.withOpacity(0.3)
+          : Colors.black.withOpacity(0.06),
     ),
     floatingActionButtonTheme: FloatingActionButtonThemeData(
       backgroundColor: accent,
