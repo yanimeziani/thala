@@ -37,8 +37,8 @@ class _EmailPasswordLoginPageState extends State<EmailPasswordLoginPage>
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2000),
-    )..repeat(reverse: true);
+      duration: const Duration(milliseconds: 1200),
+    )..forward();
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
