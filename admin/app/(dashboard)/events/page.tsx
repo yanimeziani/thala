@@ -10,6 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { eventsApi } from "@/lib/api"
+import { formatLocalizedField } from "@/lib/utils"
 import Link from "next/link"
 
 export default async function EventsPage() {
@@ -59,10 +60,10 @@ export default async function EventsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {events.map((event: any) => (
+                {events.map((event) => (
                   <TableRow key={event.id}>
                     <TableCell className="font-medium">
-                      {event.title?.en || event.title}
+                      {formatLocalizedField(event.title)}
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline">{event.mode}</Badge>
@@ -71,7 +72,7 @@ export default async function EventsPage() {
                       {new Date(event.start_at).toLocaleDateString()}
                     </TableCell>
                     <TableCell>
-                      {event.location?.en || event.location || "-"}
+                      {formatLocalizedField(event.location)}
                     </TableCell>
                     <TableCell>{event.host_name || "-"}</TableCell>
                     <TableCell>{event.interested_count || 0}</TableCell>

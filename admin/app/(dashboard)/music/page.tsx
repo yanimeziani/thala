@@ -52,7 +52,7 @@ export default async function MusicPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {tracks.map((track: any) => (
+                {tracks.map((track) => (
                   <TableRow key={track.id}>
                     <TableCell className="font-medium">{track.title}</TableCell>
                     <TableCell>{track.artist}</TableCell>

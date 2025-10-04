@@ -54,7 +54,7 @@ export default async function VideosPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {videos.map((video: any) => (
+                {videos.map((video) => (
                   <TableRow key={video.id}>
                     <TableCell className="font-medium">
                       {video.title_en || video.title}

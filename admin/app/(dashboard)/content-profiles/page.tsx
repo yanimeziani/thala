@@ -11,9 +11,19 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 
-// TODO: Add content profiles API endpoint
-async function getContentProfiles() {
-  return { data: [], error: null }
+import type { ApiResponse } from "@/lib/api"
+
+interface ContentProfile {
+  content_id: string
+  cultural_families?: string[]
+  regions?: string[]
+  languages?: string[]
+  is_guardian_approved: boolean
+}
+
+// TODO: Replace placeholder implementation once backend endpoint is available
+async function getContentProfiles(): Promise<ApiResponse<ContentProfile[]>> {
+  return { data: [] }
 }
 
 export default async function ContentProfilesPage() {
@@ -59,7 +69,7 @@ export default async function ContentProfilesPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {profiles.map((profile: any) => (
+                {profiles.map((profile) => (
                   <TableRow key={profile.content_id}>
                     <TableCell className="font-medium">
                       {profile.content_id}

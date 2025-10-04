@@ -12,7 +12,7 @@ echo ""
 
 # Start Docker services
 echo "📦 Starting Docker services (PostgreSQL, MeiliSearch, MinIO, Backend)..."
-cd "${PROJECT_ROOT}"
+cd "${PROJECT_ROOT}/backend"
 docker-compose up -d
 
 echo ""
@@ -39,4 +39,4 @@ echo "  • cd mobile && ./run_local.sh -- -d macos"
 echo "  • cd web && npm run dev"
 echo "  • cd admin && npm run dev"
 echo ""
-echo "To stop all services: docker-compose down"
+echo "To stop all services: cd backend && docker-compose down"

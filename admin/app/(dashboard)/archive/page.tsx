@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { archiveApi } from "@/lib/api"
+import { formatLocalizedField } from "@/lib/utils"
 import Link from "next/link"
 
 export default async function ArchivePage() {
@@ -60,10 +61,10 @@ export default async function ArchivePage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {entries.map((entry: any) => (
+                {entries.map((entry) => (
                   <TableRow key={entry.id}>
                     <TableCell className="font-medium">
-                      {entry.title?.en || entry.title}
+                      {formatLocalizedField(entry.title)}
                     </TableCell>
                     <TableCell>
                       {entry.category ? (
@@ -73,7 +74,7 @@ export default async function ArchivePage() {
                       )}
                     </TableCell>
                     <TableCell>
-                      {entry.era?.en || entry.era || "-"}
+                      {formatLocalizedField(entry.era)}
                     </TableCell>
                     <TableCell>
                       👍 {entry.community_upvotes} / {entry.registered_users}

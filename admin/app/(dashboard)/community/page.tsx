@@ -55,7 +55,7 @@ export default async function CommunityPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {communities.map((community: any) => (
+                {communities.map((community) => (
                   <TableRow key={community.id}>
                     <TableCell className="font-medium">{community.id}</TableCell>
                     <TableCell>{community.region}</TableCell>
@@ -107,7 +107,7 @@ export default async function CommunityPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {hostRequests.map((request: any) => (
+                {hostRequests.map((request) => (
                   <TableRow key={request.id}>
                     <TableCell className="font-medium">{request.name}</TableCell>
                     <TableCell>{request.email}</TableCell>
