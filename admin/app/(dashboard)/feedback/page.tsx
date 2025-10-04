@@ -27,7 +27,7 @@ interface Feedback {
   is_public: boolean
 }
 
-const statusIcons: Record<string, any> = {
+const statusIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   new: Clock,
   reviewing: AlertTriangle,
   planned: CheckCircle2,
@@ -207,7 +207,6 @@ export default function FeedbackPage() {
             <div className="space-y-4">
               {filteredFeedback.map((item) => {
                 const Icon = item.feedback_type === "bug" ? Bug : item.feedback_type === "feature" ? Lightbulb : MessageCircle
-                const StatusIcon = statusIcons[item.status]
 
                 return (
                   <div key={item.id} className="border rounded-lg p-4 space-y-3">
@@ -253,7 +252,7 @@ export default function FeedbackPage() {
                             <SelectItem value="planned">Planned</SelectItem>
                             <SelectItem value="in_progress">In Progress</SelectItem>
                             <SelectItem value="completed">Completed</SelectItem>
-                            <SelectItem value="wont_fix">Won't Fix</SelectItem>
+                            <SelectItem value="wont_fix">Won&apos;t Fix</SelectItem>
                             <SelectItem value="duplicate">Duplicate</SelectItem>
                           </SelectContent>
                         </Select>

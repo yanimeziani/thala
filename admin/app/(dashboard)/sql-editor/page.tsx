@@ -4,13 +4,13 @@ import { useState, useEffect } from "react"
 import Editor from "@monaco-editor/react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Database, Play, Download, Clock, TrendingUp, FileJson, FileText, ChartBar } from "lucide-react"
+import { Database, Play, Clock, TrendingUp, FileJson, FileText, ChartBar } from "lucide-react"
 import { parse } from "papaparse"
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 
 interface QueryResult {
   columns: string[]
-  rows: any[]
+  rows: Record<string, unknown>[]
   rowCount: number
   executionTime: number
 }
@@ -38,7 +38,7 @@ export default function SQLEditorPage() {
   useEffect(() => {
     const savedHistory = localStorage.getItem("sql_query_history")
     if (savedHistory) {
-      setHistory(JSON.parse(savedHistory).map((h: any) => ({
+      setHistory(JSON.parse(savedHistory).map((h: QueryHistory & { timestamp: string }) => ({
         ...h,
         timestamp: new Date(h.timestamp)
       })))
