@@ -85,6 +85,44 @@ npm run build
 npm start
 ```
 
+## Docker Deployment
+
+### Build Docker Image
+
+```bash
+docker build -t thala-admin .
+```
+
+### Run with Docker
+
+```bash
+docker run -p 3000:3000 \
+  -e GOOGLE_CLIENT_ID=your_client_id \
+  -e GOOGLE_CLIENT_SECRET=your_client_secret \
+  -e AUTH_SECRET=your_secret \
+  -e AUTH_URL=https://admin.thala.app \
+  -e NEXT_PUBLIC_API_URL=https://backend.thala.app/api/v1 \
+  thala-admin
+```
+
+### Using Docker Compose
+
+1. Create a `.env` file with your credentials:
+
+```env
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+AUTH_SECRET=your_auth_secret
+AUTH_URL=https://admin.thala.app
+NEXT_PUBLIC_API_URL=https://backend.thala.app/api/v1
+```
+
+2. Run with docker-compose:
+
+```bash
+docker-compose up -d
+```
+
 ## Project Structure
 
 ```
